@@ -354,7 +354,7 @@ export default function LandingPage() {
             <div className="flex flex-col gap-3">
               {reasons.map((reason) => (
                 <div key={reason} className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                  <Scissors className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                   <span className="text-sm text-foreground">{reason}</span>
                 </div>
               ))}
