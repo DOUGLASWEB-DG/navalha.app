@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/barberos?schema=public
+      - DIRECT_URL=postgresql://postgres:postgres@db:5432/barberos?schema=public
+      # Adicione outras variáveis de ambiente aqui
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - barberos_net
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5440:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=barberos
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d barberos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - barberos_net
+
+volumes:
+  postgres_data:
+
+networks:
+  barberos_net:
+    driver: bridge
