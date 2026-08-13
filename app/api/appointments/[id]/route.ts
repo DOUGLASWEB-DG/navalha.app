@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { sendTextMessage } from '@/lib/whatsapp'
 
 const updateSchema = z.object({
   clientId: z.string().optional(),
@@ -25,6 +26,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       include: { client: true, service: true },
     })
 
+    // Enviar mensagem para o cliente quando for CONFIRMADO
+    if (parsed.status === 'CONFIRMED') {
+      try {
+        const clientPhone = appointment.client.phone;
+        if (clientPhone) {
+          // Remover tudo que não for número
+          let number = clientPhone.replace(/\D/g, '');
+          // Se tiver 10 ou 11 dígitos, provavelmente esqueceu o DDI (55)
+          if (number.length === 10 || number.length === 11) {
+            number = '55' + number; 
+          }
+          
+          // Formatar data e hora
+          const { format } = require('date-fns');
+          const { ptBR } = require('date-fns/locale');
+          const dataFormatada = format(new Date(appointment.date), "EEEE, d 'de' MMMM 'às' HH:mm", { locale: ptBR });
+          
+          const msg = `Olá, ${appointment.client.name}! Tudo bem?\n\nPassando para confirmar o seu agendamento de *${appointment.service.name}*.\n\n📅 Data: ${dataFormatada}\n\nSeu horário está confirmadíssimo! Te esperamos na barbearia. 💈✂️`;
+          
+          await sendTextMessage(number, msg).catch(e => console.error('WhatsApp client msg error:', e));
+        }
+      } catch (e) {
+        console.error('Error with WA client notification:', e);
+      }
+    }
+
     // Auto-create income transaction when completed
     if (parsed.status === 'COMPLETED') {
       const existing = await prisma.transaction.findUnique({
@@ -36,7 +63,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           include: { service: true, client: true },
         })
         if (appt) {
-          await prisma.transaction.create({
+          const newTx = await prisma.transaction.create({
             data: {
               type: 'INCOME',
               amount: appt.service.price,
@@ -46,6 +73,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
               date: new Date(),
             },
           })
+
+          // Notificação no WhatsApp
+          try {
+            const ownerNumber = process.env.OWNER_WHATSAPP_NUMBER;
+            if (ownerNumber) {
+              const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount);
+              const msg = `🟢 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`;
+              await sendTextMessage(ownerNumber, msg).catch(e => console.error('WhatsApp message error:', e));
+            }
+          } catch (e) {
+            console.error('Error with WA integration:', e);
+          }
         }
       }
     }

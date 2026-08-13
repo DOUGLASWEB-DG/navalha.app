@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
+    "cron": "tsx scripts/cron.ts",
     "build": "prisma generate && prisma db push && next build",
     "start": "next start",
     "lint": "next lint",
