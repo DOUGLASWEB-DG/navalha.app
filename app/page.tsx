@@ -1,7 +1,7 @@
 "use client"
 
 import Link from 'next/link'
-import { Scissors, Clock, Star, MapPin, Phone, Instagram, MessageCircle, ArrowRight, CheckCircle } from 'lucide-react'
+import { Scissors, Clock, Star, MapPin, Phone, Instagram, MessageCircle, ArrowRight, CheckCircle, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
@@ -180,19 +180,28 @@ export default function LandingPage() {
           <span className="text-base font-bold font-serif text-foreground">{tenantConfig.name.toUpperCase()}</span>
         </div>
         
-        <div className={cn(
-          "flex items-center gap-2 transition-all duration-300",
-          scrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
-        )}>
-          <a href={buildWhatsAppLink()} target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" size="sm" className="border-success/40 text-success hover:bg-success/10 gap-2 hidden sm:flex">
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp
-            </Button>
-          </a>
-          <Link href="/book">
-            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5">
-              Agendar <ArrowRight className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-1 sm:gap-2">
+          <div className={cn(
+            "flex items-center gap-2 transition-all duration-300",
+            scrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+          )}>
+            <a href={buildWhatsAppLink()} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm" className="border-success/40 text-success hover:bg-success/10 gap-2 hidden sm:flex">
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </Button>
+            </a>
+            <Link href="/book">
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1.5">
+                Agendar <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </Link>
+          </div>
+          <div className="h-6 w-px bg-border/50 mx-1 hidden sm:block"></div>
+          <Link href="/login" title="Entrar no sistema">
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary gap-2">
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline font-medium">Entrar</span>
             </Button>
           </Link>
         </div>
@@ -271,7 +280,7 @@ export default function LandingPage() {
   {services.map((svc) => (
     <div
       key={svc.name}
-      className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col hover:border-primary/40 transition-all group shadow-sm hover:shadow-md"
+      className="bg-card border border-border/40 rounded-2xl overflow-hidden flex flex-col hover:border-primary/40 transition-all duration-300 group shadow-soft hover:shadow-premium"
     >
       {/* Container da Imagem */}
       <div className="relative h-48 w-full overflow-hidden">
@@ -320,7 +329,7 @@ export default function LandingPage() {
   ))}
 
   {/* CTA Card adaptado para manter a altura */}
-  <div className="bg-primary/5 border-2 border-dashed border-primary/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 text-center sm:col-span-2 lg:col-span-1 min-h-[350px]">
+  <div className="bg-primary/5 border-2 border-dashed border-primary/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 text-center sm:col-span-2 lg:col-span-1 min-h-[350px] shadow-soft hover:shadow-premium transition-all duration-300">
     <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center">
       <Star className="w-7 h-7 text-primary fill-primary/20" />
     </div>
@@ -362,7 +371,7 @@ export default function LandingPage() {
           </div>
 
           {/* Horários */}
-          <div className="bg-background border border-border rounded-xl p-6 flex flex-col gap-4">
+          <div className="bg-background border border-border/50 rounded-xl p-6 flex flex-col gap-4 shadow-soft">
             <div className="flex items-center gap-2 mb-2">
               <Clock className="w-5 h-5 text-primary" />
               <h3 className="text-base font-semibold text-foreground">Horário de Funcionamento</h3>
@@ -395,7 +404,7 @@ export default function LandingPage() {
             { icon: Phone, label: 'Telefone', value: tenantConfig.phoneDisplay },
             { icon: Instagram, label: 'Instagram', value: tenantConfig.instagram },
           ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="bg-card border border-border rounded-xl p-5 flex flex-col items-center text-center gap-3">
+            <div key={label} className="bg-card border border-border/50 rounded-xl p-5 flex flex-col items-center text-center gap-3 shadow-soft hover:shadow-premium transition-all duration-300">
               <div className="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center">
                 <Icon className="w-5 h-5 text-primary" />
               </div>
@@ -445,9 +454,6 @@ export default function LandingPage() {
           <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} {tenantConfig.name}. Powered by <span className="font-bold">Navalha.app</span>.
           </p>
-          <Link href="/login" className="text-xs text-muted-foreground hover:text-primary transition-colors">
-            login
-          </Link>
         </div>
       </footer>
     </div>

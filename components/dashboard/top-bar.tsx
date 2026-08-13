@@ -85,9 +85,8 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute right-2 top-2 flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-75"></span>
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-destructive"></span>
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card animate-in zoom-in">
+                  {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
             </Button>

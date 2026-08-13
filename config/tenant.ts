@@ -5,8 +5,8 @@ export const tenantConfig = {
   description: "O sistema definitivo para barbearias.",
   
   // Contato
-  whatsappNumber: "5569981050573", // Apenas números, com DDI e DDD
-  phoneDisplay: "(69) 9 8105-0537",
+  whatsappNumber: "5569992476425", // Apenas números, com DDI e DDD
+  phoneDisplay: "(69) 99247-6425", // Apenas para exibição, pode conter caracteres
   instagram: "@navalha.app",
   instagramLink: "https://instagram.com/navalha.app",
   

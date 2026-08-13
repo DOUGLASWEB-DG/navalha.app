@@ -63,7 +63,14 @@ export default function AppointmentsPage() {
         body: JSON.stringify({ status }),
       })
       mutate()
-      toast.success('Sucesso!', { description: `Agendamento marcado como ${status === 'CONFIRMED' ? 'confirmado' : status === 'COMPLETED' ? 'concluído' : 'cancelado'}.`})
+      const statusText = status === 'CONFIRMED' 
+        ? 'Confirmado (WhatsApp enviado ao cliente)' 
+        : status === 'COMPLETED' 
+          ? 'Concluído (Receita registrada no caixa)' 
+          : 'Cancelado';
+      toast.success('Status Atualizado', { 
+        description: `O agendamento foi marcado como ${statusText}.`
+      })
     } catch {
       toast.error('Erro', { description: 'Falha ao atualizar agendamento.' })
     }

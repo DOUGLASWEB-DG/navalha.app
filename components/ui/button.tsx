@@ -10,17 +10,17 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/85",
+          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow hover:-translate-y-[1px] active:scale-95 active:translate-y-0",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/85",
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 hover:shadow hover:-translate-y-[1px] active:scale-95 active:translate-y-0",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground active:bg-muted/50",
+          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground active:scale-95",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/70",
+          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 active:scale-95",
         ghost:
-          "hover:bg-accent hover:text-accent-foreground active:bg-muted/50",
+          "hover:bg-accent hover:text-accent-foreground active:scale-95",
         link: "scale-100 text-primary underline-offset-4 hover:underline active:scale-100",
-        success: "bg-green-600 text-white hover:bg-green-700",
+        success: "bg-green-600 text-white shadow-sm hover:bg-green-700 hover:-translate-y-[1px] active:scale-95 active:translate-y-0",
       },
       size: {
         default: "min-h-12 h-12 px-5 py-2",

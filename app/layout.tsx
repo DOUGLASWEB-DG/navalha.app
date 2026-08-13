@@ -45,27 +45,13 @@ export default function RootLayout({
         {children}
         <Toaster
           position="top-center"
-          offset="1rem"
-          mobileOffset={{ top: 'max(env(safe-area-inset-top), 0.75rem)' }}
+          expand={false}
+          richColors={true}
           toastOptions={{
-            unstyled: false,
             classNames: {
-              toast:
-                'rounded-2xl border border-border bg-card text-foreground shadow-lg',
-              title: 'text-foreground font-semibold',
-              description: 'text-muted-foreground',
-              success:
-                '!border-success/40 !bg-success/5 !text-success',
-              error:
-                '!border-destructive/40 !bg-destructive/5 !text-destructive',
-              warning:
-                '!border-warning/40 !bg-warning/5 [&_[data-title]]:text-warning-foreground [&_[data-description]]:text-warning-foreground',
-              info: '!border-info/40 !bg-info/5 [&_[data-title]]:text-info',
-              closeButton: 'text-muted-foreground hover:text-foreground',
-              actionButton:
-                '!rounded-xl !bg-primary !px-4 !py-2 !font-semibold !text-primary-foreground hover:!bg-primary/90',
-              cancelButton:
-                '!rounded-xl !border !border-border !bg-card !px-4 !py-2 !font-medium !text-foreground hover:!bg-muted',
+              toast: 'rounded-2xl shadow-xl',
+              title: 'font-semibold',
+              description: 'text-xs opacity-90',
             },
           }}
         />
