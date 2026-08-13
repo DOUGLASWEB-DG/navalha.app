@@ -1,125 +1,67 @@
-# ✂️ Navalha.app — Sistema SaaS para Barbearias
+# 💈 Navalha.app (BarberOS Premium)
 
-Sistema completo de gestão para barbearia desenvolvido com **Next.js**, **Prisma** (SQLite), **Tailwind CSS** e **TypeScript**.
+Esquece os sistemas antigos e travados. O **Navalha.app** é um SaaS (Sistema de Gestão) construído do zero para barbearias de alto padrão que querem luxo no visual e automação pesada nos bastidores.
 
-Tema visual inspirado nas barbearias de **Porto Velho, RO** — tons dourados, escuros e elegantes.
+Construído com uma stack moderna de Big Techs, o sistema não só gerencia agenda e financeiro, mas **trabalha sozinho por você**, disparando mensagens no WhatsApp dos clientes sem que você precise tocar no celular. 🤖📲
 
 ---
 
-## 🚀 Como Rodar (Setup Rápido)
+## 🚀 Tech Stack (O Motor da Máquina)
+- **Frontend & Backend:** Next.js 14 (App Router) + TypeScript
+- **Banco de Dados:** PostgreSQL (via Prisma ORM)
+- **Design & UX:** Tailwind CSS, Shadcn UI, Glassmorphism e Skeletons (Performance Percebida)
+- **Motor de WhatsApp:** Evolution API V2 (Rodando em Docker)
+- **Jobs em Background:** Cron nativo no Node via `tsx`
 
-### Pré-requisitos
+---
 
-- **Node.js** 18+ instalado ([baixar aqui](https://nodejs.org/))
-- **npm** (vem junto com o Node.js)
+## 🔥 As Mágicas do Sistema
 
-### Passo a Passo
+### 1. UX Premium & Performance Percebida
+O sistema não tem "tela de carregamento chata". Adotamos o uso pesado de **Skeleton Loaders** (igual YouTube e Instagram). Quando você navega entre Clientes, Agenda ou Finanças, a tela muda instantaneamente e pulsa o design (Perceived Performance).
+As cores giram em torno do **Dark Slate e Dourado (Amber)**, passando a exata sensação de um produto de 5 mil reais/mês.
 
+### 2. O Robô de WhatsApp 100% Invisível
+Adeus "clique aqui para enviar mensagem". O sistema está conectado diretamente ao seu número via API e faz tudo por baixo dos panos:
+- Mudou um agendamento para "Confirmado"? O cliente recebe a confirmação com data e hora.
+- Marcou como "Concluído"? O sistema registra o dinheiro no fluxo de caixa automático e avisa o dono.
+
+### 3. O Lembrete de 1 Hora (Cron Job)
+Temos um Script autônomo rodando a cada 5 minutos no servidor (`npm run cron`). Ele varre o banco de dados buscando quem tem corte marcado para a próxima hora e dispara: *"Fala mestre! Passando pra lembrar que falta cerca de 1 horinha pro nosso corte."* Nunca mais um cliente esquece o horário!
+
+---
+
+## 🛠️ Como rodar essa nave?
+
+### 1. Subindo os contêineres
+Você vai precisar do Docker rodando para o Banco de Dados e para a API do WhatsApp.
 ```bash
-# 1. Clone o repositório (ou copie a pasta)
-cd barber-marcedo
+docker-compose up -d
+```
 
-# 2. Copie o arquivo de variáveis de ambiente
-cp .env.example .env
-
-# 3. Instale as dependências (já gera o Prisma Client automaticamente)
+### 2. Instalando as dependências e o Banco
+```bash
 npm install
+npm run db:push
+npm run db:seed
+```
 
-# 4. Configure o banco de dados e popule com dados iniciais
-npm run setup
+### 3. Ligando os motores
+Abra **dois** terminais no seu VS Code:
 
-# 5. Rode o servidor de desenvolvimento
+Terminal 1 (Roda o site):
+```bash
 npm run dev
 ```
 
-Acesse: **http://localhost:3000**
-
----
-
-## 📁 Estrutura do Projeto
-
-```
-├── app/                    # Páginas e rotas (Next.js App Router)
-│   ├── page.tsx            # Landing page (página inicial)
-│   ├── book/               # Página de agendamento online
-│   ├── login/              # Página de login
-│   ├── dashboard/          # Painel administrativo
-│   │   ├── appointments/   # Gerenciar agendamentos
-│   │   ├── clients/        # Gerenciar clientes
-│   │   ├── finances/       # Controle financeiro
-│   │   ├── goals/          # Metas do negócio
-│   │   └── services/       # Catálogo de serviços
-│   └── api/                # Rotas da API
-├── components/             # Componentes reutilizáveis
-│   ├── ui/                 # Componentes base (botão, input, etc.)
-│   ├── dashboard/          # Sidebar, top bar, cards
-│   └── ...                 # Modais de formulário
-├── prisma/
-│   ├── schema.prisma       # Schema do banco de dados
-│   └── seed.ts             # Dados iniciais
-├── lib/                    # Utilitários (Prisma client, helpers)
-└── .env.example            # Exemplo de variáveis de ambiente
+Terminal 2 (Roda o Robô de Lembretes Automáticos):
+```bash
+npm run cron
 ```
 
----
+Pronto! Acesse `http://localhost:3000`. 
 
-## 🛠️ Scripts Disponíveis
-
-| Comando | Descrição |
-|---------|-----------|
-| `npm run dev` | Inicia o servidor de desenvolvimento |
-| `npm run build` | Gera o build de produção |
-| `npm start` | Inicia o servidor de produção |
-| `npm run setup` | Configura o banco + popula dados iniciais |
-| `npm run db:migrate` | Roda as migrations do Prisma |
-| `npm run db:push` | Sincroniza o schema com o banco |
-| `npm run db:seed` | Popula o banco com dados de exemplo |
-| `npm run db:studio` | Abre o Prisma Studio (visualizar dados) |
-| `npm run db:reset` | Reseta o banco de dados |
+*(As configurações globais do sistema, como o seu Número de WhatsApp e Nome da Barbearia, ficam centralizadas num único arquivo fácil de editar em `config/tenant.ts`)*
 
 ---
-
-## 🔐 Login Padrão
-
-Após rodar o seed, use estas credenciais para acessar o painel:
-
-- **Email:** `admin@barberos.com`
-- **Senha:** `admin123`
-
----
-
-## 🎨 Funcionalidades
-
-- ✅ **Landing Page** — Página inicial com serviços, sobre, contato e WhatsApp
-- ✅ **Agendamento Online** — Clientes agendam pelo site com integração WhatsApp
-- ✅ **Painel Administrativo** — Dashboard completo com métricas
-- ✅ **Gestão de Agendamentos** — Criar, editar, confirmar, cancelar
-- ✅ **Gestão de Clientes** — Cadastro com histórico de visitas
-- ✅ **Controle Financeiro** — Receitas, despesas e lucro
-- ✅ **Metas** — Defina e acompanhe metas de receita, clientes e agendamentos
-- ✅ **Catálogo de Serviços** — Gerencie preços e duração
-- ✅ **Autenticação** — Login protegido para o painel
-- ✅ **Tema Escuro Premium** — Visual elegante com tons dourados
-
----
-
-## 📱 Integração WhatsApp
-
-O sistema integra com WhatsApp para:
-- Clientes agendarem diretamente pelo WhatsApp
-- Enviar lembretes de agendamento
-- Comunicação rápida com clientes
-
-Configure o número do WhatsApp no arquivo `app/page.tsx` (constante `WHATSAPP_NUMBER`).
-
----
-
-## 🗄️ Banco de Dados
-
-O projeto usa **SQLite** por padrão (arquivo local `dev.db`), ideal para uso em um único computador. Para escalar para múltiplos usuários, basta trocar para **PostgreSQL** no `prisma/schema.prisma`.
-
----
-
-## 📄 Licença
-
-Projeto privado — uso exclusivo.
+*Feito com um Toque Impecável. 🍷🗿*
