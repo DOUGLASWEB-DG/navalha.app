@@ -4,6 +4,22 @@ Esquece os sistemas antigos e travados. O **Navalha.app** é um SaaS (Sistema de
 
 Construído com uma stack moderna de Big Techs, o sistema não só gerencia agenda e financeiro, mas **trabalha sozinho por você**, disparando mensagens no WhatsApp dos clientes sem que você precise tocar no celular. 🤖📲
 
+## 📸 Telas do Sistema
+
+> *O visual reflete a excelência do serviço. Interface Glassmorphism com tons de Dark Slate e Dourado (Amber).*
+
+<div align="center">
+  <img src="https://via.placeholder.com/800x450/0f172a/eab308?text=Tela+de+Login+(Arraste+sua+foto+aqui)" alt="Login" width="48%">
+  <img src="https://via.placeholder.com/800x450/0f172a/eab308?text=Dashboard+Principal+(Arraste+sua+foto+aqui)" alt="Dashboard" width="48%">
+</div>
+
+<br>
+
+<div align="center">
+  <img src="https://via.placeholder.com/800x450/0f172a/eab308?text=Tela+de+Agendamentos+(Arraste+sua+foto+aqui)" alt="Agendamentos" width="48%">
+  <img src="https://via.placeholder.com/800x450/0f172a/eab308?text=Controle+Financeiro+(Arraste+sua+foto+aqui)" alt="Finanças" width="48%">
+</div>
+
 ---
 
 ## 🚀 Tech Stack (O Motor da Máquina)
