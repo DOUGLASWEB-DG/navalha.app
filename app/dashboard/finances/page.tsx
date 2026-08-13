@@ -39,7 +39,7 @@ export default function FinancesPage() {
 
   // Dados de transações (para aba Transações)
   const url = `/api/finances?month=${month}&type=${typeFilter}`
-  const { data, mutate } = useSWR(url, fetcher)
+  const { data, mutate, isLoading } = useSWR(url, fetcher)
 
   // Contagem de alertas não lidos
   const { data: alertData } = useSWR('/api/finances/alerts', fetcher)
@@ -105,6 +105,7 @@ export default function FinancesPage() {
           transactions={transactions}
           summary={summary}
           deleteTransaction={deleteTransaction}
+          isLoading={isLoading}
         />
       )}
 
@@ -133,12 +134,18 @@ interface TransactionsViewProps {
   transactions: any[]
   summary: { income: number; expense: number; profit: number }
   deleteTransaction: (id: string) => void
+  isLoading?: boolean
 }
 
 function TransactionsView({
   month, setMonth, typeFilter, setTypeFilter,
-  transactions, summary, deleteTransaction,
+  transactions, summary, deleteTransaction, isLoading
 }: TransactionsViewProps) {
+  
+  if (isLoading) {
+    return <TransactionsSkeleton />
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Cards de Resumo — carrossel no mobile */}
@@ -294,6 +301,42 @@ function TransactionsView({
             <p className="text-xs text-muted-foreground">Nenhuma transação para o período selecionado</p>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Skeleton de Transações ──────────────────────────────────────────────────
+
+import { Skeleton } from '@/components/ui/skeleton'
+
+function TransactionsSkeleton() {
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex gap-4 overflow-hidden">
+        <Skeleton className="h-[104px] w-full min-w-[13rem] rounded-2xl" />
+        <Skeleton className="h-[104px] w-full min-w-[13rem] rounded-2xl" />
+        <Skeleton className="h-[104px] w-full min-w-[13rem] rounded-2xl" />
+      </div>
+      
+      <div className="flex gap-3">
+        <Skeleton className="h-12 w-48 rounded-xl" />
+        <Skeleton className="h-12 w-64 rounded-xl" />
+      </div>
+      
+      <div className="rounded-3xl border border-border bg-card shadow-sm p-4 space-y-4">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
+            <div className="flex gap-4 items-center">
+              <Skeleton className="h-11 w-11 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-48" />
+              </div>
+            </div>
+            <Skeleton className="h-5 w-20" />
+          </div>
+        ))}
       </div>
     </div>
   )

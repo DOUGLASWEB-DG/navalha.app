@@ -279,14 +279,36 @@ function KPICard({ title, value, trend, invertTrend, icon, iconBg, iconColor, va
 
 function FinanceDashboardSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <Skeleton className="h-48 rounded-2xl" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Skeleton className="lg:col-span-2 h-72 rounded-xl" />
-        <Skeleton className="h-72 rounded-xl" />
+        {/* Fake Area Chart Skeleton */}
+        <div className="lg:col-span-2 h-72 rounded-xl border border-border bg-card p-5 flex flex-col justify-between">
+          <Skeleton className="h-4 w-32 mb-8" />
+          <div className="space-y-4">
+            <Skeleton className="h-[2px] w-full opacity-20" />
+            <Skeleton className="h-[2px] w-full opacity-20" />
+            <Skeleton className="h-[2px] w-full opacity-20" />
+            <Skeleton className="h-[2px] w-full opacity-20" />
+          </div>
+          <div className="mt-8 flex gap-2 items-end h-16">
+            {[...Array(12)].map((_, i) => (
+              <Skeleton key={i} className="flex-1 rounded-t-sm" style={{ height: `${Math.random() * 80 + 20}%` }} />
+            ))}
+          </div>
+        </div>
+        {/* Fake Pie Chart Skeleton */}
+        <div className="h-72 rounded-xl border border-border bg-card p-5 flex flex-col items-center justify-center gap-4">
+          <Skeleton className="h-4 w-40 self-start" />
+          <Skeleton className="w-32 h-32 rounded-full mt-4" />
+          <div className="w-full space-y-2 mt-4">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-3/4" />
+          </div>
+        </div>
       </div>
     </div>
   )

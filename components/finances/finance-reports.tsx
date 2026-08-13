@@ -237,7 +237,7 @@ export function FinanceReports() {
 
 function ReportsSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex justify-between">
         <Skeleton className="h-12 w-48 rounded-xl" />
         <Skeleton className="h-12 w-32 rounded-xl" />
@@ -247,7 +247,17 @@ function ReportsSkeleton() {
           <Skeleton key={i} className="h-36 rounded-2xl" />
         ))}
       </div>
-      <Skeleton className="h-72 rounded-2xl" />
+      {/* Fake Bar Chart */}
+      <div className="h-72 rounded-2xl border border-border bg-card p-5 flex flex-col justify-end gap-2">
+        <div className="flex items-end justify-around h-48 w-full">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="flex gap-1 items-end h-full w-12">
+              <Skeleton className="w-full rounded-t-sm" style={{ height: `${Math.random() * 60 + 20}%` }} />
+              <Skeleton className="w-full rounded-t-sm" style={{ height: `${Math.random() * 60 + 20}%` }} />
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <Skeleton className="h-56 rounded-2xl" />
         <Skeleton className="h-56 rounded-2xl" />
