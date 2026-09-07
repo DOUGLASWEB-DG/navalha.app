@@ -16,10 +16,11 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
+import { formatBrazilPhone, normalizeBrazilPhone } from '@/lib/format'
 
 const schema = z.object({
-  name: z.string().min(1, 'Nome é obrigatório'),
-  phone: z.string().min(1, 'Telefone é obrigatório'),
+  name: z.string().trim().min(1, 'Nome é obrigatório'),
+  phone: z.string().refine((value) => normalizeBrazilPhone(value) !== null, 'Use DDD + número (ex.: (69) 99999-9999)'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   notes: z.string().optional(),
 })
@@ -47,7 +48,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
     if (client) {
       reset({
         name: client.name,
-        phone: client.phone,
+        phone: formatBrazilPhone(client.phone),
         email: client.email ?? '',
         notes: client.notes ?? '',
       })

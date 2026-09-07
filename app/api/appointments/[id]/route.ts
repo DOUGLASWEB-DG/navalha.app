@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { sendTextMessage } from '@/lib/whatsapp'
+import { normalizeBrazilPhone } from '@/lib/format'
 
 const updateSchema = z.object({
   clientId: z.string().optional(),
@@ -31,12 +32,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       try {
         const clientPhone = appointment.client.phone;
         if (clientPhone) {
-          // Remover tudo que não for número
-          let number = clientPhone.replace(/\D/g, '');
-          // Se tiver 10 ou 11 dígitos, provavelmente esqueceu o DDI (55)
-          if (number.length === 10 || number.length === 11) {
-            number = '55' + number; 
-          }
+          const number = normalizeBrazilPhone(clientPhone);
+          if (!number) {
+            console.error(`[Appointments PATCH] Invalid client phone for ${appointment.client.id}`);
+          } else {
           
           // Formatar data e hora
           const { format } = require('date-fns');
@@ -46,6 +45,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           const msg = `Olá, ${appointment.client.name}! Tudo bem?\n\nPassando para confirmar o seu agendamento de *${appointment.service.name}*.\n\n📅 Data: ${dataFormatada}\n\nSeu horário está confirmadíssimo! Te esperamos na barbearia. 💈✂️`;
           
           await sendTextMessage(number, msg).catch(e => console.error('WhatsApp client msg error:', e));
+          }
         }
       } catch (e) {
         console.error('Error with WA client notification:', e);

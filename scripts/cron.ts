@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { format, addHours, differenceInMinutes } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import 'dotenv/config';
+import { normalizeBrazilPhone } from '../lib/format';
 
 const prisma = new PrismaClient();
 const EVO_URL = process.env.NEXT_PUBLIC_EVO_URL || 'http://localhost:8080';
@@ -61,10 +62,8 @@ async function checkReminders() {
       if (minsDiff <= 70 && minsDiff >= 30) {
         let phone = appt.client.phone;
         if (phone) {
-          phone = phone.replace(/\D/g, '');
-          if (phone.length === 10 || phone.length === 11) {
-            phone = '55' + phone;
-          }
+          phone = normalizeBrazilPhone(phone) || '';
+          if (!phone) continue;
 
           const timeFormatted = format(new Date(appt.date), "HH:mm", { locale: ptBR });
           const msg = `⏰ *Lembrete de Agendamento!*\n\nOlá, ${appt.client.name}! \nFalta cerca de 1 hora para o seu horário das *${timeFormatted}*.\n\nServiço: ${appt.service.name}\n\nTe esperamos na barbearia! 💈✂️`;

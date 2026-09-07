@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { normalizeBrazilPhone } from '@/lib/format'
 
 const createSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  phone: z.string().min(1, 'Phone is required'),
+  name: z.string().trim().min(1, 'Name is required'),
+  phone: z.string().refine((value) => normalizeBrazilPhone(value) !== null, 'Telefone inválido. Use DDD + número.'),
   email: z.string().email().optional().or(z.literal('')),
   notes: z.string().optional(),
 })
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
     const client = await prisma.client.create({
       data: {
         name: parsed.name,
-        phone: parsed.phone,
+        phone: normalizeBrazilPhone(parsed.phone)!,
         email: parsed.email || undefined,
         notes: parsed.notes,
       },
