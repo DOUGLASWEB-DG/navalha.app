@@ -15,6 +15,7 @@ import {
   Trash2,
   MessageCircle,
   Clock,
+  User,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { confirmAction } from '@/lib/confirm-toast'
@@ -51,8 +52,8 @@ export default function AppointmentsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingAppointment, setEditingAppointment] = useState<any>(null)
 
-  const dateStr = format(selectedDate, 'yyyy-MM-dd')
-  const queryParams = `?date=${dateStr}&status=${statusFilter}`
+  const monthStr = format(selectedDate, 'yyyy-MM')
+  const queryParams = `?month=${monthStr}&status=${statusFilter}`
   const { data: appointments, mutate } = useSWR(`/api/appointments${queryParams}`, fetcher)
 
   async function updateStatus(id: string, status: AppointmentStatus) {
@@ -105,7 +106,7 @@ export default function AppointmentsPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       <PageHeader
         title="Agendamentos"
-        description="Gerencie sua agenda diária e horários"
+        description="Gerencie sua agenda de horários"
       >
         <Button
           onClick={() => { setEditingAppointment(null); setModalOpen(true) }}
@@ -119,9 +120,14 @@ export default function AppointmentsPage() {
       {/* Controles e Filtros */}
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <input
-          type="date"
-          value={format(selectedDate, 'yyyy-MM-dd')}
-          onChange={(e) => setSelectedDate(new Date(e.target.value + 'T12:00:00'))}
+          type="month"
+          value={format(selectedDate, 'yyyy-MM')}
+          onChange={(e) => {
+             const [year, month] = e.target.value.split('-');
+             if (year && month) {
+               setSelectedDate(new Date(Number(year), Number(month) - 1, 1, 12, 0, 0));
+             }
+          }}
           className="min-h-12 rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
         />
         
@@ -144,11 +150,10 @@ export default function AppointmentsPage() {
         </div>
       </div>
 
-      {/* Cabeçalho da Data Atual */}
+      {/* Cabeçalho do Mês Atual */}
       <div className="flex items-center gap-3">
-        <h3 className="text-base font-semibold text-foreground">
-          {isSameDay(selectedDate, new Date()) ? 'Hoje — ' : ''}
-          {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
+        <h3 className="text-base font-semibold text-foreground capitalize">
+          {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
         </h3>
         <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full">
           {appointments?.length ?? 0} agendamentos
@@ -156,111 +161,100 @@ export default function AppointmentsPage() {
       </div>
 
       {/* Lista Inteligente de Agendamentos */}
-      <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+      <div className="w-full">
         {appointments && appointments.length > 0 ? (
-          <div className="flex flex-col gap-3 p-3 lg:gap-0 lg:divide-y lg:divide-border lg:p-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {appointments.map((appt: any) => (
               <div
                 key={appt.id}
-                className="group flex flex-col gap-4 rounded-2xl border border-border bg-background p-4 transition-all duration-150 active:scale-[0.99] active:bg-muted lg:flex-row lg:items-center lg:gap-4 lg:rounded-none lg:border-0 lg:bg-transparent lg:px-5 lg:py-4 lg:hover:bg-muted/50 lg:active:scale-100"
+                className="group relative flex flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
               >
-                <div className="flex items-start gap-3 lg:items-center">
-                  <div className="w-16 shrink-0 text-center flex flex-col items-center justify-center bg-muted rounded-xl py-2 border border-border lg:bg-transparent lg:border-0 lg:py-0">
-                    <p className="text-lg font-bold text-foreground">
-                      {format(new Date(appt.date), 'HH:mm')}
-                    </p>
-                  </div>
-
-                  <div className="relative hidden w-4 shrink-0 flex-col items-center self-stretch lg:flex">
-                    <div
-                      className={cn(
-                        'mt-1 h-3 w-3 shrink-0 rounded-full border-2',
-                        appt.status === 'COMPLETED'
-                          ? 'border-success bg-success'
-                          : appt.status === 'CONFIRMED'
-                            ? 'border-info bg-info'
-                            : appt.status === 'CANCELED'
-                              ? 'border-muted-foreground bg-muted'
-                              : 'border-warning bg-warning'
-                      )}
-                    />
-                    <div className="mt-1 w-px flex-1 bg-border" />
-                  </div>
-
-                  <div className="min-w-0 flex-1 lg:flex-1">
-                    <p className="text-sm font-semibold text-foreground">{appt.client?.name}</p>
-                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                      <span className="text-xs text-muted-foreground">{appt.service?.name}</span>
-                      <span className="text-muted-foreground hidden sm:inline">·</span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5" />
-                        {appt.service?.durationMins} min
-                      </span>
-                      {appt.barber && (
-                        <>
-                          <span className="text-muted-foreground hidden sm:inline">·</span>
-                          <span className="flex items-center gap-1 text-xs text-primary/80">
-                            Barbeiro: {appt.barber.name}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    {appt.notes && (
-                      <p className="mt-1.5 text-xs italic text-muted-foreground line-clamp-1">
-                        &quot;{appt.notes}&quot;
+                {/* Header do Card (Data/Hora e Ações) */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-lg border border-primary/20">
+                      <p className="text-xs font-bold leading-tight text-center">
+                        {format(new Date(appt.date), 'dd/MM')} <br/>
+                        <span className="text-[11px] uppercase font-semibold">{format(new Date(appt.date), 'HH:mm')}</span>
                       </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-3 border-t border-border pt-3 lg:ml-auto lg:border-t-0 lg:pt-0">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20 hidden sm:inline-flex">
-                      R${appt.service?.price?.toFixed(2)}
-                    </span>
+                    </div>
                     <StatusBadge status={appt.status} />
                   </div>
-
+                  
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 shrink-0 text-muted-foreground sm:h-8 sm:w-8 sm:opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
-                        aria-label="Ações do agendamento"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
                       >
-                        <MoreVertical className="h-5 w-5 sm:h-4 sm:w-4" />
+                        <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => { setEditingAppointment(appt); setModalOpen(true) }} className="gap-2 cursor-pointer">
-                      <Pencil className="w-4 h-4" /> Editar
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => openWhatsApp(appt)} className="gap-2 cursor-pointer text-success">
-                      <MessageCircle className="w-4 h-4" /> Enviar WhatsApp
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-border" />
-                    {appt.status !== 'CONFIRMED' && (
-                      <DropdownMenuItem onClick={() => updateStatus(appt.id, 'CONFIRMED')} className="gap-2 cursor-pointer focus:bg-info/10 focus:text-info text-info">
-                        <CheckCircle2 className="w-4 h-4" /> Confirmar
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => { setEditingAppointment(appt); setModalOpen(true) }} className="gap-2 cursor-pointer">
+                        <Pencil className="w-4 h-4" /> Editar
                       </DropdownMenuItem>
-                    )}
-                    {appt.status !== 'COMPLETED' && (
-                      <DropdownMenuItem onClick={() => updateStatus(appt.id, 'COMPLETED')} className="gap-2 cursor-pointer focus:bg-success/10 focus:text-success text-success">
-                        <CheckCircle2 className="w-4 h-4" /> Marcar Concluído
+                      <DropdownMenuItem onClick={() => openWhatsApp(appt)} className="gap-2 cursor-pointer text-success">
+                        <MessageCircle className="w-4 h-4" /> Enviar WhatsApp
                       </DropdownMenuItem>
-                    )}
-                    {appt.status !== 'CANCELED' && (
-                      <DropdownMenuItem onClick={() => updateStatus(appt.id, 'CANCELED')} className="gap-2 cursor-pointer focus:bg-muted/10 text-muted-foreground">
-                        <XCircle className="w-4 h-4" /> Cancelar
+                      <DropdownMenuSeparator className="bg-border" />
+                      {appt.status !== 'CONFIRMED' && (
+                        <DropdownMenuItem onClick={() => updateStatus(appt.id, 'CONFIRMED')} className="gap-2 cursor-pointer focus:bg-info/10 focus:text-info text-info">
+                          <CheckCircle2 className="w-4 h-4" /> Confirmar
+                        </DropdownMenuItem>
+                      )}
+                      {appt.status !== 'COMPLETED' && (
+                        <DropdownMenuItem onClick={() => updateStatus(appt.id, 'COMPLETED')} className="gap-2 cursor-pointer focus:bg-success/10 focus:text-success text-success">
+                          <CheckCircle2 className="w-4 h-4" /> Marcar Concluído
+                        </DropdownMenuItem>
+                      )}
+                      {appt.status !== 'CANCELED' && (
+                        <DropdownMenuItem onClick={() => updateStatus(appt.id, 'CANCELED')} className="gap-2 cursor-pointer focus:bg-muted/10 text-muted-foreground">
+                          <XCircle className="w-4 h-4" /> Cancelar
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator className="bg-border" />
+                      <DropdownMenuItem onClick={() => deleteAppointment(appt.id)} className="gap-2 cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive">
+                        <Trash2 className="w-4 h-4" /> Excluir
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator className="bg-border" />
-                    <DropdownMenuItem onClick={() => deleteAppointment(appt.id)} className="gap-2 cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive">
-                      <Trash2 className="w-4 h-4" /> Excluir
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
+                    </DropdownMenuContent>
                   </DropdownMenu>
+                </div>
+
+                {/* Corpo do Card (Cliente e Serviço) */}
+                <div className="flex-1 mt-2">
+                  <p className="text-base font-bold text-foreground mb-1 line-clamp-1">{appt.client?.name}</p>
+                  <p className="text-sm font-medium text-muted-foreground line-clamp-1">{appt.service?.name}</p>
+                  
+                  <div className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>{appt.service?.durationMins} min</span>
+                    </div>
+                    {appt.barber && (
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span className="text-primary/90 font-medium">Barbeiro: {appt.barber.name}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {appt.notes && (
+                    <p className="mt-4 text-xs italic text-muted-foreground bg-muted/50 p-2.5 rounded-lg line-clamp-2 border border-border">
+                      &quot;{appt.notes}&quot;
+                    </p>
+                  )}
+                </div>
+
+                {/* Rodapé do Card (Preço) */}
+                <div className="flex items-center justify-between border-t border-border pt-3 mt-2">
+                  <span className="text-sm font-bold text-foreground">
+                    Valor
+                  </span>
+                  <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+                    R$ {appt.service?.price?.toFixed(2)}
+                  </span>
                 </div>
               </div>
             ))}

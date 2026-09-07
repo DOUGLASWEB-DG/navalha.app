@@ -11,6 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { ProductFormModal } from '@/components/products/product-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
@@ -51,57 +52,31 @@ export default function ProductsPage() {
         </Button>
       </PageHeader>
 
-      <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+      <div className="w-full">
         {products && products.length > 0 ? (
-          <div className="flex flex-col gap-3 p-3 lg:gap-0 lg:divide-y lg:divide-white/5 lg:p-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {products.map((p: any) => (
               <div
                 key={p.id}
-                className={`group flex flex-col gap-4 rounded-2xl border border-border bg-background p-5 transition-all duration-150 active:scale-[0.99] active:bg-muted sm:flex-row sm:items-center sm:justify-between sm:gap-6 lg:rounded-none lg:border-0 lg:bg-transparent lg:px-6 lg:py-5 lg:hover:bg-white/5 lg:active:scale-100 ${
+                className={`group relative flex flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40 ${
                   !p.active ? 'opacity-60' : ''
                 }`}
               >
-                <div className="flex min-w-0 flex-1 items-start gap-4 sm:items-center">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]">
-                    <Package className="h-5 w-5 text-primary" />
-                  </div>
-                  
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate text-base font-bold text-foreground">{p.name}</p>
-                      {!p.active && (
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-card text-muted-foreground border border-border">Inativo</span>
-                      )}
-                    </div>
-                    {p.description ? (
-                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2 sm:line-clamp-1">{p.description}</p>
-                    ) : (
-                      <p className="mt-1 text-sm text-muted-foreground italic">Sem descrição</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-4 border-t border-border pt-4 sm:border-t-0 sm:pt-0 sm:shrink-0">
-                  <div className="flex items-center gap-4">
-                    <div className={`flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg border ${
-                      p.stock <= 5 ? 'bg-destructive/10 text-destructive border-destructive/20' : 'bg-card text-muted-foreground border-border'
-                    }`}>
-                      <Hash className="w-4 h-4" />
-                      <span>{p.stock} em estoque</span>
-                    </div>
-                    <div className="flex items-center text-primary font-bold bg-primary/10 px-3 py-1.5 rounded-lg border border-primary/20">
-                      <span className="text-base">R${p.price.toFixed(2)}</span>
+                {/* Header (Ícone e Ações) */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+                      <Package className="w-6 h-6 text-primary" />
                     </div>
                   </div>
-
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 shrink-0 text-muted-foreground sm:h-8 sm:w-8 sm:opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
                       >
-                        <MoreVertical className="h-5 w-5 sm:h-4 sm:w-4" />
+                        <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -113,6 +88,38 @@ export default function ProductsPage() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
+                </div>
+
+                {/* Corpo do Card */}
+                <div className="flex-1 mt-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-base font-bold text-foreground line-clamp-1">{p.name}</p>
+                    {!p.active && (
+                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border shrink-0">Inativo</span>
+                    )}
+                  </div>
+                  {p.description ? (
+                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{p.description}</p>
+                  ) : (
+                    <p className="mt-1 text-sm text-muted-foreground italic">Sem descrição</p>
+                  )}
+                  
+                  <div className={`mt-4 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border w-fit ${
+                      p.stock <= 5 ? 'bg-destructive/10 text-destructive border-destructive/20' : 'bg-muted/50 text-muted-foreground border-border'
+                    }`}>
+                    <Hash className="w-4 h-4" />
+                    <span>{p.stock} em estoque</span>
+                  </div>
+                </div>
+
+                {/* Rodapé (Preço) */}
+                <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
+                  <span className="text-sm font-bold text-foreground">
+                    Valor
+                  </span>
+                  <span className="text-base font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20">
+                    R$ {p.price.toFixed(2)}
+                  </span>
                 </div>
               </div>
             ))}

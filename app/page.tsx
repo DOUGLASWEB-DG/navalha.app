@@ -91,7 +91,7 @@ function HeroTitle() {
             opacity: [0, 1, 1, 0],
           }}
           transition={{ duration: 0.5, ease: "easeOut", delay: 1.6 }}
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-primary z-10 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-primary z-10 drop-shadow-[0_0_15px_rgba(37,99,235,0.5)]"
         >
           <motion.div
             animate={{ rotate: [0, -40, 0, -40, 0] }}
@@ -107,43 +107,7 @@ function HeroTitle() {
 
 const WHATSAPP_NUMBER = tenantConfig.whatsappNumber
 
-const services = [
-  {
-     name: 'Corte Clássico',
-     price: 35,
-     duration: '30 min',
-     desc: 'Corte na tesoura ou máquina sob medida para seu estilo',
-     image: 'https://images.pexels.com/photos/32329615/pexels-photo-32329615.jpeg' 
-  }, 
-  {
-     name: 'Barba',
-     price: 20, 
-     duration: '20 min', 
-     desc: 'Alinhamento e modelagem de barba com acabamento impecável',
-     image: 'https://images.pexels.com/photos/18298041/pexels-photo-18298041.jpeg' 
-  },
-  { 
-    name: 'Corte + Barba', 
-    price: 50, 
-    duration: '50 min',
-    desc: 'Pacote completo — nosso serviço mais procurado',
-    image: 'https://images.pexels.com/photos/1813346/pexels-photo-1813346.jpeg' 
-  },
-  {
-     name: 'Barboterapia', 
-     price: 40, 
-     duration: '40 min', 
-     desc: 'Barba com toalha quente e navalha tradicional',
-     image: 'https://images.pexels.com/photos/12304504/pexels-photo-12304504.jpeg ' 
-  },
-  { 
-    name: 'Corte Infantil', 
-    price: 25, 
-    duration: '25 min', 
-    desc: 'Cortes para crianças até 12 anos',
-    image: 'https://images.pexels.com/photos/19664866/pexels-photo-19664866.jpeg' 
-  },
-]
+const services = tenantConfig.services;
 
 const reasons = tenantConfig.reasons
 
@@ -227,7 +191,7 @@ export default function LandingPage() {
           </p>
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Link href="/book">
-              <Button size="lg" className="bg-primary text-primary-foreground h-14 px-8 text-base gap-2 rounded-full font-bold shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:shadow-[0_0_40px_rgba(245,158,11,0.5)] hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-300 group">
+              <Button size="lg" className="bg-primary text-primary-foreground h-14 px-8 text-base gap-2 rounded-full font-bold shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_40px_rgba(37,99,235,0.5)] hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-300 group">
                 Agendar Horário
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -398,45 +362,40 @@ export default function LandingPage() {
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold font-serif text-balance">Encontre-nos</h2>
         </div>
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-3 gap-4 mb-12">
           {[
-            { icon: MapPin, label: 'Endereço', value: tenantConfig.address },
-            { icon: Phone, label: 'Telefone', value: tenantConfig.phoneDisplay },
-            { icon: Instagram, label: 'Instagram', value: tenantConfig.instagram },
-          ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="bg-card border border-border/50 rounded-xl p-5 flex flex-col items-center text-center gap-3 shadow-soft hover:shadow-premium transition-all duration-300">
-              <div className="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center">
+            { icon: MapPin, label: 'Endereço', value: tenantConfig.address, link: tenantConfig.googleMapsLink },
+            { icon: Phone, label: 'Telefone', value: tenantConfig.phoneDisplay, link: buildWhatsAppLink() },
+            { icon: Instagram, label: 'Instagram', value: tenantConfig.instagram, link: tenantConfig.instagramLink },
+          ].map(({ icon: Icon, label, value, link }) => (
+            <a href={link} target="_blank" rel="noopener noreferrer" key={label} className="bg-card border border-border/50 rounded-xl p-5 flex flex-col items-center text-center gap-3 shadow-soft hover:shadow-premium transition-all duration-300 hover:border-primary/50 group">
+              <div className="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Icon className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground font-medium">{label}</p>
-                <p className="text-sm font-semibold text-foreground mt-1">{value}</p>
+                <p className="text-sm font-semibold text-foreground mt-1 group-hover:text-primary transition-colors">{value}</p>
               </div>
-            </div>
+            </a>
           ))}
         </div>
+        
+        {tenantConfig.googleMapsEmbedUrl && (
+          <div className="w-full h-[400px] rounded-2xl overflow-hidden border border-border/50 shadow-soft">
+            <iframe 
+              src={tenantConfig.googleMapsEmbedUrl} 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+        )}
       </section>
 
-      {/* CTA Banner */}
-      <section className="py-16 px-6 border-t border-border bg-primary/5">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="text-3xl font-bold font-serif text-balance mb-3">Pronto para um Corte Novo?</h2>
-          <p className="text-muted-foreground mb-6">Agende online em segundos ou mande uma mensagem no WhatsApp</p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <Link href="/book">
-              <Button size="lg" className="bg-primary text-primary-foreground h-14 px-8 text-base gap-2 rounded-full font-bold shadow-[0_0_30px_rgba(245,158,11,0.3)] hover:shadow-[0_0_40px_rgba(245,158,11,0.5)] hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-300 group">
-                Agendar Online <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <a href={buildWhatsAppLink()} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="lg" className="h-14 px-8 text-base bg-zinc-900 border-2 border-success/30 text-success gap-2 rounded-full font-bold shadow-[0_0_20px_rgba(34,197,94,0.1)] hover:border-success/80 hover:bg-success/10 hover:shadow-[0_0_30px_rgba(34,197,94,0.25)] hover:scale-105 active:scale-95 transition-all duration-300">
-                <MessageCircle className="w-5 h-5" />
-                WhatsApp
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
+     
 
       {/* Footer */}
       <footer className="border-t border-border py-8 px-6 bg-card">

@@ -79,7 +79,7 @@ module.exports = {
       },
       boxShadow: {
         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-        'glow': '0 0 20px rgba(var(--primary), 0.2)',
+        'glow': '0 0 20px hsl(var(--primary) / 0.2)',
         'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)',
         'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0,0,0,0.05)',
       },

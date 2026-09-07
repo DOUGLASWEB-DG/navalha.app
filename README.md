@@ -1,83 +1,168 @@
-# 💈 Navalha.app (BarberOS Premium)
+# Navalha.app
 
-Esquece os sistemas antigos e travados. O **Navalha.app** é um SaaS (Sistema de Gestão) construído do zero para barbearias de alto padrão que querem luxo no visual e automação pesada nos bastidores.
+Sistema de gestao para barbearias, com agenda, clientes, servicos, produtos,
+financeiro e comunicacao automatizada por WhatsApp.
 
-Construído com uma stack moderna de Big Techs, o sistema não só gerencia agenda e financeiro, mas **trabalha sozinho por você**, disparando mensagens no WhatsApp dos clientes sem que você precise tocar no celular. 🤖📲
+> Projeto privado em desenvolvimento. Consulte a equipe antes de usar em
+> producao.
 
-## 📸 Telas do Sistema
+## Visao geral
 
-> *O visual reflete a excelência do serviço. Interface Glassmorphism com tons de Dark Slate e Dourado (Amber).*
+O Navalha.app centraliza a operacao diaria da barbearia em um painel
+responsivo:
 
-<div align="center">
-  <img src="https://via.placeholder.com/800x450/0f172a/eab308?text=Tela+de+Login+(Arraste+sua+foto+aqui)" alt="Login" width="48%">
-  <img src="https://via.placeholder.com/800x450/0f172a/eab308?text=Dashboard+Principal+(Arraste+sua+foto+aqui)" alt="Dashboard" width="48%">
-</div>
+- Agenda diaria com filtros por data e status
+- Cadastro de clientes com telefone normalizado para o Brasil
+- Servicos, produtos e controle de estoque
+- Dashboard com indicadores, metas e receitas
+- Financeiro com entradas, despesas, categorias e relatorios
+- Usuarios e permissoes para barbeiros e administradores
+- Confirmacoes e lembretes de agendamento via WhatsApp
+- Interface responsiva com tema premium e carregamentos skeleton
 
-<br>
+## Stack
 
-<div align="center">
-  <img src="https://via.placeholder.com/800x450/0f172a/eab308?text=Tela+de+Agendamentos+(Arraste+sua+foto+aqui)" alt="Agendamentos" width="48%">
-  <img src="https://via.placeholder.com/800x450/0f172a/eab308?text=Controle+Financeiro+(Arraste+sua+foto+aqui)" alt="Finanças" width="48%">
-</div>
+- **Frontend e backend:** Next.js 15, React 19 e TypeScript
+- **Estilos:** Tailwind CSS, Radix UI e componentes reutilizaveis
+- **Persistencia:** PostgreSQL com Prisma ORM
+- **Formularios e validacao:** React Hook Form e Zod
+- **Graficos:** Recharts
+- **WhatsApp:** Evolution API
+- **Automacoes:** Node.js, `tsx` e cron
 
----
+## Requisitos
 
-## 🚀 Tech Stack (O Motor da Máquina)
-- **Frontend & Backend:** Next.js 14 (App Router) + TypeScript
-- **Banco de Dados:** PostgreSQL (via Prisma ORM)
-- **Design & UX:** Tailwind CSS, Shadcn UI, Glassmorphism e Skeletons (Performance Percebida)
-- **Motor de WhatsApp:** Evolution API V2 (Rodando em Docker)
-- **Jobs em Background:** Cron nativo no Node via `tsx`
+- Node.js 20 ou superior
+- npm
+- PostgreSQL (Supabase ou servidor proprio)
+- Docker e Docker Compose, caso use os servicos locais definidos em
+  `docker-compose.yml`
 
----
+## Configuracao local
 
-## 🔥 As Mágicas do Sistema
+### 1. Clone o repositorio
 
-### 1. UX Premium & Performance Percebida
-O sistema não tem "tela de carregamento chata". Adotamos o uso pesado de **Skeleton Loaders** (igual YouTube e Instagram). Quando você navega entre Clientes, Agenda ou Finanças, a tela muda instantaneamente e pulsa o design (Perceived Performance).
-As cores giram em torno do **Dark Slate e Dourado (Amber)**, passando a exata sensação de um produto de 5 mil reais/mês.
-
-### 2. O Robô de WhatsApp 100% Invisível
-Adeus "clique aqui para enviar mensagem". O sistema está conectado diretamente ao seu número via API e faz tudo por baixo dos panos:
-- Mudou um agendamento para "Confirmado"? O cliente recebe a confirmação com data e hora.
-- Marcou como "Concluído"? O sistema registra o dinheiro no fluxo de caixa automático e avisa o dono.
-
-### 3. O Lembrete de 1 Hora (Cron Job)
-Temos um Script autônomo rodando a cada 5 minutos no servidor (`npm run cron`). Ele varre o banco de dados buscando quem tem corte marcado para a próxima hora e dispara: *"Fala mestre! Passando pra lembrar que falta cerca de 1 horinha pro nosso corte."* Nunca mais um cliente esquece o horário!
-
----
-
-## 🛠️ Como rodar essa nave?
-
-### 1. Subindo os contêineres
-Você vai precisar do Docker rodando para o Banco de Dados e para a API do WhatsApp.
 ```bash
-docker-compose up -d
+git clone https://github.com/DOUGLASWEB-DG/Barbeiro-Atual.git
+cd Barbeiro-Atual
 ```
 
-### 2. Instalando as dependências e o Banco
+### 2. Instale as dependencias
+
 ```bash
 npm install
+```
+
+### 3. Configure as variaveis de ambiente
+
+Copie `.env.example` para `.env` e preencha as credenciais do PostgreSQL:
+
+```bash
+cp .env.example .env
+```
+
+Variaveis obrigatorias:
+
+| Variavel | Finalidade |
+| --- | --- |
+| `DATABASE_URL` | Conexao principal com pool de conexoes |
+| `DIRECT_URL` | Conexao direta usada pelo Prisma em migracoes |
+
+Nunca envie o arquivo `.env` para o Git.
+
+### 4. Prepare o banco
+
+```bash
 npm run db:push
 npm run db:seed
 ```
 
-### 3. Ligando os motores
-Abra **dois** terminais no seu VS Code:
+### 5. Inicie o sistema
 
-Terminal 1 (Roda o site):
+Terminal 1 - aplicacao web:
+
 ```bash
 npm run dev
 ```
 
-Terminal 2 (Roda o Robô de Lembretes Automáticos):
+Terminal 2 - lembretes automaticos:
+
 ```bash
 npm run cron
 ```
 
-Pronto! Acesse `http://localhost:3000`. 
+Acesse [http://localhost:3000](http://localhost:3000).
 
-*(As configurações globais do sistema, como o seu Número de WhatsApp e Nome da Barbearia, ficam centralizadas num único arquivo fácil de editar em `config/tenant.ts`)*
+## Scripts disponiveis
 
----
-*Feito com um Toque Impecável. 🍷🗿*
+| Comando | Descricao |
+| --- | --- |
+| `npm run dev` | Inicia o Next.js em desenvolvimento |
+| `npm run build` | Gera o Prisma Client, atualiza o banco e cria o build |
+| `npm run start` | Inicia a aplicacao compilada |
+| `npm run lint` | Executa o ESLint do projeto |
+| `npm run format` | Formata os arquivos com Prettier |
+| `npm run cron` | Executa o processo de lembretes do WhatsApp |
+| `npm run db:push` | Sincroniza o schema Prisma com o banco |
+| `npm run db:migrate` | Cria e executa uma migracao Prisma |
+| `npm run db:seed` | Carrega dados iniciais |
+| `npm run db:studio` | Abre o Prisma Studio |
+| `npm run db:reset` | Reseta o banco de desenvolvimento |
+
+## Estrutura principal
+
+```text
+app/
+  api/                 Rotas da API
+  dashboard/           Telas administrativas
+  book/                Fluxo publico de agendamento
+components/            Componentes compartilhados
+config/                Configuracoes da barbearia
+lib/                   Autenticacao, formatacao e integracoes
+prisma/                Schema e seed do banco
+public/                Imagens e assets publicos
+scripts/               Jobs e automacoes
+```
+
+## Configuracoes da barbearia
+
+Dados institucionais, como nome, identidade e informacoes de contato, ficam
+centralizados em [config/tenant.ts](config/tenant.ts). Ajuste esse arquivo
+conforme a identidade da sua unidade.
+
+## Qualidade e validacao
+
+Antes de abrir um Pull Request, execute:
+
+```bash
+npx tsc --noEmit
+npm run lint
+```
+
+Para testar uma alteracao visual, valide o dashboard em desktop e celular,
+principalmente as telas de Agenda, Clientes e Agendamentos.
+
+## Fluxo Git recomendado
+
+```bash
+git checkout -b minha-alteracao
+git status
+git add arquivo1 arquivo2
+git commit -m "Descreve a alteracao"
+git push -u origin minha-alteracao
+```
+
+Depois, abra um Pull Request para `main`. Evite usar `git add .` quando houver
+alteracoes de outras tarefas no mesmo diretorio.
+
+## Seguranca
+
+- Nao compartilhe credenciais, tokens ou arquivos `.env`.
+- Valide entradas no frontend e na API.
+- Use HTTPS e variaveis protegidas no ambiente de producao.
+- Revise os logs de integracoes externas antes de publicar.
+
+## Licenca
+
+Uso privado e restrito ao projeto Navalha.app. Consulte os proprietarios antes
+de redistribuir ou publicar este codigo.

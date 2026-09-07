@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
     const dateParam = searchParams.get('date')
     const status = searchParams.get('status')
 
+    const monthParam = searchParams.get('month')
+
     const where: any = {}
 
     // Filtra pelo barbeiro logado se for role BARBER
@@ -26,7 +28,15 @@ export async function GET(req: NextRequest) {
       where.barberId = user.id
     }
 
-    if (dateParam) {
+    if (monthParam) {
+      const [year, month] = monthParam.split('-').map(Number)
+      if (!year || !month) {
+        return NextResponse.json({ error: 'Invalid month param. Expected yyyy-MM' }, { status: 400 })
+      }
+      const start = new Date(year, month - 1, 1, 0, 0, 0, 0)
+      const end = new Date(year, month, 0, 23, 59, 59, 999) // last day of month
+      where.date = { gte: start, lte: end }
+    } else if (dateParam) {
       const [year, month, day] = dateParam.split('-').map(Number)
       if (!year || !month || !day) {
         return NextResponse.json({ error: 'Invalid date param. Expected yyyy-MM-dd' }, { status: 400 })
