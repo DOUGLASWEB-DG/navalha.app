@@ -210,29 +210,48 @@ export default function DashboardPage() {
         </div>
 
         {todayAppointments && todayAppointments.length > 0 ? (
-          <div className="flex flex-col gap-3 lg:gap-0 lg:divide-y lg:divide-border">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {todayAppointments.map((appt: any) => (
               <div
                 key={appt.id}
-                className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/30 p-4 transition-all duration-150 active:scale-[0.99] active:bg-muted lg:flex-row lg:items-center lg:gap-4 lg:rounded-none lg:border-0 lg:bg-transparent lg:p-3 lg:active:scale-100"
+                className="flex min-h-[17rem] flex-col rounded-2xl border border-border bg-background p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm"
               >
-                <div className="flex items-start gap-4">
-                  <div className="w-14 shrink-0 text-center">
-                    <p className="text-sm font-bold text-foreground">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="rounded-xl border border-primary/10 bg-primary/10 px-3 py-2 text-center">
+                    <p className="text-sm font-bold text-primary">
+                      {format(new Date(appt.date), 'dd/MM')}
+                    </p>
+                    <p className="text-base font-bold leading-tight text-primary">
                       {format(new Date(appt.date), 'HH:mm')}
                     </p>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-foreground">{appt.client?.name}</p>
-                    <p className="text-xs text-muted-foreground">{appt.service?.name}</p>
-                  </div>
+                  <StatusBadge status={appt.status} />
                 </div>
-                <div className="hidden h-10 w-px shrink-0 bg-border lg:block" />
-                <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/5 pt-3 lg:ml-auto lg:border-t-0 lg:pt-0">
-                  <span className="text-sm font-semibold text-primary">
+
+                <div className="mt-5 min-w-0">
+                  <p className="truncate text-base font-semibold text-foreground">{appt.client?.name}</p>
+                  <p className="mt-1 truncate text-sm text-muted-foreground">{appt.service?.name}</p>
+                  <div className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      {appt.service?.durationMins} min
+                    </span>
+                    <span className="truncate text-primary/80">
+                      Barbeiro: {appt.barber?.name ?? 'Não definido'}
+                    </span>
+                  </div>
+                  {appt.notes && (
+                    <p className="mt-3 line-clamp-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs italic text-muted-foreground">
+                      &quot;{appt.notes}&quot;
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
+                  <span className="text-sm font-semibold text-foreground">Valor</span>
+                  <span className="rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-1 text-base font-bold text-primary">
                     R${appt.service?.price?.toFixed(2)}
                   </span>
-                  <StatusBadge status={appt.status} />
                 </div>
               </div>
             ))}

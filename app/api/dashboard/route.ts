@@ -20,7 +20,7 @@ export async function GET() {
           date: { gte: todayStart, lte: endOfDay(now) },
           status: { not: 'CANCELED' },
         },
-        include: { client: true, service: true },
+        include: { client: true, service: true, barber: true },
         orderBy: { date: 'asc' },
       }),
     ])

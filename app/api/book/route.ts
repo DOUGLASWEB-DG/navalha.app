@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { normalizeBrazilPhone } from '@/lib/format'
 
 const bookingSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  phone: z.string().min(1, 'Phone is required'),
+  phone: z.string().refine((value) => normalizeBrazilPhone(value) !== null, 'Telefone inválido. Use DDD + número.'),
   serviceId: z.string().min(1, 'Service is required'),
   barberId: z.string().optional(),
   date: z.string().min(1, 'Date is required'),
@@ -17,16 +18,17 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const parsed = bookingSchema.parse(body)
 
+    const phone = normalizeBrazilPhone(parsed.phone)!
     // Find or create client
     let client = await prisma.client.findUnique({
-      where: { phone: parsed.phone },
+      where: { phone },
     })
 
     if (!client) {
       client = await prisma.client.create({
         data: {
           name: parsed.name,
-          phone: parsed.phone,
+          phone,
         },
       })
     }

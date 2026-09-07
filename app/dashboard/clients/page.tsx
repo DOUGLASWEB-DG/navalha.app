@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ClientFormModal } from '@/components/clients/client-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
+import { formatBrazilPhone, getInitial, normalizeBrazilPhone } from '@/lib/format'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -54,9 +55,13 @@ export default function ClientsPage() {
   }
 
   function openWhatsApp(client: any) {
-    const phone = client.phone.replace(/\D/g, '')
+    const phone = normalizeBrazilPhone(client.phone)
+    if (!phone) {
+      toast.error('Telefone inválido', { description: 'Atualize o telefone antes de abrir o WhatsApp.' })
+      return
+    }
     const msg = encodeURIComponent(`Olá ${client.name}! Temos horários disponíveis. Gostaria de agendar um horário?`)
-    window.open(`https://wa.me/55${phone}?text=${msg}`, '_blank')
+    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank')
   }
 
   return (
@@ -101,14 +106,14 @@ export default function ClientsPage() {
                   <div className="flex min-w-0 flex-1 items-start gap-3 sm:items-center">
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
                       <span className="text-base font-bold text-primary">
-                        {client.name.charAt(0).toUpperCase()}
+                        {getInitial(client.name)}
                       </span>
                     </div>
                     
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-foreground">{client.name}</p>
                       <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                        <p className="text-xs text-muted-foreground">{client.phone}</p>
+                        <p className="text-xs text-muted-foreground">{formatBrazilPhone(client.phone)}</p>
                         
                         {client.email && (
                           <>
