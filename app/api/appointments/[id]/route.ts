@@ -7,6 +7,7 @@ import { normalizeBrazilPhone } from '@/lib/format'
 const updateSchema = z.object({
   clientId: z.string().optional(),
   serviceId: z.string().optional(),
+  serviceIds: z.array(z.string().min(1)).min(1).optional(),
   date: z.string().optional(),
   notes: z.string().optional(),
   status: z.enum(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED']).optional(),
@@ -18,13 +19,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const body = await req.json()
     const parsed = updateSchema.parse(body)
 
-    const data: any = { ...parsed }
+    const { serviceIds, ...appointmentFields } = parsed
+    const data: any = { ...appointmentFields }
     if (parsed.date) data.date = new Date(parsed.date)
+    if (serviceIds) {
+      data.serviceId = serviceIds[0]
+      data.appointmentServices = {
+        deleteMany: {},
+        create: Array.from(new Set(serviceIds)).map((serviceId) => ({ serviceId })),
+      }
+    }
 
     const appointment = await prisma.appointment.update({
       where: { id },
       data,
-      include: { client: true, service: true },
+      include: { client: true, service: true, appointmentServices: { include: { service: true } } },
     })
 
     // Enviar mensagem para o cliente quando for CONFIRMADO
@@ -42,7 +51,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           const { ptBR } = require('date-fns/locale');
           const dataFormatada = format(new Date(appointment.date), "EEEE, d 'de' MMMM 'às' HH:mm", { locale: ptBR });
           
-          const msg = `Olá, ${appointment.client.name}! Tudo bem?\n\nPassando para confirmar o seu agendamento de *${appointment.service.name}*.\n\n📅 Data: ${dataFormatada}\n\nSeu horário está confirmadíssimo! Te esperamos na barbearia. 💈✂️`;
+          const services = appointment.appointmentServices?.length
+            ? appointment.appointmentServices.map((item) => item.service.name).join(' + ')
+            : appointment.service.name
+          const msg = `Olá, ${appointment.client.name}! Tudo bem?\n\nPassando para confirmar o seu agendamento de *${services}*.\n\n📅 Data: ${dataFormatada}\n\nSeu horário está confirmadíssimo! Te esperamos na barbearia. 💈✂️`;
           
           await sendTextMessage(number, msg).catch(e => console.error('WhatsApp client msg error:', e));
           }
@@ -60,14 +72,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (!existing) {
         const appt = await prisma.appointment.findUnique({
           where: { id },
-          include: { service: true, client: true },
+          include: { service: true, client: true, appointmentServices: { include: { service: true } } },
         })
         if (appt) {
-          const newTx = await prisma.transaction.create({
-            data: {
-              type: 'INCOME',
-              amount: appt.service.price,
-              description: `${appt.service.name} — ${appt.client.name}`,
+        const services = appt.appointmentServices.length > 0
+          ? appt.appointmentServices.map((item) => item.service)
+          : [appt.service]
+        const totalAmount = services.reduce((sum, service) => sum + service.price, 0)
+        const serviceNames = services.map((service) => service.name).join(' + ')
+        const newTx = await prisma.transaction.create({
+          data: {
+            type: 'INCOME',
+            amount: totalAmount,
+            description: `${serviceNames} — ${appt.client.name}`,
               category: 'Service',
               appointmentId: id,
               date: new Date(),

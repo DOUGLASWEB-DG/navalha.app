@@ -96,8 +96,11 @@ export default function AppointmentsPage() {
     const phone = appt.client?.phone?.replace(/\D/g, '')
     const dateStr = format(new Date(appt.date), "d 'de' MMMM", { locale: ptBR })
     const time = format(new Date(appt.date), 'HH:mm')
+    const serviceName = appt.appointmentServices?.length
+      ? appt.appointmentServices.map((item: any) => item.service.name).join(' + ')
+      : appt.service?.name
     const msg = encodeURIComponent(
-      `Olá ${appt.client?.name}! Este é um lembrete do seu agendamento de ${appt.service?.name} no dia ${dateStr} às ${time}. Até lá!`
+      `Olá ${appt.client?.name}! Este é um lembrete do seu agendamento de ${serviceName} no dia ${dateStr} às ${time}. Até lá!`
     )
     window.open(`https://wa.me/55${phone}?text=${msg}`, '_blank')
   }
@@ -225,12 +228,18 @@ export default function AppointmentsPage() {
                 {/* Corpo do Card (Cliente e Serviço) */}
                 <div className="flex-1 mt-2">
                   <p className="text-base font-bold text-foreground mb-1 line-clamp-1">{appt.client?.name}</p>
-                  <p className="text-sm font-medium text-muted-foreground line-clamp-1">{appt.service?.name}</p>
+                  <p className="text-sm font-medium text-muted-foreground line-clamp-2">
+                    {appt.appointmentServices?.length
+                      ? appt.appointmentServices.map((item: any) => item.service.name).join(' + ')
+                      : appt.service?.name}
+                  </p>
                   
                   <div className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4" />
-                      <span>{appt.service?.durationMins} min</span>
+                      <span>{appt.appointmentServices?.length
+                        ? appt.appointmentServices.reduce((total: number, item: any) => total + item.service.durationMins, 0)
+                        : appt.service?.durationMins} min</span>
                     </div>
                     {appt.barber && (
                       <div className="flex items-center gap-2">

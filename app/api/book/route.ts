@@ -7,6 +7,7 @@ const bookingSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   phone: z.string().refine((value) => normalizeBrazilPhone(value) !== null, 'Telefone inválido. Use DDD + número.'),
   serviceId: z.string().min(1, 'Service is required'),
+  serviceIds: z.array(z.string().min(1)).min(1).optional(),
   barberId: z.string().optional(),
   date: z.string().min(1, 'Date is required'),
   time: z.string().min(1, 'Time is required'),
@@ -39,9 +40,13 @@ export async function POST(req: NextRequest) {
     const datetime = new Date(year, month - 1, day, hour, minute, 0)
     const endDatetime = new Date(datetime)
     
-    const service = await prisma.service.findUnique({ where: { id: parsed.serviceId }})
-    if (!service) throw new Error('Service not found')
-    endDatetime.setMinutes(endDatetime.getMinutes() + service.durationMins)
+    const serviceIds = Array.from(new Set(parsed.serviceIds ?? [parsed.serviceId]))
+    const services = await prisma.service.findMany({
+      where: { id: { in: serviceIds }, active: true },
+    })
+    if (services.length !== serviceIds.length) throw new Error('Service not found')
+    const totalDuration = services.reduce((total, service) => total + service.durationMins, 0)
+    endDatetime.setMinutes(endDatetime.getMinutes() + totalDuration)
 
     let finalBarberId = parsed.barberId && parsed.barberId !== 'any' ? parsed.barberId : null
 
@@ -54,7 +59,10 @@ export async function POST(req: NextRequest) {
           date: { gte: new Date(year, month - 1, day, 0, 0, 0), lte: new Date(year, month - 1, day, 23, 59, 59) },
           status: { not: 'CANCELED' }
         },
-        include: { service: true }
+        include: {
+          service: true,
+          appointmentServices: { include: { service: true } },
+        }
       })
 
       // Achar um barbeiro que não tenha conflito de horário
@@ -62,7 +70,10 @@ export async function POST(req: NextRequest) {
         const hasConflict = overlappingAppointments.some(appt => {
           if (appt.barberId !== b.id) return false
           const apptStart = appt.date.getTime()
-          const apptEnd = apptStart + (appt.service.durationMins * 60000)
+          const apptDuration = appt.appointmentServices.length > 0
+            ? appt.appointmentServices.reduce((total, item) => total + item.service.durationMins, 0)
+            : appt.service.durationMins
+          const apptEnd = apptStart + (apptDuration * 60000)
           const reqStart = datetime.getTime()
           const reqEnd = endDatetime.getTime()
           return (reqStart < apptEnd && reqEnd > apptStart)
@@ -81,13 +92,16 @@ export async function POST(req: NextRequest) {
     const appointment = await prisma.appointment.create({
       data: {
         clientId: client.id,
-        serviceId: parsed.serviceId,
+        serviceId: serviceIds[0],
+        appointmentServices: {
+          create: serviceIds.map((serviceId) => ({ serviceId })),
+        },
         barberId: finalBarberId,
         date: datetime,
         notes: parsed.notes,
         status: 'PENDING',
       },
-      include: { service: true, client: true },
+      include: { service: true, client: true, appointmentServices: { include: { service: true } } },
     })
 
     return NextResponse.json({
@@ -95,7 +109,7 @@ export async function POST(req: NextRequest) {
       appointment: {
         id: appointment.id,
         clientName: appointment.client.name,
-        service: appointment.service.name,
+        service: appointment.appointmentServices.map((item) => item.service.name).join(' + '),
         date: appointment.date,
       },
     }, { status: 201 })

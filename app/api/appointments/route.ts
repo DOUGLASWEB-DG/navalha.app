@@ -6,6 +6,7 @@ import { getSession } from '@/lib/auth'
 const createSchema = z.object({
   clientId: z.string().min(1),
   serviceId: z.string().min(1),
+  serviceIds: z.array(z.string().min(1)).min(1).optional(),
   barberId: z.string().optional(),
   date: z.string(),
   notes: z.string().optional(),
@@ -54,7 +55,12 @@ export async function GET(req: NextRequest) {
 
     const appointments = await prisma.appointment.findMany({
       where,
-      include: { client: true, service: true, barber: { select: { id: true, name: true } } },
+      include: {
+        client: true,
+        service: true,
+        appointmentServices: { include: { service: true } },
+        barber: { select: { id: true, name: true } },
+      },
       orderBy: { date: 'asc' },
     })
 
@@ -76,16 +82,25 @@ export async function POST(req: NextRequest) {
       barberId = user.id // Se for barbeiro, forçar o próprio ID
     }
 
+    const serviceIds = Array.from(new Set(parsed.serviceIds ?? [parsed.serviceId]))
     const appointment = await prisma.appointment.create({
       data: {
         clientId: parsed.clientId,
-        serviceId: parsed.serviceId,
+        serviceId: serviceIds[0],
+        appointmentServices: {
+          create: serviceIds.map((serviceId) => ({ serviceId })),
+        },
         barberId: barberId,
         date: new Date(parsed.date),
         notes: parsed.notes,
         status: parsed.status ?? 'PENDING',
       },
-      include: { client: true, service: true, barber: { select: { id: true, name: true } } },
+      include: {
+        client: true,
+        service: true,
+        appointmentServices: { include: { service: true } },
+        barber: { select: { id: true, name: true } },
+      },
     })
 
     return NextResponse.json(appointment, { status: 201 })

@@ -42,6 +42,7 @@ type Step = 'service' | 'barber' | 'datetime' | 'details' | 'success'
 
 interface BookingData {
   serviceId: string
+  serviceIds: string[]
   serviceName: string
   servicePrice: number
   serviceDuration: number
@@ -104,6 +105,7 @@ function BookingContent() {
         body: JSON.stringify({
           ...details,
           serviceId: booking.serviceId,
+          serviceIds: booking.serviceIds,
           barberId: booking.barberId,
           date: booking.date,
           time: booking.time,
@@ -240,7 +242,7 @@ function BookingContent() {
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center sm:text-left">
               <h1 className="text-3xl font-extrabold font-serif text-foreground tracking-tight">O que vamos fazer?</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-2">Escolha o serviço perfeito para o seu visual.</p>
+              <p className="text-sm sm:text-base text-muted-foreground mt-2">Escolha um ou combine vários serviços.</p>
             </div>
 
             {loadingInit ? (
@@ -253,19 +255,25 @@ function BookingContent() {
                 {services?.map((svc: any) => (
                   <button
                     key={svc.id}
+                    type="button"
                     onClick={() => {
+                      const serviceIds = booking.serviceIds ?? []
+                      const nextIds = serviceIds.includes(svc.id)
+                        ? serviceIds.filter((id) => id !== svc.id)
+                        : [...serviceIds, svc.id]
+                      const selectedServices = services.filter((service: any) => nextIds.includes(service.id))
                       setBooking({
                         ...booking,
-                        serviceId: svc.id,
-                        serviceName: svc.name,
-                        servicePrice: svc.price,
-                        serviceDuration: svc.durationMins,
+                        serviceId: nextIds[0],
+                        serviceIds: nextIds,
+                        serviceName: selectedServices.map((service: any) => service.name).join(' + '),
+                        servicePrice: selectedServices.reduce((total: number, service: any) => total + service.price, 0),
+                        serviceDuration: selectedServices.reduce((total: number, service: any) => total + service.durationMins, 0),
                       })
-                      setTimeout(() => setStep('barber'), 200)
                     }}
                     className={cn(
                       'w-full text-left bg-card backdrop-blur-md border rounded-2xl p-5 transition-all duration-200 group active:scale-[0.97] shadow-sm',
-                      booking.serviceId === svc.id 
+                      booking.serviceIds?.includes(svc.id)
                         ? 'border-primary bg-primary/5' 
                         : 'border-border hover:border-primary/40 hover:bg-accent/50'
                     )}
@@ -274,7 +282,7 @@ function BookingContent() {
                       <div className="flex items-center gap-4 min-w-0">
                         <div className={cn(
                           "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-all",
-                          booking.serviceId === svc.id ? "bg-primary text-primary-foreground scale-110 shadow-sm" : "bg-muted border border-border text-primary"
+                          booking.serviceIds?.includes(svc.id) ? "bg-primary text-primary-foreground scale-110 shadow-sm" : "bg-muted border border-border text-primary"
                         )}>
                           <Scissors className="w-6 h-6" />
                         </div>
@@ -295,6 +303,15 @@ function BookingContent() {
                     </div>
                   </button>
                 ))}
+                <Button
+                  type="button"
+                  disabled={!booking.serviceIds?.length}
+                  onClick={() => setStep('barber')}
+                  className="mt-2 h-12 rounded-xl font-bold"
+                >
+                  Continuar com {booking.serviceIds?.length || 0} serviço(s)
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             )}
           </div>

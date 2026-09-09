@@ -25,11 +25,21 @@ export async function GET(req: NextRequest) {
         service: {
           select: { durationMins: true },
         },
+        appointmentServices: {
+          select: { service: { select: { durationMins: true } } },
+        },
       },
     })
 
     // Retorna a lista de agendamentos para o frontend calcular a disponibilidade
-    return NextResponse.json(appointments)
+    return NextResponse.json(appointments.map((appointment) => ({
+      ...appointment,
+      service: {
+        durationMins: appointment.appointmentServices.length > 0
+          ? appointment.appointmentServices.reduce((total, item) => total + item.service.durationMins, 0)
+          : appointment.service.durationMins,
+      },
+    })))
   } catch (error) {
     console.error('[Availability GET]', error)
     return NextResponse.json({ error: 'Failed to fetch availability' }, { status: 500 })

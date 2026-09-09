@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
-import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target } from 'lucide-react'
+import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Scissors, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -30,6 +30,8 @@ const pageTitles: Record<string, string> = {
   '/dashboard/finances': 'Controle Financeiro',
   '/dashboard/goals': 'Metas',
   '/dashboard/services': 'Serviços',
+  '/dashboard/products': 'Produtos',
+  '/dashboard/users': 'Equipe',
 }
 
 const severityColors = {
@@ -157,6 +159,24 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
               <Link href="/dashboard/goals" className="cursor-pointer gap-3">
                 <Target className="h-5 w-5 shrink-0" />
                 Metas
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="min-h-12 rounded-xl">
+              <Link href="/dashboard/products" className="cursor-pointer gap-3">
+                <Package className="h-5 w-5 shrink-0" />
+                Produtos
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="min-h-12 rounded-xl">
+              <Link href="/dashboard/services" className="cursor-pointer gap-3">
+                <Scissors className="h-5 w-5 shrink-0" />
+                Serviços
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="min-h-12 rounded-xl">
+              <Link href="/dashboard/users" className="cursor-pointer gap-3">
+                <Shield className="h-5 w-5 shrink-0" />
+                Equipe
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="min-h-12 rounded-xl">
