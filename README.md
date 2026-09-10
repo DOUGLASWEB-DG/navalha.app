@@ -142,18 +142,99 @@ npm run lint
 Para testar uma alteracao visual, valide o dashboard em desktop e celular,
 principalmente as telas de Agenda, Clientes e Agendamentos.
 
-## Fluxo Git recomendado
+## Visao geral da estrategia de ramificacao (Gitflow)
+
+O fluxo de trabalho e coordenado pela natureza da tarefa. O agente Lead /
+Maestro classifica a demanda e direciona o trabalho para o agente responsavel,
+sempre mantendo o codigo isolado ate que as validacoes sejam concluidas.
+
+### Papeis no fluxo de trabalho
+
+| Papel no fluxo | Responsabilidade |
+| --- | --- |
+| **Coordenador do fluxo (Lead / Maestro)** | Classifica a demanda como Funcionalidade, Release ou Hotfix e define a origem e o destino do merge. |
+| **Desenvolvedor de funcionalidades (Feature Developer)** | Desenvolve novas funcionalidades a partir de `develop` e abre o Pull Request de volta para `develop`. |
+| **Responsavel pela release (Release Manager)** | Congela novas adicoes, executa a regressao, incrementa a versao e prepara os merges de producao. |
+| **Responsavel por emergencias (Emergency Handler)** | Corrige falhas criticas a partir de `main` e sincroniza a correcao com `main` e `develop`. |
+
+### Matriz de decisao
+
+| Tipo de tarefa | Branch de origem | Destino final | Tag de versao |
+| --- | --- | --- | --- |
+| **Funcionalidade (Feature)** | `develop` | `develop` | Nao |
+| **Release** (preparacao de versao) | `develop` | `main` e `develop` | Sim, por exemplo `v1.2.0` |
+| **Hotfix** (correcao emergencial) | `main` | `main` e `develop` | Sim, por exemplo `v1.2.1` |
+
+### Fluxo de Funcionalidade (Feature)
+
+1. O Coordenador do fluxo classifica a demanda como uma nova funcionalidade.
+2. O Desenvolvedor de funcionalidades cria a branch a partir de `develop`:
+
+   ```bash
+   git switch develop
+   git pull --ff-only origin develop
+   git switch -c feature/nome-da-feature
+   ```
+
+3. O desenvolvedor implementa a funcionalidade, executa os testes unitarios e de
+   integracao e abre um Pull Request para `develop`.
+4. A branch e integrada em `develop` somente apos a revisao e a aprovacao das
+   validacoes automaticas.
+
+### Fluxo de Release (preparacao de versao)
+
+1. O Coordenador do fluxo identifica que o conjunto de alteracoes esta pronto para
+   homologacao.
+2. O Responsavel pela release cria a branch a partir de `develop`, usando a proxima
+   versao semver:
+
+   ```bash
+   git switch develop
+   git pull --ff-only origin develop
+   git switch -c release/vX.Y.Z
+   ```
+
+3. A branch de release recebe apenas ajustes de estabilizacao. O agente executa
+   a regressao completa e valida o pacote em homologacao.
+4. Apos a aprovacao, o Responsavel pela release faz merge duplo:
+   - `release/vX.Y.Z` para `main`, criando a tag `vX.Y.Z`;
+   - `release/vX.Y.Z` de volta para `develop`, preservando os ajustes de
+     estabilizacao.
+
+### Fluxo de Hotfix (correcao emergencial)
+
+1. O Coordenador do fluxo classifica a falha como critica e que exige correcao
+   emergencial em producao.
+2. O Responsavel por emergencias cria a branch a partir de `main`:
+
+   ```bash
+   git switch main
+   git pull --ff-only origin main
+   git switch -c hotfix/nome-da-correcao
+   ```
+
+3. O agente implementa a menor correcao segura, executa os testes unitarios e
+   de integracao e valida o comportamento em producao.
+4. Apos a aprovacao, o Responsavel por emergencias faz merge duplo:
+   - `hotfix/nome-da-correcao` para `main`, criando ou atualizando a tag de
+     versao (por exemplo, `v1.2.1`);
+   - `hotfix/nome-da-correcao` para `develop`, evitando que a falha volte a
+     aparecer na proxima release.
+
+### Validacao obrigatoria
+
+Antes de qualquer merge, o agente responsavel deve executar no ambiente
+isolado:
 
 ```bash
-git checkout -b minha-alteracao
-git status
-git add arquivo1 arquivo2
-git commit -m "Descreve a alteracao"
-git push -u origin minha-alteracao
+npx tsc --noEmit
+npm run lint
 ```
 
-Depois, abra um Pull Request para `main`. Evite usar `git add .` quando houver
-alteracoes de outras tarefas no mesmo diretorio.
+Quando houver testes unitarios ou de integracao configurados para a alteracao,
+eles tambem devem ser executados e aprovados antes da abertura ou aprovacao do
+Pull Request. Evite usar `git add .` quando houver alteracoes de outras tarefas
+no mesmo diretorio.
 
 ## Seguranca
 
@@ -162,7 +243,21 @@ alteracoes de outras tarefas no mesmo diretorio.
 - Use HTTPS e variaveis protegidas no ambiente de producao.
 - Revise os logs de integracoes externas antes de publicar.
 
-## Licenca
+## Direitos autorais e termos de uso
 
-Uso privado e restrito ao projeto Navalha.app. Consulte os proprietarios antes
-de redistribuir ou publicar este codigo.
+Copyright (c) 2026 DOUGLASWEB-DG. Todos os direitos reservados.
+
+Este repositorio e publico para consulta, aprendizado e colaboracao no
+desenvolvimento do projeto. A disponibilizacao publica do codigo nao concede
+licenca para vender, sublicenciar, redistribuir, hospedar como servico,
+incorporar em produto comercial ou explorar financeiramente qualquer parte
+deste projeto sem autorizacao previa e escrita dos detentores dos direitos.
+
+Contribuicoes para melhorar o projeto sao bem-vindas por Pull Request. Ao
+enviar uma contribuicao, o autor confirma que possui os direitos necessarios
+para envia-la e autoriza sua incorporacao ao projeto. A contribuicao nao
+transfere automaticamente a titularidade do projeto nem concede permissao de
+exploracao comercial a terceiros.
+
+Consulte [LICENSE](LICENSE) para os termos completos. Esta declaracao nao
+substitui aconselhamento juridico.
