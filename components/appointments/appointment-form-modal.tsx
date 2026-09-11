@@ -30,7 +30,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 const schema = z.object({
   clientId: z.string().min(1, 'Selecione um cliente'),
-  serviceId: z.string().min(1, 'Selecione um serviço'),
+  serviceIds: z.array(z.string()).min(1, 'Selecione pelo menos um serviço'),
   barberId: z.string().optional(),
   date: z.string().min(1, 'Selecione uma data'),
   time: z.string().min(1, 'Selecione um horário'),
@@ -85,7 +85,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
       const apptDate = new Date(appointment.date)
       reset({
         clientId: appointment.clientId,
-        serviceId: appointment.serviceId,
+        serviceIds: appointment.appointmentServices?.map((item: any) => item.serviceId) || [appointment.serviceId],
         barberId: appointment.barberId ?? 'any',
         date: format(apptDate, 'yyyy-MM-dd'),
         time: format(apptDate, 'HH:mm'),
@@ -98,7 +98,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
         date: defaultDate ? format(defaultDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
         time: '09:00',
         clientId: '',
-        serviceId: '',
+        serviceIds: [],
         barberId: 'any',
         notes: '',
       })
@@ -117,7 +117,8 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           clientId: data.clientId,
-          serviceId: data.serviceId,
+          serviceIds: data.serviceIds,
+          serviceId: data.serviceIds[0],
           barberId: data.barberId === 'any' ? undefined : data.barberId,
           date: datetime.toISOString(),
           status: data.status,
@@ -138,7 +139,9 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
     }
   }
 
-  const selectedService = services?.find((s: any) => s.id === watch('serviceId'))
+  const selectedServices = services?.filter((s: any) => watch('serviceIds')?.includes(s.id)) || []
+  const totalPrice = selectedServices.reduce((total: number, service: any) => total + service.price, 0)
+  const totalDuration = selectedServices.reduce((total: number, service: any) => total + service.durationMins, 0)
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -176,22 +179,30 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
             <Label className="text-sm font-semibold text-foreground">Serviço *</Label>
             <div className="relative">
               <Scissors className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-              <Select onValueChange={(v) => setValue('serviceId', v)} value={watch('serviceId')}>
-                <SelectTrigger className="pl-9">
-                  <SelectValue placeholder="Selecione o serviço..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {services?.map((s: any) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name} — R${s.price.toFixed(2)} ({s.durationMins}min)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-2 rounded-lg border border-border p-2">
+                {services?.map((s: any) => {
+                  const checked = watch('serviceIds')?.includes(s.id)
+                  return (
+                    <label key={s.id} className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-muted">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          const ids = watch('serviceIds') || []
+                          setValue('serviceIds', checked ? ids.filter((id) => id !== s.id) : [...ids, s.id], { shouldValidate: true })
+                        }}
+                      />
+                      <span className="text-sm">{s.name} — R${s.price.toFixed(2)} ({s.durationMins}min)</span>
+                    </label>
+                  )
+                })}
+              </div>
             </div>
-            {errors.serviceId && <p className="text-xs text-destructive">{errors.serviceId.message}</p>}
-            {selectedService && (
-              <p className="text-xs text-muted-foreground font-medium">Tempo estimado: {selectedService.durationMins} minutos</p>
+            {errors.serviceIds && <p className="text-xs text-destructive">{errors.serviceIds.message}</p>}
+            {selectedServices.length > 0 && (
+              <p className="text-xs text-muted-foreground font-medium">
+                Total: R${totalPrice.toFixed(2)} · {totalDuration} minutos
+              </p>
             )}
           </div>
 

@@ -32,6 +32,7 @@ model Service {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   appointments Appointment[]
+  appointmentServices AppointmentService[]
 }
 
 model Appointment {
@@ -49,6 +50,19 @@ model Appointment {
   service     Service           @relation(fields: [serviceId], references: [id])
   barber      User?             @relation(fields: [barberId], references: [id]) // Relacionamento com o barbeiro
   transaction Transaction?
+  appointmentServices AppointmentService[]
+}
+
+model AppointmentService {
+  appointmentId String
+  serviceId    String
+  price        Float
+  durationMins Int
+  appointment  Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  service      Service     @relation(fields: [serviceId], references: [id])
+
+  @@id([appointmentId, serviceId])
+  @@index([serviceId])
 }
 
 enum AppointmentStatus {

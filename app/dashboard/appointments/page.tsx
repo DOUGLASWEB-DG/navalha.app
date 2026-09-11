@@ -12,13 +12,11 @@ import {
   CheckCircle2,
   XCircle,
   Pencil,
-  Trash2,
   MessageCircle,
   Clock,
   User,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { confirmAction } from '@/lib/confirm-toast'
 import { Button } from '@/components/ui/button'
 import { StatusBadge } from '@/components/shared/status-badge'
 import { AppointmentFormModal } from '@/components/appointments/appointment-form-modal'
@@ -58,11 +56,15 @@ export default function AppointmentsPage() {
 
   async function updateStatus(id: string, status: AppointmentStatus) {
     try {
-      await fetch(`/api/appointments/${id}`, {
+      const response = await fetch(`/api/appointments/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       })
+      if (!response.ok) {
+        const result = await response.json().catch(() => null)
+        throw new Error(result?.error || 'Falha ao atualizar agendamento.')
+      }
       mutate()
       const statusText = status === 'CONFIRMED' 
         ? 'Confirmado (WhatsApp enviado ao cliente)' 
@@ -72,23 +74,8 @@ export default function AppointmentsPage() {
       toast.success('Status Atualizado', { 
         description: `O agendamento foi marcado como ${statusText}.`
       })
-    } catch {
-      toast.error('Erro', { description: 'Falha ao atualizar agendamento.' })
-    }
-  }
-
-  async function deleteAppointment(id: string) {
-    const ok = await confirmAction({
-      title: 'Excluir este agendamento?',
-      confirmLabel: 'Excluir',
-    })
-    if (!ok) return
-    try {
-      await fetch(`/api/appointments/${id}`, { method: 'DELETE' })
-      mutate()
-      toast.success('Sucesso!', { description: 'Agendamento excluído.' })
-    } catch {
-      toast.error('Erro', { description: 'Falha ao excluir agendamento.' })
+    } catch (error) {
+      toast.error('Erro', { description: error instanceof Error ? error.message : 'Falha ao atualizar agendamento.' })
     }
   }
 
@@ -96,8 +83,11 @@ export default function AppointmentsPage() {
     const phone = appt.client?.phone?.replace(/\D/g, '')
     const dateStr = format(new Date(appt.date), "d 'de' MMMM", { locale: ptBR })
     const time = format(new Date(appt.date), 'HH:mm')
+    const services = appt.appointmentServices?.length
+      ? appt.appointmentServices.map((item: any) => item.service?.name).join(', ')
+      : appt.service?.name
     const msg = encodeURIComponent(
-      `Olá ${appt.client?.name}! Este é um lembrete do seu agendamento de ${appt.service?.name} no dia ${dateStr} às ${time}. Até lá!`
+      `Olá ${appt.client?.name}! Este é um lembrete do seu agendamento de ${services} no dia ${dateStr} às ${time}. Até lá!`
     )
     window.open(`https://wa.me/55${phone}?text=${msg}`, '_blank')
   }
@@ -204,7 +194,7 @@ export default function AppointmentsPage() {
                           <CheckCircle2 className="w-4 h-4" /> Confirmar
                         </DropdownMenuItem>
                       )}
-                      {appt.status !== 'COMPLETED' && (
+                      {appt.status === 'CONFIRMED' && (
                         <DropdownMenuItem onClick={() => updateStatus(appt.id, 'COMPLETED')} className="gap-2 cursor-pointer focus:bg-success/10 focus:text-success text-success">
                           <CheckCircle2 className="w-4 h-4" /> Marcar Concluído
                         </DropdownMenuItem>
@@ -214,10 +204,6 @@ export default function AppointmentsPage() {
                           <XCircle className="w-4 h-4" /> Cancelar
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuSeparator className="bg-border" />
-                      <DropdownMenuItem onClick={() => deleteAppointment(appt.id)} className="gap-2 cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive">
-                        <Trash2 className="w-4 h-4" /> Excluir
-                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -225,12 +211,18 @@ export default function AppointmentsPage() {
                 {/* Corpo do Card (Cliente e Serviço) */}
                 <div className="flex-1 mt-2">
                   <p className="text-base font-bold text-foreground mb-1 line-clamp-1">{appt.client?.name}</p>
-                  <p className="text-sm font-medium text-muted-foreground line-clamp-1">{appt.service?.name}</p>
+                  <p className="text-sm font-medium text-muted-foreground line-clamp-2">
+                    {appt.appointmentServices?.length
+                      ? appt.appointmentServices.map((item: any) => item.service?.name).join(', ')
+                      : appt.service?.name}
+                  </p>
                   
                   <div className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4" />
-                      <span>{appt.service?.durationMins} min</span>
+                      <span>{appt.appointmentServices?.length
+                        ? appt.appointmentServices.reduce((total: number, item: any) => total + item.durationMins, 0)
+                        : appt.service?.durationMins} min</span>
                     </div>
                     {appt.barber && (
                       <div className="flex items-center gap-2">
@@ -253,7 +245,9 @@ export default function AppointmentsPage() {
                     Valor
                   </span>
                   <span className="text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
-                    R$ {appt.service?.price?.toFixed(2)}
+                    R$ {(appt.appointmentServices?.length
+                      ? appt.appointmentServices.reduce((total: number, item: any) => total + item.price, 0)
+                      : appt.service?.price || 0).toFixed(2)}
                   </span>
                 </div>
               </div>

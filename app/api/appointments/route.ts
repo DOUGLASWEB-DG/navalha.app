@@ -2,10 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { getSession } from '@/lib/auth'
+import { AppointmentStatus } from '@prisma/client'
+import {
+  AppointmentRuleError,
+  getAppointmentDayRange,
+  parseIncomingAppointmentDate,
+  validateAppointmentSchedule,
+} from '@/lib/appointment-rules'
+import {
+  appointmentServiceCreateData,
+  getActiveServices,
+  getServiceTotals,
+  normalizeServiceIds,
+} from '@/lib/appointment-services'
 
 const createSchema = z.object({
   clientId: z.string().min(1),
-  serviceId: z.string().min(1),
+  serviceIds: z.array(z.string().min(1)).min(1).optional(),
+  serviceId: z.string().min(1).optional(),
   barberId: z.string().optional(),
   date: z.string(),
   notes: z.string().optional(),
@@ -15,6 +29,7 @@ const createSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     const user = await getSession()
+    if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
     const { searchParams } = new URL(req.url)
     const dateParam = searchParams.get('date')
     const status = searchParams.get('status')
@@ -33,9 +48,11 @@ export async function GET(req: NextRequest) {
       if (!year || !month) {
         return NextResponse.json({ error: 'Invalid month param. Expected yyyy-MM' }, { status: 400 })
       }
-      const start = new Date(year, month - 1, 1, 0, 0, 0, 0)
-      const end = new Date(year, month, 0, 23, 59, 59, 999) // last day of month
-      where.date = { gte: start, lte: end }
+      const startValue = `${year}-${String(month).padStart(2, '0')}-01`
+      const nextMonth = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`
+      const { start } = getAppointmentDayRange(startValue)
+      const { start: end } = getAppointmentDayRange(nextMonth)
+      where.date = { gte: start, lt: end }
     } else if (dateParam) {
       const [year, month, day] = dateParam.split('-').map(Number)
       if (!year || !month || !day) {
@@ -43,9 +60,8 @@ export async function GET(req: NextRequest) {
       }
 
       // Interpreta como data local (consistente com /api/book)
-      const start = new Date(year, month - 1, day, 0, 0, 0, 0)
-      const end = new Date(year, month - 1, day, 23, 59, 59, 999)
-      where.date = { gte: start, lte: end }
+      const { start, end } = getAppointmentDayRange(dateParam)
+      where.date = { gte: start, lt: end }
     }
 
     if (status && status !== 'ALL') {
@@ -54,7 +70,12 @@ export async function GET(req: NextRequest) {
 
     const appointments = await prisma.appointment.findMany({
       where,
-      include: { client: true, service: true, barber: { select: { id: true, name: true } } },
+      include: {
+        client: true,
+        service: true,
+        appointmentServices: { include: { service: true } },
+        barber: { select: { id: true, name: true } },
+      },
       orderBy: { date: 'asc' },
     })
 
@@ -68,24 +89,70 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = await getSession()
+    if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
     const body = await req.json()
     const parsed = createSchema.parse(body)
+    if (parsed.status && parsed.status !== AppointmentStatus.PENDING) {
+      throw new AppointmentRuleError('Novos agendamentos devem iniciar como pendentes.')
+    }
 
     let barberId = parsed.barberId
     if (user?.role === 'BARBER') {
       barberId = user.id // Se for barbeiro, forçar o próprio ID
     }
 
+    const serviceIds = normalizeServiceIds(parsed.serviceIds, parsed.serviceId)
+    const [client, services] = await Promise.all([
+      prisma.client.findUnique({ where: { id: parsed.clientId } }),
+      getActiveServices(serviceIds),
+    ])
+    if (!client || !client.isActive) throw new AppointmentRuleError('Cliente não encontrado ou inativo.')
+    const totals = getServiceTotals(services)
+
+    const date = parsed.date.includes('Z') || parsed.date.includes('+')
+      ? new Date(parsed.date)
+      : parseIncomingAppointmentDate(parsed.date)
+    if (Number.isNaN(date.getTime())) throw new AppointmentRuleError('Data do agendamento inválida.')
+    validateAppointmentSchedule(date, totals.durationMins)
+
+    const barbers = await prisma.user.findMany({
+      where: user.role === 'BARBER' ? { id: user.id, role: 'BARBER' } : { role: 'BARBER' },
+      select: { id: true },
+    })
+    if (barberId && !barbers.some((barber) => barber.id === barberId)) {
+      throw new AppointmentRuleError('Barbeiro não encontrado.')
+    }
+    const candidates = barberId ? barbers.filter((barber) => barber.id === barberId) : barbers
+    const appointments = await prisma.appointment.findMany({
+      where: { status: { not: AppointmentStatus.CANCELED }, barberId: { in: candidates.map((barber) => barber.id) } },
+      include: { service: { select: { durationMins: true } }, appointmentServices: { select: { durationMins: true } } },
+    })
+    const availableBarber = candidates.find((barber) => !appointments.some((appointment) => {
+      const duration = appointment.appointmentServices.length
+        ? appointment.appointmentServices.reduce((total, item) => total + item.durationMins, 0)
+        : appointment.service.durationMins
+      const appointmentEnd = appointment.date.getTime() + duration * 60_000
+      const requestedEnd = date.getTime() + totals.durationMins * 60_000
+      return appointment.barberId === barber.id && date.getTime() < appointmentEnd && requestedEnd > appointment.date.getTime()
+    }))
+    if (!availableBarber) throw new AppointmentRuleError('Esse horário não está mais disponível.')
+
     const appointment = await prisma.appointment.create({
       data: {
-        clientId: parsed.clientId,
-        serviceId: parsed.serviceId,
-        barberId: barberId,
-        date: new Date(parsed.date),
+        clientId: client.id,
+        serviceId: services[0].id,
+        appointmentServices: { create: appointmentServiceCreateData(services) },
+        barberId: availableBarber.id,
+        date,
         notes: parsed.notes,
-        status: parsed.status ?? 'PENDING',
+        status: parsed.status ?? AppointmentStatus.PENDING,
       },
-      include: { client: true, service: true, barber: { select: { id: true, name: true } } },
+      include: {
+        client: true,
+        service: true,
+        appointmentServices: { include: { service: true } },
+        barber: { select: { id: true, name: true } },
+      },
     })
 
     return NextResponse.json(appointment, { status: 201 })
@@ -93,6 +160,9 @@ export async function POST(req: NextRequest) {
     console.error('[Appointments POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })
+    }
+    if (error instanceof AppointmentRuleError) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
     return NextResponse.json({ error: 'Failed to create appointment' }, { status: 500 })
   }

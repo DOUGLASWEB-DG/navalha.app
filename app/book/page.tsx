@@ -40,7 +40,14 @@ import { cn } from '@/lib/utils'
 import { tenantConfig } from '@/config/tenant'
 import { WhatsAppIcon } from '@/components/shared/whatsapp-icon'
 
-const fetcher = <T,>(url: string) => fetch(url).then((r) => r.json() as Promise<T>)
+const fetcher = async <T,>(url: string) => {
+  const response = await fetch(url)
+  const body = await response.json().catch(() => null)
+  if (!response.ok) {
+    throw new Error(typeof body?.error === 'string' ? body.error : 'Não foi possível carregar os dados.')
+  }
+  return body as T
+}
 
 const WHATSAPP_NUMBER = '5569992476425'
 
@@ -66,6 +73,10 @@ const SERVICE_IMAGES: Record<string, string> = {
 type Step = 'service' | 'barber' | 'datetime' | 'details' | 'success'
 
 interface BookingData {
+  serviceIds: string[]
+  serviceNames: string[]
+  totalPrice: number
+  totalDuration: number
   serviceId: string
   serviceName: string
   servicePrice: number
@@ -100,6 +111,11 @@ interface AppointmentAvailability {
   }
 }
 
+interface AvailabilityResponse {
+  requestedDurationMins?: number
+  appointments: AppointmentAvailability[]
+}
+
 interface BookingApiData {
   services: Service[]
   barbers: Barber[]
@@ -117,8 +133,9 @@ interface ApiErrorResponse {
 }
 
 function buildWhatsAppLink(data: Partial<BookingData>) {
-  const msg = data.serviceName
-    ? `Olá! Gostaria de agendar um(a) *${data.serviceName}*${data.date ? ` no dia *${format(new Date(data.date + 'T12:00:00'), "d 'de' MMMM", { locale: ptBR })}*` : ''}${data.time ? ` às *${data.time}*` : ''}. Esse horário está disponível?`
+  const serviceLabel = data.serviceNames?.length ? data.serviceNames.join(', ') : data.serviceName
+  const msg = serviceLabel
+    ? `Olá! Gostaria de agendar *${serviceLabel}*${data.date ? ` no dia *${format(new Date(data.date + 'T12:00:00'), "d 'de' MMMM", { locale: ptBR })}*` : ''}${data.time ? ` às *${data.time}*` : ''}. Esse horário está disponível?`
     : `Olá! Gostaria de agendar um horário. Quais horários estão disponíveis?`
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
 }
@@ -220,13 +237,23 @@ function BookingContent() {
   const [calendarMonth, setCalendarMonth] = useState(startOfToday())
   const [showCalendar, setShowCalendar] = useState(false)
 
-  const { data: apiData, isLoading: loadingInit } = useSWR<BookingApiData>('/api/book', fetcher)
+  const {
+    data: apiData,
+    error: initError,
+    isLoading: loadingInit,
+    mutate: reloadInit,
+  } = useSWR<BookingApiData>('/api/book', fetcher)
   const services = apiData?.services ?? []
   const barbers = apiData?.barbers ?? []
   const firstBarberId = barbers[0]?.id
 
-  const { data: availabilityData, isLoading: loadingAvail } = useSWR<AppointmentAvailability[]>(
-    booking.date ? `/api/book/availability?date=${booking.date}` : null,
+  const {
+    data: availabilityData,
+    error: availabilityError,
+    isLoading: loadingAvail,
+    mutate: reloadAvailability,
+  } = useSWR<AvailabilityResponse>(
+    booking.date ? `/api/book/availability?date=${booking.date}&serviceIds=${(booking.serviceIds || []).join(',')}` : null,
     fetcher
   )
 
@@ -250,7 +277,7 @@ function BookingContent() {
   }
 
   async function submit(details: { name: string; phone: string; notes: string }) {
-    if (!booking.serviceId || !booking.date || !booking.time) return
+    if (!booking.serviceIds?.length || !booking.date || !booking.time) return
     setIsSubmitting(true)
     
     const finalBooking = { ...booking, ...details }
@@ -262,6 +289,7 @@ function BookingContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...details,
+          serviceIds: booking.serviceIds,
           serviceId: booking.serviceId,
           barberId: booking.barberId,
           date: booking.date,
@@ -294,7 +322,7 @@ function BookingContent() {
     
     const [h, m] = slot.split(':').map(Number)
     const reqStart = h * 60 + m
-    const reqEnd = reqStart + (booking.serviceDuration || 30)
+    const reqEnd = reqStart + (booking.totalDuration || booking.serviceDuration || 30)
 
     // O ultimo horario precisa terminar ate as 20h, horario de fechamento.
     if (reqEnd > 20 * 60) return false
@@ -312,7 +340,7 @@ function BookingContent() {
     // Checa se pelo menos um barbeiro está livre
     const hasFreeBarber = targetBarbers.some((barber) => {
       // Pega todos agendamentos desse barbeiro
-      const barberAppts = availabilityData.filter((appointment) => appointment.barberId === barber.id)
+      const barberAppts = availabilityData.appointments.filter((appointment) => appointment.barberId === barber.id)
       
       // Checa se há conflito
       const hasConflict = barberAppts.some((appointment) => {
@@ -416,9 +444,26 @@ function BookingContent() {
             </div>
 
             {loadingInit ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-4">
-                <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-                <p className="text-sm font-medium text-muted-foreground animate-pulse">Consultando...</p>
+              <div className="space-y-3" aria-label="Carregando serviços">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="flex h-28 animate-pulse items-center gap-4 rounded-2xl border border-border bg-card p-5">
+                    <div className="h-16 w-16 rounded-xl bg-muted" />
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 w-2/5 rounded-full bg-muted" />
+                      <div className="h-3 w-4/5 rounded-full bg-muted" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : initError ? (
+              <div className="rounded-3xl border border-destructive/20 bg-destructive/5 px-6 py-10 text-center">
+                <p className="text-base font-bold text-foreground">Não conseguimos carregar os serviços</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Verifique sua conexão e tente novamente.
+                </p>
+                <Button type="button" variant="outline" onClick={() => reloadInit()} className="mt-5 rounded-xl">
+                  Tentar novamente
+                </Button>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
@@ -426,18 +471,26 @@ function BookingContent() {
                   <button
                     key={svc.id}
                     onClick={() => {
+                      const selectedIds = booking.serviceIds || []
+                      const serviceIds = selectedIds.includes(svc.id)
+                        ? selectedIds.filter((id) => id !== svc.id)
+                        : [...selectedIds, svc.id]
+                      const selectedServices = services.filter((service) => serviceIds.includes(service.id))
                       setBooking({
                         ...booking,
-                        serviceId: svc.id,
-                        serviceName: svc.name,
-                        servicePrice: svc.price,
-                        serviceDuration: svc.durationMins,
+                        serviceIds,
+                        serviceId: serviceIds[0],
+                        serviceNames: selectedServices.map((service) => service.name),
+                        serviceName: selectedServices.map((service) => service.name).join(', '),
+                        servicePrice: selectedServices.reduce((total, service) => total + service.price, 0),
+                        serviceDuration: selectedServices.reduce((total, service) => total + service.durationMins, 0),
+                        totalPrice: selectedServices.reduce((total, service) => total + service.price, 0),
+                        totalDuration: selectedServices.reduce((total, service) => total + service.durationMins, 0),
                       })
-                      setTimeout(() => setStep('barber'), 200)
                     }}
                     className={cn(
                       'w-full text-left bg-card backdrop-blur-md border rounded-2xl p-5 transition-all duration-200 group active:scale-[0.97] shadow-sm',
-                      booking.serviceId === svc.id 
+                      (booking.serviceIds || []).includes(svc.id)
                         ? 'border-primary bg-primary/5' 
                         : 'border-border hover:border-primary/40 hover:bg-accent/50'
                     )}
@@ -469,6 +522,26 @@ function BookingContent() {
                     </div>
                   </button>
                 ))}
+                <div className="sticky bottom-4 mt-3 rounded-2xl border border-primary/20 bg-card p-4 shadow-xl">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold text-muted-foreground">
+                        {(booking.serviceIds || []).length} serviço(s) selecionado(s)
+                      </p>
+                      <p className="text-lg font-black text-primary">
+                        R${(booking.totalPrice || 0).toFixed(2)} · {booking.totalDuration || 0} min
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      disabled={!booking.serviceIds?.length}
+                      onClick={() => setStep('barber')}
+                      className="rounded-xl"
+                    >
+                      Continuar
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -618,15 +691,27 @@ function BookingContent() {
                 </p>
                 {loadingAvail && <span className="text-xs text-primary animate-pulse">Atualizando...</span>}
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                {TIME_SLOTS.map((slot) => {
-                  const isSelected = booking.time === slot
-                  const available = isSlotAvailable(slot)
+              {availabilityError ? (
+                <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4">
+                  <p className="text-sm font-semibold text-foreground">Não foi possível consultar os horários.</p>
+                  <button
+                    type="button"
+                    onClick={() => reloadAvailability()}
+                    className="mt-2 text-xs font-bold text-primary underline underline-offset-4"
+                  >
+                    Tentar novamente
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                  {TIME_SLOTS.map((slot) => {
+                    const isSelected = booking.time === slot
+                    const available = isSlotAvailable(slot)
 
                   return (
                     <button
                       key={slot}
-                      disabled={!available}
+                      disabled={!available || loadingAvail || Boolean(availabilityError)}
                       onClick={() => setBooking({ ...booking, time: slot })}
                       className={cn(
                         'py-3 rounded-xl border text-sm font-black transition-all active:scale-95 shadow-sm',
@@ -641,7 +726,8 @@ function BookingContent() {
                     </button>
                   )
                 })}
-              </div>
+                </div>
+              )}
               <p className="mt-3 text-[11px] text-muted-foreground">
                 Horários em cinza já passaram ou estão ocupados.
               </p>
@@ -692,7 +778,7 @@ function BookingContent() {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-black text-primary uppercase tracking-widest">Serviço</p>
-                  <p className="text-lg font-bold text-foreground truncate">{booking.serviceName}</p>
+                  <p className="text-lg font-bold text-foreground line-clamp-2">{booking.serviceNames?.join(', ') || booking.serviceName}</p>
                 </div>
               </div>
               
@@ -764,7 +850,7 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
       <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between gap-4 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
         <div className="min-w-0">
-          <p className="text-xs font-black text-primary uppercase tracking-widest mb-1">{booking.serviceName}</p>
+          <p className="text-xs font-black text-primary uppercase tracking-widest mb-1">{booking.serviceNames?.join(', ') || booking.serviceName}</p>
           <div className="flex items-center gap-2">
             <CalendarDays className="w-3.5 h-3.5 text-muted-foreground" />
             <p className="text-sm font-bold text-foreground">
@@ -773,7 +859,8 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xl font-black text-foreground leading-none">R${booking.servicePrice}</p>
+          <p className="text-xl font-black text-foreground leading-none">R${(booking.totalPrice || booking.servicePrice || 0).toFixed(2)}</p>
+          <p className="mt-1 text-xs font-bold text-muted-foreground">{booking.totalDuration || booking.serviceDuration || 0} min</p>
         </div>
       </div>
 

@@ -230,11 +230,17 @@ export default function DashboardPage() {
 
                 <div className="mt-5 min-w-0">
                   <p className="truncate text-base font-semibold text-foreground">{appt.client?.name}</p>
-                  <p className="mt-1 truncate text-sm text-muted-foreground">{appt.service?.name}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    {appt.appointmentServices?.length
+                      ? appt.appointmentServices.map((item: any) => item.service?.name).join(', ')
+                      : appt.service?.name}
+                  </p>
                   <div className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
                     <span className="flex items-center gap-2">
                       <Clock className="h-4 w-4" />
-                      {appt.service?.durationMins} min
+                      {appt.appointmentServices?.length
+                        ? appt.appointmentServices.reduce((total: number, item: any) => total + item.durationMins, 0)
+                        : appt.service?.durationMins} min
                     </span>
                     <span className="truncate text-primary/80">
                       Barbeiro: {appt.barber?.name ?? 'Não definido'}
@@ -250,7 +256,9 @@ export default function DashboardPage() {
                 <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
                   <span className="text-sm font-semibold text-foreground">Valor</span>
                   <span className="rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-1 text-base font-bold text-primary">
-                    R${appt.service?.price?.toFixed(2)}
+                    R${(appt.appointmentServices?.length
+                      ? appt.appointmentServices.reduce((total: number, item: any) => total + item.price, 0)
+                      : appt.service?.price || 0).toFixed(2)}
                   </span>
                 </div>
               </div>

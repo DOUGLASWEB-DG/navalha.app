@@ -52,6 +52,7 @@ async function checkReminders() {
       include: {
         client: true,
         service: true,
+        appointmentServices: { include: { service: true } },
       }
     });
 
@@ -66,7 +67,10 @@ async function checkReminders() {
           if (!phone) continue;
 
           const timeFormatted = format(new Date(appt.date), "HH:mm", { locale: ptBR });
-          const msg = `⏰ *Lembrete de Agendamento!*\n\nOlá, ${appt.client.name}! \nFalta cerca de 1 hora para o seu horário das *${timeFormatted}*.\n\nServiço: ${appt.service.name}\n\nTe esperamos na barbearia! 💈✂️`;
+          const serviceNames = appt.appointmentServices.length
+            ? appt.appointmentServices.map((item) => item.service.name).join(', ')
+            : appt.service.name;
+          const msg = `⏰ *Lembrete de Agendamento!*\n\nOlá, ${appt.client.name}! \nFalta cerca de 1 hora para o seu horário das *${timeFormatted}*.\n\nServiços: ${serviceNames}\n\nTe esperamos na barbearia! 💈✂️`;
 
           console.log(`[Cron] Enviando lembrete para ${appt.client.name} (${phone}) - Faltam ${minsDiff} minutos`);
           
