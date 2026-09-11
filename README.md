@@ -1,90 +1,118 @@
 # Navalha.app
 
-Sistema de gestao para barbearias que centraliza agenda, clientes, operacao,
-financeiro e relacionamento com os clientes em um unico lugar.
+Sistema de gestão para barbearias que centraliza agenda, clientes, operação,
+financeiro e relacionamento com os clientes em um único lugar.
 
-> Projeto privado em desenvolvimento. Consulte a equipe antes de usar em
-> producao.
+> **Projeto privado em desenvolvimento.** Consulte a equipe antes de usar em
+> produção.
 
 ## O problema que o Navalha.app resolve
 
 Barbearias que controlam agendamentos, clientes, estoque e caixa em planilhas,
-anotacoes ou ferramentas separadas perdem tempo, ficam sujeitas a erros e tem
-dificuldade para acompanhar o desempenho do negocio. A falta de confirmacoes
-automaticas tambem aumenta as chances de faltas e deixa o atendimento mais
+anotações ou ferramentas separadas perdem tempo, ficam sujeitas a erros e têm
+dificuldade para acompanhar o desempenho do negócio. A falta de confirmações
+automáticas também aumenta as chances de faltas e deixa o atendimento mais
 reativo.
 
 O Navalha.app resolve esse problema ao reunir a rotina da barbearia em um
-painel responsivo, com informacoes organizadas e automacoes que ajudam a equipe
-a atender melhor, reduzir faltas e tomar decisoes com base nos dados.
+painel responsivo, com informações organizadas e automações que ajudam a
+equipe a atender melhor, reduzir faltas e tomar decisões com base em dados.
 
 ## Principais funcionalidades
 
-### Organizar a agenda e o atendimento
+### Organização da agenda e do atendimento
 
-- Agenda diaria com filtros por data e status.
-- Confirmacoes e lembretes de agendamento via WhatsApp.
+- Agenda diária com filtros por data e status.
+- Confirmações e lembretes de agendamento via WhatsApp.
 - Cadastro de clientes com telefone normalizado para o Brasil.
-- Interface responsiva, com tema premium e carregamentos skeleton.
+- Interface responsiva, com tema premium e carregamentos em *skeleton*.
 
-### Controlar a operacao
+### Controle da operação
 
-- Cadastro de servicos e produtos.
+- Cadastro de serviços e produtos.
 - Controle de estoque.
-- Usuarios e permissoes para barbeiros e administradores.
+- Usuários e permissões para barbeiros e administradores.
 
-### Acompanhar resultados e o financeiro
+### Acompanhamento de resultados e financeiro
 
 - Dashboard com indicadores, metas e receitas.
 - Controle financeiro com entradas, despesas e categorias.
-- Relatorios para acompanhar a saude do negocio.
+- Relatórios para acompanhar a saúde do negócio.
 
-## Beneficios para a barbearia
+## Benefícios para a barbearia
 
-- **Mais organizacao:** toda a operacao diaria fica centralizada em um unico
+- **Mais organização:** toda a operação diária fica centralizada em um único
   sistema.
-- **Menos faltas:** clientes recebem confirmacoes e lembretes pelo WhatsApp.
-- **Mais controle:** estoque, caixa, servicos e equipe podem ser acompanhados
+- **Menos faltas:** os clientes recebem confirmações e lembretes pelo
+  WhatsApp.
+- **Mais controle:** estoque, caixa, serviços e equipe podem ser acompanhados
   no mesmo ambiente.
-- **Decisoes melhores:** indicadores, metas e relatorios tornam os resultados
-  mais visiveis.
-- **Melhor experiencia:** equipe e clientes contam com uma interface rapida,
+- **Decisões melhores:** indicadores, metas e relatórios tornam os resultados
+  mais visíveis.
+- **Melhor experiência:** equipe e clientes contam com uma interface rápida,
   responsiva e consistente.
 
-## Stack
+## Stack tecnológica
 
-- **Frontend e backend:** Next.js 15, React 19 e TypeScript
-- **Estilos:** Tailwind CSS, Radix UI e componentes reutilizaveis
-- **Persistencia:** PostgreSQL com Prisma ORM
-- **Formularios e validacao:** React Hook Form e Zod
-- **Graficos:** Recharts
-- **WhatsApp:** Evolution API
-- **Automacoes:** Node.js, `tsx` e cron
+<div align="center">
+
+**Frontend & Backend**
+<br/>
+<img src="https://skillicons.dev/icons?perline=8&i=nextjs,react,ts,nodejs" />
+
+<br/><br/>
+
+**Estilos & UI**
+<br/>
+<img src="https://skillicons.dev/icons?perline=8&i=tailwind" />
+<img src="https://img.shields.io/badge/-Radix_UI-161618?style=for-the-badge&logo=radixui&logoColor=white" />
+
+<br/><br/>
+
+**Dados & Persistência**
+<br/>
+<img src="https://skillicons.dev/icons?perline=8&i=postgres,prisma,docker" />
+
+<br/><br/>
+
+**Formulários & Validação**
+<br/>
+<img src="https://img.shields.io/badge/-React_Hook_Form-EC5990?style=for-the-badge&logo=reacthookform&logoColor=white" />
+<img src="https://img.shields.io/badge/-Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white" />
+
+<br/><br/>
+
+**Gráficos & Integrações**
+<br/>
+<img src="https://img.shields.io/badge/-Recharts-22B5BF?style=for-the-badge&logo=chartdotjs&logoColor=white" />
+<img src="https://img.shields.io/badge/-Evolution_API-00E676?style=for-the-badge&logo=whatsapp&logoColor=white" />
+
+</div>
 
 ## Requisitos
 
 - Node.js 20 ou superior
 - npm
-- PostgreSQL (Supabase ou servidor proprio)
-- Docker e Docker Compose, caso use os servicos locais definidos em
+- PostgreSQL (Supabase ou servidor próprio)
+- Docker e Docker Compose, caso utilize os serviços locais definidos em
   `docker-compose.yml`
 
-## Configuracao local
+## Configuração local
 
-### 1. Clone o repositorio
+### 1. Clone o repositório
 
 ```bash
 git clone https://github.com/DOUGLASWEB-DG/Barbeiro-Atual.git
 cd Barbeiro-Atual
 ```
 
-### 2. Instale as dependencias
+### 2. Instale as dependências
 
 ```bash
 npm install
 ```
 
-### 3. Configure as variaveis de ambiente
+### 3. Configure as variáveis de ambiente
 
 Copie `.env.example` para `.env` e preencha as credenciais do PostgreSQL:
 
@@ -92,16 +120,16 @@ Copie `.env.example` para `.env` e preencha as credenciais do PostgreSQL:
 cp .env.example .env
 ```
 
-Variaveis obrigatorias:
+Variáveis obrigatórias:
 
-| Variavel | Finalidade |
+| Variável | Finalidade |
 | --- | --- |
-| `DATABASE_URL` | Conexao principal com pool de conexoes |
-| `DIRECT_URL` | Conexao direta usada pelo Prisma em migracoes |
+| `DATABASE_URL` | Conexão principal, com pool de conexões |
+| `DIRECT_URL` | Conexão direta usada pelo Prisma nas migrações |
 
-Nunca envie o arquivo `.env` para o Git.
+> **Atenção:** nunca envie o arquivo `.env` para o Git.
 
-### 4. Prepare o banco
+### 4. Prepare o banco de dados
 
 ```bash
 npm run db:push
@@ -110,13 +138,13 @@ npm run db:seed
 
 ### 5. Inicie o sistema
 
-Terminal 1 - aplicacao web:
+**Terminal 1** — aplicação web:
 
 ```bash
 npm run dev
 ```
 
-Terminal 2 - lembretes automaticos:
+**Terminal 2** — lembretes automáticos:
 
 ```bash
 npm run cron
@@ -124,21 +152,21 @@ npm run cron
 
 Acesse [http://localhost:3000](http://localhost:3000).
 
-## Scripts disponiveis
+## Scripts disponíveis
 
-| Comando | Descricao |
+| Comando | Descrição |
 | --- | --- |
-| `npm run dev` | Inicia o Next.js em desenvolvimento |
+| `npm run dev` | Inicia o Next.js em modo de desenvolvimento |
 | `npm run build` | Gera o Prisma Client, atualiza o banco e cria o build |
-| `npm run start` | Inicia a aplicacao compilada |
+| `npm run start` | Inicia a aplicação compilada |
 | `npm run lint` | Executa o ESLint do projeto |
 | `npm run format` | Formata os arquivos com Prettier |
 | `npm run cron` | Executa o processo de lembretes do WhatsApp |
-| `npm run db:push` | Sincroniza o schema Prisma com o banco |
-| `npm run db:migrate` | Cria e executa uma migracao Prisma |
+| `npm run db:push` | Sincroniza o schema do Prisma com o banco |
+| `npm run db:migrate` | Cria e executa uma migração do Prisma |
 | `npm run db:seed` | Carrega dados iniciais |
 | `npm run db:studio` | Abre o Prisma Studio |
-| `npm run db:reset` | Reseta o banco de desenvolvimento |
+| `npm run db:reset` | Reseta o banco de dados de desenvolvimento |
 
 ## Estrutura principal
 
@@ -146,22 +174,22 @@ Acesse [http://localhost:3000](http://localhost:3000).
 app/
   api/                 Rotas da API
   dashboard/           Telas administrativas
-  book/                Fluxo publico de agendamento
+  book/                Fluxo público de agendamento
 components/            Componentes compartilhados
-config/                Configuracoes da barbearia
-lib/                   Autenticacao, formatacao e integracoes
+config/                Configurações da barbearia
+lib/                   Autenticação, formatação e integrações
 prisma/                Schema e seed do banco
-public/                Imagens e assets publicos
-scripts/               Jobs e automacoes
+public/                Imagens e assets públicos
+scripts/               Jobs e automações
 ```
 
-## Configuracoes da barbearia
+## Configurações da barbearia
 
-Dados institucionais, como nome, identidade e informacoes de contato, ficam
-centralizados em [config/tenant.ts](config/tenant.ts). Ajuste esse arquivo
-conforme a identidade da sua unidade.
+Os dados institucionais — como nome, identidade visual e informações de
+contato — ficam centralizados em [`config/tenant.ts`](config/tenant.ts).
+Ajuste esse arquivo conforme a identidade da sua unidade.
 
-## Qualidade e validacao
+## Qualidade e validação
 
 Antes de abrir um Pull Request, execute:
 
@@ -170,8 +198,8 @@ npx tsc --noEmit
 npm run lint
 ```
 
-Para testar uma alteracao visual, valide o dashboard em desktop e celular,
-principalmente as telas de Agenda, Clientes e Agendamentos.
+Ao testar uma alteração visual, valide o dashboard em desktop e em celular,
+com atenção especial às telas de Agenda, Clientes e Agendamentos.
 
 ## Fluxo Git recomendado
 
@@ -183,17 +211,17 @@ git commit -m "Descreve a alteracao"
 git push -u origin minha-alteracao
 ```
 
-Depois, abra um Pull Request para `main`. Evite usar `git add .` quando houver
-alteracoes de outras tarefas no mesmo diretorio.
+Em seguida, abra um Pull Request para `main`. Evite usar `git add .` quando
+houver alterações de outras tarefas no mesmo diretório.
 
-## Seguranca
+## Segurança
 
-- Nao compartilhe credenciais, tokens ou arquivos `.env`.
-- Valide entradas no frontend e na API.
-- Use HTTPS e variaveis protegidas no ambiente de producao.
-- Revise os logs de integracoes externas antes de publicar.
+- Não compartilhe credenciais, tokens ou arquivos `.env`.
+- Valide entradas tanto no frontend quanto na API.
+- Utilize HTTPS e variáveis de ambiente protegidas em produção.
+- Revise os logs de integrações externas antes de publicar.
 
-## Licenca
+## Licença
 
-Uso privado e restrito ao projeto Navalha.app. Consulte os proprietarios antes
-de redistribuir ou publicar este codigo.
+Uso privado e restrito ao projeto Navalha.app. Consulte os proprietários
+antes de redistribuir ou publicar este código.
