@@ -1,0 +1,166 @@
+// Prisma schema for BarberOS - Local SQLite, scalable to PostgreSQL for SaaS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Client {
+  id           String        @id @default(cuid())
+  name         String
+  phone        String        @unique
+  email        String?
+  notes        String?
+  isActive     Boolean       @default(true) // <-- Campo para soft delete
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+}
+
+model Service {
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  price        Float
+  durationMins Int           @default(30)
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  clientId    String
+  serviceId   String
+  date        DateTime
+  status      AppointmentStatus @default(PENDING)
+  notes       String?
+  barberId    String? // ID do barbeiro que realizará o serviço
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  reminderSent Boolean           @default(false)
+  client       Client            @relation(fields: [clientId], references: [id])
+  service     Service           @relation(fields: [serviceId], references: [id])
+  barber      User?             @relation(fields: [barberId], references: [id]) // Relacionamento com o barbeiro
+  transaction Transaction?
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELED
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  type          TransactionType
+  amount        Float
+  description   String
+  category      String?
+  categoryId    String?
+  appointmentId String?         @unique
+  date          DateTime        @default(now())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  appointment   Appointment?    @relation(fields: [appointmentId], references: [id])
+  categoryRef   Category?       @relation(fields: [categoryId], references: [id])
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  name         String
+  icon         String        @default("CircleDollarSign")
+  color        String        @default("#6b7280")
+  type         CategoryType  @default(BOTH)
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+  BOTH
+}
+
+model FinanceAlert {
+  id        String              @id @default(cuid())
+  type      FinanceAlertType
+  message   String
+  severity  AlertSeverity       @default(INFO)
+  read      Boolean             @default(false)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+enum FinanceAlertType {
+  OVER_LIMIT
+  NEGATIVE_BALANCE
+  HIGH_SPENDING
+  MONTH_COMPARISON
+  GOAL_REACHED
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  DANGER
+}
+
+model Goal {
+  id          String   @id @default(cuid())
+  title       String
+  type        GoalType
+  targetAmount Float
+  period      String   // "daily" | "weekly" | "monthly"
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum GoalType {
+  REVENUE
+  CLIENTS
+  APPOINTMENTS
+}
+
+enum Role {
+  ADMIN
+  BARBER
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  role         Role          @default(ADMIN) // Papel do usuário (Admin ou Barbeiro)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[] // Agendamentos vinculados a este barbeiro
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  stock       Int      @default(0) // Controle de estoque
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

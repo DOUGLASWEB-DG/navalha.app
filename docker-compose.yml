@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5440:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=barberos
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d barberos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - barberos_net
+
+  redis:
+    image: redis:alpine
+    networks:
+      - barberos_net
+
+  evolution-api:
+    image: evoapicloud/evolution-api:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_URL=http://localhost:8080
+      - DOCKER_ENV=true
+      - AUTHENTICATION_TYPE=apikey
+      - AUTHENTICATION_API_KEY=barberos_whatsapp_key
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://postgres:postgres@db:5432/barberos?schema=evolution
+      - REDIS_ENABLED=true
+      - REDIS_URI=redis://redis:6379
+      - CACHE_REDIS_URI=redis://redis:6379
+    volumes:
+      - evolution_instances:/evolution/instances
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - barberos_net
+
+volumes:
+  postgres_data:
+  evolution_instances:
+
+networks:
+  barberos_net:
+    driver: bridge
