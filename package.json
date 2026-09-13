@@ -7,8 +7,9 @@
     "cron": "tsx scripts/cron.ts",
     "build": "prisma generate && prisma db push && next build",
     "start": "next start",
-    "lint": "next lint",
-    "format": "prettier --write .",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write --unsafe .",
+    "format": "biome format --write .",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
@@ -52,14 +53,11 @@
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.13",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "eslint": "^8.0.0",
-    "eslint-config-next": "^15.0.0",
-    "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.8.1",
     "prisma": "^6.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.0.0"
