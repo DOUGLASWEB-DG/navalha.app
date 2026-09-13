@@ -8,17 +8,104 @@ financeiro e comunicacao automatizada por WhatsApp.
 
 ## Visao geral
 
-O Navalha.app centraliza a operacao diaria da barbearia em um painel
-responsivo:
+# Estado atual do projeto
 
-- Agenda diaria com filtros por data e status
-- Cadastro de clientes com telefone normalizado para o Brasil
-- Servicos, produtos e controle de estoque
-- Dashboard com indicadores, metas e receitas
-- Financeiro com entradas, despesas, categorias e relatorios
-- Usuarios e permissoes para barbeiros e administradores
-- Confirmacoes e lembretes de agendamento via WhatsApp
-- Interface responsiva com tema premium e carregamentos skeleton
+## Navalha.app
+
+Este documento registra o estado técnico atual do projeto,
+os principais riscos conhecidos e os próximos pontos de evolução.
+
+O objetivo não é apenas registrar funcionalidades,
+mas acompanhar a evolução da qualidade técnica do sistema.
+
+---
+
+## Matriz de projeto
+
+| Área | Estado | Observação |
+|---|---|---|
+| Stack | 🟢 Muito boa | Base tecnológica adequada |
+| Estrutura | 🟢 Boa | Organização inicial consistente |
+| Banco/modelagem | 🟡 Precisa evolução | Existem decisões de domínio a consolidar |
+| Agendamento | 🔴 Crítico | Principal ponto técnico atual |
+| UI/Design System | 🟡 Boa base | Precisa padronização |
+| Responsividade | 🔴 Atenção | Componentes compartilhados apresentam problemas mobile |
+| Segurança/RBAC | 🟡 Funciona | Precisa maior centralização e endurecimento |
+| Testes | 🔴 Precisa evoluir | Cobertura insuficiente |
+| CI/CD | 🔴 Precisa estruturar | Pipeline ainda não consolidado |
+| Observabilidade | 🔴 Praticamente ausente | Falta estratégia de logs e monitoramento |
+| Documentação | 🟡 Boa base | Precisa organização técnica |
+| SaaS real | 🔴 Ainda não | Multi-tenant e billing ainda não implementados |
+
+---
+
+# Prioridade atual
+
+Agendamento.
+
+A evolução deve seguir:
+
+1. Entendimento do fluxo de agendamento público
+2. Estabilização dos componentes compartilhados de UI
+3. Consolidação de Appointment + AppointmentService
+4. Adaptação das APIs
+5. Adaptação da agenda
+6. Adaptação do financeiro
+7. Adaptação das notificações/WhatsApp
+8. Validação de conflitos de horário
+9. Testes desktop/mobile
+10. Testes automatizados
+11. Versionamento
+
+---
+
+# Critério de evolução
+
+Funcionalidades
+
+Ela deve considerar:
+
+- domínio
+- banco de dados
+- API
+- interface
+- validação
+- segurança
+- responsividade
+- testes
+- documentação
+- deploy
+
+---
+
+# Próximo marco
+
+## Multi-serviço por agendamento
+
+Permitir que um cliente tenha vários serviços dentro do
+mesmo agendamento.
+
+Exemplo:
+
+Cliente:
+João
+
+Agendamento:
+14:00
+
+Serviços:
+- Corte
+- Barba
+- Sobrancelha
+
+O sistema deve calcular corretamente:
+
+- duração total
+- valor total
+- disponibilidade do barbeiro
+- agenda
+- financeiro
+- notificações
 
 ## Stack
 
