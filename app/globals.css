@@ -1,147 +1,147 @@
-@import "tailwindcss";
-@config "../tailwind.config.js";
+  @import "tailwindcss";
+  @config "../tailwind.config.js";
 
-/*
-  BarberOS — Tema Barbearia Premium
-  Slate & Emerald (Confiança, Lucro & Gestão Moderna)
-*/
+  /*
+    BarberOS — Tema Barbearia Premium
+    Slate & Emerald (Confiança, Lucro & Gestão Moderna)
+  */
 
-:root {
-  /* Solar View Theme (Light Mode) */
-  --background: 220 14% 96%; /* #F4F5F7 Cinza bem claro */
-  --foreground: 222 47% 11%;
-  
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  
-  --primary: 221 83% 53%; /* Azul Barbearia */
-  --primary-foreground: 0 0% 100%;
-  
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%; /* Texto cinza secundário */
-  
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  
-  --success: 142 71% 45%; /* Verde */
-  --success-foreground: 0 0% 100%;
-  
-  --warning: 38 92% 50%; /* Laranja/Amarelo de Alerta */
-  --warning-foreground: 48 96% 89%;
-  
-  --info: 210 90% 62%;
-  --info-foreground: 0 0% 100%;
-  
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221 83% 53%;
-  
-  --radius: 0.5rem;
+  :root {
+    /* Solar View Theme (Light Mode) */
+    --background: 220 14% 96%; /* #F4F5F7 Cinza bem claro */
+    --foreground: 222 47% 11%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    
+    --primary: 221 83% 53%; /* Azul Barbearia */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%; /* Texto cinza secundário */
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --success: 142 71% 45%; /* Verde */
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%; /* Laranja/Amarelo de Alerta */
+    --warning-foreground: 48 96% 89%;
+    
+    --info: 210 90% 62%;
+    --info-foreground: 0 0% 100%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 53%;
+    
+    --radius: 0.5rem;
 
-  --sidebar: 0 0% 100%;
-  --sidebar-foreground: 222 47% 11%;
-  --sidebar-border: 214.3 31.8% 91.4%;
-  --sidebar-accent: 210 40% 96.1%;
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-accent: 210 40% 96.1%;
 
-  --chart-1: 221 83% 53%; 
-  --chart-2: 142 71% 45%;
-  --chart-3: 38 92% 50%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 0 84% 60%;
-}
-
-.dark {
-  /* Slate & Emerald Dark Mode (Foco no Mockup) */
-  --background: 222 47% 11%; /* Dark Slate Gray */
-  --foreground: 210 40% 98%; /* White/Slate */
-  --card: 217 33% 17%; /* Lighter Slate for Cards */
-  --card-foreground: 210 40% 98%;
-  --popover: 217 33% 17%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 221 83% 53%; /* Azul Barbearia */
-  --primary-foreground: 0 0% 100%;
-  --secondary: 215 25% 27%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 215 25% 27%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 215 25% 27%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62% 30%;
-  --destructive-foreground: 210 40% 98%;
-  --success: 160 84% 39%;
-  --success-foreground: 0 0% 100%;
-  --warning: 48 96% 53%;
-  --warning-foreground: 0 0% 10%;
-  --info: 210 90% 62%;
-  --info-foreground: 0 0% 100%;
-  --border: 215 25% 27%;
-  --input: 217 33% 17%;
-  --ring: 221 83% 53%;
-
-  --sidebar: 217 33% 17%; /* Lighter Slate for Sidebar */
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-border: 215 25% 27%;
-  --sidebar-accent: 215 25% 27%;
-
-  --chart-1: 160 84% 39%; /* Emerald */
-  --chart-2: 210 90% 62%; /* Blue */
-  --chart-3: 48 96% 53%; /* Yellow */
-  --chart-4: 280 65% 60%; /* Purple */
-  --chart-5: 0 84% 60%; /* Red */
-}
-
-* {
-  border-color: hsl(var(--border));
-}
-
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-}
-
-/* Rolagem discreta (app-like): esconde barras, mantém scroll */
-html {
-  scrollbar-width: none;
-}
-
-html::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Carrossel horizontal nativo */
-.touch-pan-x {
-  touch-action: pan-x;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+    --chart-1: 221 83% 53%; 
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 0 84% 60%;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
+  .dark {
+    /* Slate & Emerald Dark Mode (Foco no Mockup) */
+    --background: 222 47% 11%; /* Dark Slate Gray */
+    --foreground: 210 40% 98%; /* White/Slate */
+    --card: 217 33% 17%; /* Lighter Slate for Cards */
+    --card-foreground: 210 40% 98%;
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 221 83% 53%; /* Azul Barbearia */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 215 25% 27%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 215 25% 27%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 215 25% 27%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 48 96% 53%;
+    --warning-foreground: 0 0% 10%;
+    --info: 210 90% 62%;
+    --info-foreground: 0 0% 100%;
+    --border: 215 25% 27%;
+    --input: 217 33% 17%;
+    --ring: 221 83% 53%;
+
+    --sidebar: 217 33% 17%; /* Lighter Slate for Sidebar */
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-border: 215 25% 27%;
+    --sidebar-accent: 215 25% 27%;
+
+    --chart-1: 160 84% 39%; /* Emerald */
+    --chart-2: 210 90% 62%; /* Blue */
+    --chart-3: 48 96% 53%; /* Yellow */
+    --chart-4: 280 65% 60%; /* Purple */
+    --chart-5: 0 84% 60%; /* Red */
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  /* Rolagem discreta (app-like): esconde barras, mantém scroll */
+  html {
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Carrossel horizontal nativo */
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }

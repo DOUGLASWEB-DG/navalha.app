@@ -1,104 +1,125 @@
 "use client"
 
 import Link from 'next/link'
-import { Scissors, Clock, Star, MapPin, Phone, Instagram, ArrowRight, CheckCircle, User } from 'lucide-react'
+import { Scissors, Clock, Star, MapPin, Phone, Instagram, ArrowRight, User, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { cn } from "@/lib/utils"
-import { animate, useInView, useMotionValue, motion } from "framer-motion"
+import { motion, useScroll, useTransform } from "framer-motion"
 import { tenantConfig } from '@/config/tenant'
 import { WhatsAppIcon } from '@/components/shared/whatsapp-icon'
 
-function Counter({ value }: { value: string }) {
-  const ref = useRef<HTMLSpanElement>(null)
-  const isInView = useInView(ref, { once: true, margin: "-50px" })
-  
-  // Extrai apenas os números (ex: "500+" vira 500)
-  const numericValue = parseFloat(value.replace(/[^0-9.]/g, ""))
-  
-  const motionValue = useMotionValue(0)
+// Logotipo Tipográfico Minimalista (Sem ícone, com .app em azul sem duplicação)
+function AppBrand({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+  const textSizes = {
+    sm: "text-sm",
+    md: "text-base",
+    lg: "text-xl"
+  }
 
-  useEffect(() => {
-    if (isInView) {
-      const controls = animate(motionValue, numericValue, {
-        duration: 3.5, // Bem mais lento
-        ease: "easeOut"
-      })
-      return controls.stop
-    }
-  }, [isInView, motionValue, numericValue])
+  // Tratamento para remover .app do nome caso já exista no tenantConfig e evitar duplicar
+  const baseName = tenantConfig.name.toLowerCase().replace(/\.?app$/i, '')
 
-  useEffect(() => {
-    return motionValue.on("change", (latest) => {
-      if (ref.current) {
-        const isDecimal = value.includes(".")
-        const formatted = isDecimal 
-          ? latest.toFixed(1) 
-          : Math.floor(latest).toLocaleString()
-        
-        // Adiciona o sufixo original (como o "+") de volta
-        ref.current.textContent = formatted + (value.includes("+") ? "+" : "")
-      }
-    })
-  }, [motionValue, value])
+  return (
+    <div className="flex items-center font-sans select-none tracking-tight">
+      <span className={cn("font-bold text-foreground", textSizes[size])}>
+        {baseName}
+        <span className="text-primary font-semibold">.app</span>
+      </span>
+    </div>
+  )
+}
 
-  return <span ref={ref}>0</span>
+function HairParticles({ isPrimary = false }: { isPrimary?: boolean }) {
+  const particles = Array.from({ length: 6 })
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
+      {particles.map((_, i) => (
+        <motion.span
+          key={i}
+          initial={{
+            opacity: 0,
+            x: `${(i + 1) * 15}%`,
+            y: "40%",
+            rotate: Math.random() * 40 - 20,
+          }}
+          animate={{
+            opacity: [0, 1, 0],
+            y: ["40%", "130%"],
+            x: [`${(i + 1) * 15}%`, `${(i + 1) * 15 + (Math.random() * 10 - 5)}%`],
+            rotate: Math.random() * 120 - 60,
+          }}
+          transition={{
+            duration: 0.6,
+            delay: (isPrimary ? 1.6 : 0.2) + i * 0.05,
+            ease: "easeOut"
+          }}
+          className={cn(
+            "absolute w-[1.5px] h-2.5 rounded-full",
+            isPrimary ? "bg-primary" : "bg-muted-foreground/40"
+          )}
+        />
+      ))}
+    </div>
+  )
 }
 
 function HeroTitle() {
   return (
-    <h1 className="text-5xl md:text-7xl font-bold font-serif text-balance leading-tight mb-6 flex flex-col items-center">
-      {/* Primeira linha cortada devagar */}
-      <div className="relative inline-block">
+    <h1 className="text-4xl sm:text-6xl font-bold font-serif text-balance leading-tight mb-6 flex flex-col items-center tracking-tight">
+      <div className="relative inline-block py-1">
+        <HairParticles />
         <motion.div
           initial={{ clipPath: 'inset(0 100% 0 0)' }}
           animate={{ clipPath: 'inset(0 0% 0 0)' }}
-          transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
+          transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
         >
           A Arte do
         </motion.div>
+        
         <motion.div
           initial={{ left: "-10%", opacity: 0 }}
           animate={{ 
             left: "105%", 
             opacity: [0, 1, 1, 0],
           }}
-          transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
+          transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
           className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-muted-foreground z-10"
         >
           <motion.div
-            animate={{ rotate: [0, -30, 0, -30, 0, -30, 0] }}
-            transition={{ duration: 1.2, ease: "linear", delay: 0.2 }}
+            animate={{ rotate: [0, -20, 0, -20, 0] }}
+            transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
           >
-            <Scissors className="w-10 h-10 md:w-14 md:h-14" />
+            <Scissors className="w-8 h-8 md:w-10 md:h-10 transform -scale-x-100" />
           </motion.div>
         </motion.div>
       </div>
 
-      {/* Segunda linha cortada muito rápido (sapidão) */}
-      <div className="relative inline-block mt-1 md:mt-2">
+      <div className="relative inline-block py-1">
+        <HairParticles isPrimary />
         <motion.div
           initial={{ clipPath: 'inset(0 100% 0 0)' }}
           animate={{ clipPath: 'inset(0 0% 0 0)' }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 1.6 }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 1.4 }}
           className="text-primary"
         >
           Corte Perfeito
         </motion.div>
+
         <motion.div
           initial={{ left: "-10%", opacity: 0 }}
           animate={{ 
             left: "105%", 
             opacity: [0, 1, 1, 0],
           }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 1.6 }}
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-primary z-10 drop-shadow-[0_0_15px_rgba(37,99,235,0.5)]"
+          transition={{ duration: 0.5, ease: "easeOut", delay: 1.4 }}
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-primary z-10"
         >
           <motion.div
-            animate={{ rotate: [0, -40, 0, -40, 0] }}
-            transition={{ duration: 0.5, ease: "linear", delay: 1.6 }}
+            animate={{ rotate: [0, -30, 0] }}
+            transition={{ duration: 0.5, ease: "linear", delay: 1.4 }}
           >
-            <Scissors className="w-12 h-12 md:w-16 md:h-16" />
+            <Scissors className="w-10 h-10 md:w-12 md:h-12 transform -scale-x-100" />
           </motion.div>
         </motion.div>
       </div>
@@ -107,9 +128,7 @@ function HeroTitle() {
 }
 
 const WHATSAPP_NUMBER = tenantConfig.whatsappNumber
-
-const services = tenantConfig.services;
-
+const services = tenantConfig.services
 const reasons = tenantConfig.reasons
 
 function buildWhatsAppLink(serviceName?: string, date?: string, time?: string) {
@@ -120,39 +139,33 @@ function buildWhatsAppLink(serviceName?: string, date?: string, time?: string) {
 }
 
 export default function LandingPage() {
-  const [scrolled, setScrolled] = useState(false)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const [activeTab, setActiveTab] = useState<'client' | 'pro'>('client')
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 300)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  })
+
+  const headerButtonsOpacity = useTransform(scrollYProgress, [0.25, 0.35], [0, 1])
+  const heroButtonsOpacity = useTransform(scrollYProgress, [0.15, 0.25], [1, 0])
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
-      {/* Nav */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/50 bg-background/80 backdrop-blur-md flex items-center px-6 justify-between">
-        <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
-              <img 
-                src={tenantConfig.logoUrl} 
-                alt="Logo" 
-                className="w-full h-full object-contain p-0" 
-              />
-          </div>
-          <span className="text-base font-bold font-serif text-foreground">{tenantConfig.name.toUpperCase()}</span>
-        </div>
+    <div className="min-h-screen bg-background text-foreground font-sans antialiased">
+      {/* Header com a nova marca corrigida */}
+      <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-border/60 bg-background/80 backdrop-blur-md flex items-center px-6 justify-between">
+        <Link href="/" className="hover:opacity-90 transition-opacity">
+          <AppBrand size="md" />
+        </Link>
         
-        <div className="flex items-center gap-1 sm:gap-2">
-          <div className={cn(
-            "flex items-center gap-2 transition-all duration-300",
-            scrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
-          )}>
+        <div className="flex items-center gap-2">
+          <motion.div 
+            style={{ opacity: headerButtonsOpacity }}
+            className="flex items-center gap-2"
+          >
             <a href={buildWhatsAppLink()} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm" className="border-success/40 text-success hover:bg-success/10 gap-2 hidden sm:flex">
-                <WhatsAppIcon className="w-4 h-4" />
+              <Button variant="outline" size="sm" className="border-border text-foreground hover:bg-accent gap-2 hidden sm:flex">
+                <WhatsAppIcon className="w-4 h-4 text-emerald-500" />
                 WhatsApp
               </Button>
             </a>
@@ -161,10 +174,11 @@ export default function LandingPage() {
                 Agendar <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
-          </div>
-          <div className="h-6 w-px bg-border/50 mx-1 hidden sm:block"></div>
+          </motion.div>
+
+          <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
           <Link href="/login" title="Entrar no sistema">
-            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary gap-2">
+            <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline font-medium">Entrar</span>
             </Button>
@@ -172,185 +186,238 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative pt-16 min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'repeating-linear-gradient(45deg, hsl(138, 20%, 34%) 0, hsl(145, 87%, 21%) 1px, transparent 0, transparent 50%)',
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
-
-        
-
-        <div className="relative text-center px-6 max-w-4xl mx-auto">
-          
+      {/* Hero Section */}
+      <section ref={heroRef} className="relative pt-28 pb-16 min-h-[90vh] flex flex-col items-center justify-center px-6">
+        <div className="text-center max-w-3xl mx-auto flex flex-col items-center">
           <HeroTitle />
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
+          
+          <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
             {tenantConfig.description}
           </p>
-          <div className="flex items-center justify-center gap-4 flex-wrap">
+
+          <motion.div 
+            style={{ opacity: heroButtonsOpacity }}
+            className="flex items-center justify-center gap-3 flex-wrap mb-12"
+          >
             <Link href="/book">
-              <Button size="lg" className="bg-primary text-primary-foreground h-14 px-8 text-base gap-2 rounded-full font-bold shadow-[0_0_30px_rgba(37,99,235,0.3)] hover:shadow-[0_0_40px_rgba(37,99,235,0.5)] hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-300 group">
+              <Button size="lg" className="bg-primary text-primary-foreground h-12 px-7 rounded-xl font-semibold gap-2 hover:bg-primary/90 transition-all">
                 Agendar Horário
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-             
+              
             <a href={buildWhatsAppLink()} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="lg" className="h-14 px-8 text-base bg-zinc-900 border-2 border-success/30 text-success gap-2 rounded-full font-bold shadow-[0_0_20px_rgba(34,197,94,0.1)] hover:border-success/80 hover:bg-success/10 hover:shadow-[0_0_30px_rgba(34,197,94,0.25)] hover:scale-105 active:scale-95 transition-all duration-300">
-                <WhatsAppIcon className="w-5 h-5" />
-                Agendar via WhatsApp
+              <Button variant="outline" size="lg" className="h-12 px-7 rounded-xl border-border font-semibold gap-2 hover:bg-accent transition-all">
+                <WhatsAppIcon className="w-4 h-4 text-emerald-500" />
+                WhatsApp
               </Button>
             </a>
-          </div>
+          </motion.div>
 
-         {/* Stats */}
-<div className="flex items-center justify-center gap-8 mt-14 flex-wrap">
-  {[
-    { value: '500+', label: 'Clientes Satisfeitos' },
-    { value: '6+', label: 'Anos de Experiência' },
-    { value: '4.9', label: 'Avaliação' },
-  ].map((stat, index) => (
-    <motion.div 
-      key={stat.label} 
-      className="text-center min-w-[120px]"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.2 }}
-    >
-      <p className="text-3xl font-bold font-serif text-primary">
-        <Counter value={stat.value} />
-      </p>
-      <p className="text-xs text-muted-foreground mt-1 uppercase tracking-tighter">
-        {stat.label}
-      </p>
-    </motion.div>
-  ))}
-</div>  
+          {/* Interface / Preview do Sistema */}
+          <div className="w-full max-w-2xl border border-border/80 rounded-2xl bg-card overflow-hidden shadow-sm">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/60 bg-muted/30">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-border inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-border inline-block" />
+                <span className="w-2.5 h-2.5 rounded-full bg-border inline-block" />
+              </div>
+
+              <div className="flex bg-muted p-0.5 rounded-lg text-xs font-medium">
+                <button 
+                  onClick={() => setActiveTab('client')}
+                  className={cn("px-3 py-1 rounded-md transition-all", activeTab === 'client' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                >
+                  Cliente
+                </button>
+                <button 
+                  onClick={() => setActiveTab('pro')}
+                  className={cn("px-3 py-1 rounded-md transition-all", activeTab === 'pro' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground")}
+                >
+                  Barbeiro
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 text-left">
+              {activeTab === 'client' ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                    <div>
+                      <p className="text-xs text-primary font-semibold uppercase tracking-wider">Agendamento Online</p>
+                      <h4 className="text-base font-bold text-foreground">Corte + Barba</h4>
+                    </div>
+                    <span className="text-base font-bold text-primary">R$ 60,00</span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {['09:00', '10:30', '14:00', '15:30', '17:00', '18:30'].map((time, idx) => (
+                      <div 
+                        key={time} 
+                        className={cn(
+                          "py-2 rounded-lg border text-center text-xs font-medium transition-colors",
+                          idx === 2 ? "border-primary bg-primary/10 text-primary font-semibold" : "border-border/60 text-muted-foreground"
+                        )}
+                      >
+                        {time}
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button className="w-full bg-primary text-primary-foreground h-10 rounded-lg text-sm font-semibold gap-2">
+                    <Sparkles className="w-4 h-4" /> Confirmar Horário
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="p-3 border border-border/60 rounded-xl bg-muted/20">
+                      <p className="text-xs text-muted-foreground">Atendimentos</p>
+                      <p className="text-lg font-bold text-foreground mt-0.5">14 hoje</p>
+                    </div>
+                    <div className="p-3 border border-border/60 rounded-xl bg-muted/20">
+                      <p className="text-xs text-muted-foreground">Faturamento</p>
+                      <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">R$ 840,00</p>
+                    </div>
+                    <div className="p-3 border border-border/60 rounded-xl bg-muted/20">
+                      <p className="text-xs text-muted-foreground">Presença</p>
+                      <p className="text-lg font-bold text-foreground mt-0.5">100%</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 border border-border/60 rounded-xl flex items-center justify-between bg-muted/10">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center">
+                        JD
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">João Data</p>
+                        <p className="text-[11px] text-muted-foreground">Corte — 14:00</p>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      Confirmado
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Serviços */}
-      <section id="servicos" className="py-20 px-6 max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <p className="text-xs text-primary tracking-widest uppercase font-semibold mb-2">O Que Oferecemos</p>
-          <h2 className="text-4xl font-bold font-serif text-balance">Nossos Serviços</h2>
+      <section id="servicos" className="py-16 px-6 max-w-5xl mx-auto border-t border-border/40">
+        <div className="text-center mb-10">
+          <p className="text-xs text-primary tracking-widest uppercase font-semibold mb-1">O Que Oferecemos</p>
+          <h2 className="text-3xl font-bold font-serif">Nossos Serviços</h2>
         </div>
 
-       {/* Serviços com Fotos */}
-<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-  {services.map((svc) => (
-    <div
-      key={svc.name}
-      className="bg-card border border-border/40 rounded-2xl overflow-hidden flex flex-col hover:border-primary/40 transition-all duration-300 group shadow-soft hover:shadow-premium"
-    >
-      {/* Container da Imagem */}
-      <div className="relative h-48 w-full overflow-hidden">
-        <img 
-          src={svc.image} 
-          alt={svc.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        {/* Overlay de Gradiente para dar leitura ao preço sobre a foto se quiser, 
-            ou mantemos o preço no corpo do card para ficar mais limpo: */}
-        <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm px-3 py-1 rounded-full border border-border/50">
-           <p className="text-sm font-bold text-primary">R${svc.price}</p>
-        </div>
-      </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {services.map((svc) => (
+            <div 
+              key={svc.name}
+              className="bg-card border border-border/60 rounded-xl overflow-hidden flex flex-col hover:border-border transition-colors group"
+            >
+              <div className="relative h-44 w-full overflow-hidden bg-muted">
+                <img 
+                  src={svc.image} 
+                  alt={svc.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute top-2.5 right-2.5 bg-background/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-border text-xs font-bold text-primary">
+                  R${svc.price}
+                </div>
+              </div>
 
-      {/* Conteúdo do Card */}
-      <div className="p-5 flex flex-col flex-grow gap-3">
-        <div className="flex items-center justify-between">
-          <p className="text-lg font-bold text-foreground">{svc.name}</p>
-          <div className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-            <Clock className="w-3 h-3" />
-            {svc.duration}
+              <div className="p-4 flex flex-col flex-grow gap-2.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-base font-bold text-foreground">{svc.name}</p>
+                  <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground font-semibold">
+                    <Clock className="w-3 h-3" />
+                    {svc.duration}
+                  </div>
+                </div>
+                
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                  {svc.desc}
+                </p>
+
+                <a
+                  href={buildWhatsAppLink(svc.name)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto pt-1"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2 border-border/80 hover:bg-accent text-xs font-semibold rounded-lg"
+                  >
+                    <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
+                    Agendar
+                  </Button>
+                </a>
+              </div>
+            </div>
+          ))}
+
+          {/* Card Personalizado */}
+          <div className="bg-muted/20 border border-dashed border-border rounded-xl p-5 flex flex-col items-center justify-center gap-3 text-center sm:col-span-2 lg:col-span-1">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <Star className="w-5 h-5 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-base font-bold text-foreground">Pacote Personalizado?</p>
+              <p className="text-xs text-muted-foreground">Fale conosco sobre combinações sob medida</p>
+            </div>
+            <a href={buildWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="w-full max-w-[180px]">
+              <Button size="sm" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 text-xs rounded-lg">
+                <WhatsAppIcon className="w-3.5 h-3.5" />
+                Fale Conosco
+              </Button>
+            </a>
           </div>
         </div>
-        
-        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-          {svc.desc}
-        </p>
-
-        <a
-          href={buildWhatsAppLink(svc.name)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-auto pt-2"
-        >
-          <Button
-            variant="outline"
-            className="w-full gap-2 border-border group-hover:border-primary group-hover:text-primary transition-colors bg-secondary/30"
-          >
-            <WhatsAppIcon className="w-4 h-4" />
-            Agendar
-          </Button>
-        </a>
-      </div>
-    </div>
-  ))}
-
-  {/* CTA Card adaptado para manter a altura */}
-  <div className="bg-primary/5 border-2 border-dashed border-primary/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-4 text-center sm:col-span-2 lg:col-span-1 min-h-[350px] shadow-soft hover:shadow-premium transition-all duration-300">
-    <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center">
-      <Star className="w-7 h-7 text-primary fill-primary/20" />
-    </div>
-    <div className="space-y-2">
-      <p className="text-lg font-bold text-foreground">Pacote Personalizado?</p>
-      <p className="text-sm text-muted-foreground px-4">Fale conosco sobre uma combinação de serviços sob medida</p>
-    </div>
-    <a href={buildWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="w-full max-w-[200px]">
-      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
-        <WhatsAppIcon className="w-4 h-4" />
-        Fale Conosco
-      </Button>
-    </a>
-  </div>
-</div>
       </section>
 
       {/* Sobre */}
-      <section id="sobre" className="py-20 px-6 bg-card border-y border-border">
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+      <section id="sobre" className="py-16 px-6 bg-muted/20 border-y border-border/50">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <p className="text-xs text-primary tracking-widest uppercase font-semibold mb-2">Sobre Nós</p>
-            <h2 className="text-4xl font-bold font-serif text-balance mb-4">
+            <p className="text-xs text-primary tracking-widest uppercase font-semibold mb-1">Sobre Nós</p>
+            <h2 className="text-3xl font-bold font-serif mb-3">
               Feito com Precisão
             </h2>
-            <p className="text-muted-foreground leading-relaxed mb-6">
-              Acreditamos que cada cliente merece uma experiência incrível — não apenas um corte de cabelo. 
-              Nossa barbearia é construída sobre habilidade, estilo e atenção aos detalhes. 
-              Seja um corte clássico ou um estilo moderno, nós temos o que você precisa.
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-5">
+              Acreditamos que cada cliente merece uma experiência incrível. 
+              Nossa barbearia é construída sobre habilidade, estilo e atenção aos detalhes.
             </p>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
               {reasons.map((reason) => (
-                <div key={reason} className="flex items-start gap-3">
-                  <Scissors className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                  <span className="text-sm text-foreground">{reason}</span>
+                <div key={reason} className="flex items-start gap-2.5">
+                  <Scissors className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span className="text-xs sm:text-sm text-foreground">{reason}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Horários */}
-          <div className="bg-background border border-border/50 rounded-xl p-6 flex flex-col gap-4 shadow-soft">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-5 h-5 text-primary" />
-              <h3 className="text-base font-semibold text-foreground">Horário de Funcionamento</h3>
+          <div className="bg-card border border-border/60 rounded-xl p-5 flex flex-col gap-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Horário de Funcionamento</h3>
             </div>
             {tenantConfig.businessHours.map((row) => (
-              <div key={row.day} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                <span className="text-sm text-muted-foreground">{row.day}</span>
-                <span className="text-sm font-semibold text-foreground">{row.time}</span>
+              <div key={row.day} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0 text-xs">
+                <span className="text-muted-foreground">{row.day}</span>
+                <span className="font-semibold text-foreground">{row.time}</span>
               </div>
             ))}
             <div className="pt-2">
               <Link href="/book">
-                <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
-                  Agendar Horário <ArrowRight className="w-4 h-4" />
+                <Button size="sm" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 text-xs rounded-lg">
+                  Agendar Horário <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
               </Link>
             </div>
@@ -359,30 +426,30 @@ export default function LandingPage() {
       </section>
 
       {/* Contato */}
-      <section id="contato" className="py-20 px-6 max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold font-serif text-balance">Encontre-nos</h2>
+      <section id="contato" className="py-16 px-6 max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold font-serif">Encontre-nos</h2>
         </div>
-        <div className="grid sm:grid-cols-3 gap-4 mb-12">
+        <div className="grid sm:grid-cols-3 gap-3 mb-8">
           {[
             { icon: MapPin, label: 'Endereço', value: tenantConfig.address, link: tenantConfig.googleMapsLink },
             { icon: Phone, label: 'Telefone', value: tenantConfig.phoneDisplay, link: buildWhatsAppLink() },
             { icon: Instagram, label: 'Instagram', value: tenantConfig.instagram, link: tenantConfig.instagramLink },
           ].map(({ icon: Icon, label, value, link }) => (
-            <a href={link} target="_blank" rel="noopener noreferrer" key={label} className="bg-card border border-border/50 rounded-xl p-5 flex flex-col items-center text-center gap-3 shadow-soft hover:shadow-premium transition-all duration-300 hover:border-primary/50 group">
-              <div className="w-10 h-10 bg-primary/10 border border-primary/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Icon className="w-5 h-5 text-primary" />
+            <a href={link} target="_blank" rel="noopener noreferrer" key={label} className="bg-card border border-border/60 rounded-xl p-4 flex flex-col items-center text-center gap-2 hover:border-border transition-colors">
+              <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Icon className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">{label}</p>
-                <p className="text-sm font-semibold text-foreground mt-1 group-hover:text-primary transition-colors">{value}</p>
+                <p className="text-[11px] text-muted-foreground font-medium">{label}</p>
+                <p className="text-xs font-semibold text-foreground mt-0.5">{value}</p>
               </div>
             </a>
           ))}
         </div>
         
         {tenantConfig.googleMapsEmbedUrl && (
-          <div className="w-full h-[400px] rounded-2xl overflow-hidden border border-border/50 shadow-soft">
+          <div className="w-full h-[320px] rounded-xl overflow-hidden border border-border/60">
             <iframe 
               src={tenantConfig.googleMapsEmbedUrl} 
               width="100%" 
@@ -396,23 +463,12 @@ export default function LandingPage() {
         )}
       </section>
 
-     
-
       {/* Footer */}
-      <footer className="border-t border-border py-8 px-6 bg-card">
+      <footer className="border-t border-border/60 py-6 px-6 bg-card">
         <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center overflow-hidden shadow-lg">
-              <img 
-                src={tenantConfig.logoUrl} 
-                alt="Logo" 
-                className="w-full h-full object-contain p-0" 
-              />
-            </div>
-            <span className="text-sm font-bold font-serif text-foreground uppercase tracking-tight">{tenantConfig.name}</span>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} {tenantConfig.name}. Powered by <span className="font-bold">Navalha.app</span>.
+          <AppBrand size="sm" />
+          <p className="text-[11px] text-muted-foreground">
+            &copy; {new Date().getFullYear()} {tenantConfig.name}. Todos os direitos reservados.
           </p>
         </div>
       </footer>
