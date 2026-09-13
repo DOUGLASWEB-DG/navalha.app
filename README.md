@@ -1,118 +1,146 @@
 # Navalha.app
 
-Sistema de gestão para barbearias que centraliza agenda, clientes, operação,
-financeiro e relacionamento com os clientes em um único lugar.
+Sistema de gestao para barbearias, com agenda, clientes, servicos, produtos,
+financeiro e comunicacao automatizada por WhatsApp.
 
-> **Projeto privado em desenvolvimento.** Consulte a equipe antes de usar em
-> produção.
+> Projeto privado em desenvolvimento. Consulte a equipe antes de usar em
+> producao.
 
-## O problema que o Navalha.app resolve
+## Visao geral
 
-Barbearias que controlam agendamentos, clientes, estoque e caixa em planilhas,
-anotações ou ferramentas separadas perdem tempo, ficam sujeitas a erros e têm
-dificuldade para acompanhar o desempenho do negócio. A falta de confirmações
-automáticas também aumenta as chances de faltas e deixa o atendimento mais
-reativo.
+# Estado atual do projeto
 
-O Navalha.app resolve esse problema ao reunir a rotina da barbearia em um
-painel responsivo, com informações organizadas e automações que ajudam a
-equipe a atender melhor, reduzir faltas e tomar decisões com base em dados.
+## Navalha.app
 
-## Principais funcionalidades
+Este documento registra o estado técnico atual do projeto,
+os principais riscos conhecidos e os próximos pontos de evolução.
 
-### Organização da agenda e do atendimento
+O objetivo não é apenas registrar funcionalidades,
+mas acompanhar a evolução da qualidade técnica do sistema.
 
-- Agenda diária com filtros por data e status.
-- Confirmações e lembretes de agendamento via WhatsApp.
-- Cadastro de clientes com telefone normalizado para o Brasil.
-- Interface responsiva, com tema premium e carregamentos em *skeleton*.
+---
 
-### Controle da operação
+## Matriz de projeto
 
-- Cadastro de serviços e produtos.
-- Controle de estoque.
-- Usuários e permissões para barbeiros e administradores.
+| Área | Estado | Observação |
+|---|---|---|
+| Stack | 🟢 Muito boa | Base tecnológica adequada |
+| Estrutura | 🟢 Boa | Organização inicial consistente |
+| Banco/modelagem | 🟡 Precisa evolução | Existem decisões de domínio a consolidar |
+| Agendamento | 🔴 Crítico | Principal ponto técnico atual |
+| UI/Design System | 🟡 Boa base | Precisa padronização |
+| Responsividade | 🔴 Atenção | Componentes compartilhados apresentam problemas mobile |
+| Segurança/RBAC | 🟡 Funciona | Precisa maior centralização e endurecimento |
+| Testes | 🔴 Precisa evoluir | Cobertura insuficiente |
+| CI/CD | 🔴 Precisa estruturar | Pipeline ainda não consolidado |
+| Observabilidade | 🔴 Praticamente ausente | Falta estratégia de logs e monitoramento |
+| Documentação | 🟡 Boa base | Precisa organização técnica |
+| SaaS real | 🔴 Ainda não | Multi-tenant e billing ainda não implementados |
 
-### Acompanhamento de resultados e financeiro
+---
 
-- Dashboard com indicadores, metas e receitas.
-- Controle financeiro com entradas, despesas e categorias.
-- Relatórios para acompanhar a saúde do negócio.
+# Prioridade atual
 
-## Benefícios para a barbearia
+Agendamento.
 
-- **Mais organização:** toda a operação diária fica centralizada em um único
-  sistema.
-- **Menos faltas:** os clientes recebem confirmações e lembretes pelo
-  WhatsApp.
-- **Mais controle:** estoque, caixa, serviços e equipe podem ser acompanhados
-  no mesmo ambiente.
-- **Decisões melhores:** indicadores, metas e relatórios tornam os resultados
-  mais visíveis.
-- **Melhor experiência:** equipe e clientes contam com uma interface rápida,
-  responsiva e consistente.
+A evolução deve seguir:
 
-## Stack tecnológica
+1. Entendimento do fluxo de agendamento público
+2. Estabilização dos componentes compartilhados de UI
+3. Consolidação de Appointment + AppointmentService
+4. Adaptação das APIs
+5. Adaptação da agenda
+6. Adaptação do financeiro
+7. Adaptação das notificações/WhatsApp
+8. Validação de conflitos de horário
+9. Testes desktop/mobile
+10. Testes automatizados
+11. Versionamento
 
-<div align="center">
+---
 
-**Frontend & Backend**
-<br/>
-<img src="https://skillicons.dev/icons?perline=8&i=nextjs,react,ts,nodejs" />
+# Critério de evolução
 
-<br/><br/>
+Funcionalidades
 
-**Estilos & UI**
-<br/>
-<img src="https://skillicons.dev/icons?perline=8&i=tailwind" />
-<img src="https://img.shields.io/badge/-Radix_UI-161618?style=for-the-badge&logo=radixui&logoColor=white" />
+Ela deve considerar:
 
-<br/><br/>
+- domínio
+- banco de dados
+- API
+- interface
+- validação
+- segurança
+- responsividade
+- testes
+- documentação
+- deploy
 
-**Dados & Persistência**
-<br/>
-<img src="https://skillicons.dev/icons?perline=8&i=postgres,prisma,docker" />
+---
 
-<br/><br/>
+# Próximo marco
 
-**Formulários & Validação**
-<br/>
-<img src="https://img.shields.io/badge/-React_Hook_Form-EC5990?style=for-the-badge&logo=reacthookform&logoColor=white" />
-<img src="https://img.shields.io/badge/-Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white" />
+## Multi-serviço por agendamento
 
-<br/><br/>
+Permitir que um cliente tenha vários serviços dentro do
+mesmo agendamento.
 
-**Gráficos & Integrações**
-<br/>
-<img src="https://img.shields.io/badge/-Recharts-22B5BF?style=for-the-badge&logo=chartdotjs&logoColor=white" />
-<img src="https://img.shields.io/badge/-Evolution_API-00E676?style=for-the-badge&logo=whatsapp&logoColor=white" />
+Exemplo:
 
-</div>
+Cliente:
+João
+
+Agendamento:
+14:00
+
+Serviços:
+- Corte
+- Barba
+- Sobrancelha
+
+O sistema deve calcular corretamente:
+
+- duração total
+- valor total
+- disponibilidade do barbeiro
+- agenda
+- financeiro
+- notificações
+
+## Stack
+
+- **Frontend e backend:** Next.js 15, React 19 e TypeScript
+- **Estilos:** Tailwind CSS, Radix UI e componentes reutilizaveis
+- **Persistencia:** PostgreSQL com Prisma ORM
+- **Formularios e validacao:** React Hook Form e Zod
+- **Graficos:** Recharts
+- **WhatsApp:** Evolution API
+- **Automacoes:** Node.js, `tsx` e cron
 
 ## Requisitos
 
 - Node.js 20 ou superior
 - npm
-- PostgreSQL (Supabase ou servidor próprio)
-- Docker e Docker Compose, caso utilize os serviços locais definidos em
+- PostgreSQL (Supabase ou servidor proprio)
+- Docker e Docker Compose, caso use os servicos locais definidos em
   `docker-compose.yml`
 
-## Configuração local
+## Configuracao local
 
-### 1. Clone o repositório
+### 1. Clone o repositorio
 
 ```bash
 git clone https://github.com/DOUGLASWEB-DG/Barbeiro-Atual.git
 cd Barbeiro-Atual
 ```
 
-### 2. Instale as dependências
+### 2. Instale as dependencias
 
 ```bash
 npm install
 ```
 
-### 3. Configure as variáveis de ambiente
+### 3. Configure as variaveis de ambiente
 
 Copie `.env.example` para `.env` e preencha as credenciais do PostgreSQL:
 
@@ -120,16 +148,16 @@ Copie `.env.example` para `.env` e preencha as credenciais do PostgreSQL:
 cp .env.example .env
 ```
 
-Variáveis obrigatórias:
+Variaveis obrigatorias:
 
-| Variável | Finalidade |
+| Variavel | Finalidade |
 | --- | --- |
-| `DATABASE_URL` | Conexão principal, com pool de conexões |
-| `DIRECT_URL` | Conexão direta usada pelo Prisma nas migrações |
+| `DATABASE_URL` | Conexao principal com pool de conexoes |
+| `DIRECT_URL` | Conexao direta usada pelo Prisma em migracoes |
 
-> **Atenção:** nunca envie o arquivo `.env` para o Git.
+Nunca envie o arquivo `.env` para o Git.
 
-### 4. Prepare o banco de dados
+### 4. Prepare o banco
 
 ```bash
 npm run db:push
@@ -138,13 +166,13 @@ npm run db:seed
 
 ### 5. Inicie o sistema
 
-**Terminal 1** — aplicação web:
+Terminal 1 - aplicacao web:
 
 ```bash
 npm run dev
 ```
 
-**Terminal 2** — lembretes automáticos:
+Terminal 2 - lembretes automaticos:
 
 ```bash
 npm run cron
@@ -152,21 +180,21 @@ npm run cron
 
 Acesse [http://localhost:3000](http://localhost:3000).
 
-## Scripts disponíveis
+## Scripts disponiveis
 
-| Comando | Descrição |
+| Comando | Descricao |
 | --- | --- |
-| `npm run dev` | Inicia o Next.js em modo de desenvolvimento |
+| `npm run dev` | Inicia o Next.js em desenvolvimento |
 | `npm run build` | Gera o Prisma Client, atualiza o banco e cria o build |
-| `npm run start` | Inicia a aplicação compilada |
+| `npm run start` | Inicia a aplicacao compilada |
 | `npm run lint` | Executa o ESLint do projeto |
 | `npm run format` | Formata os arquivos com Prettier |
 | `npm run cron` | Executa o processo de lembretes do WhatsApp |
-| `npm run db:push` | Sincroniza o schema do Prisma com o banco |
-| `npm run db:migrate` | Cria e executa uma migração do Prisma |
+| `npm run db:push` | Sincroniza o schema Prisma com o banco |
+| `npm run db:migrate` | Cria e executa uma migracao Prisma |
 | `npm run db:seed` | Carrega dados iniciais |
 | `npm run db:studio` | Abre o Prisma Studio |
-| `npm run db:reset` | Reseta o banco de dados de desenvolvimento |
+| `npm run db:reset` | Reseta o banco de desenvolvimento |
 
 ## Estrutura principal
 
@@ -174,22 +202,22 @@ Acesse [http://localhost:3000](http://localhost:3000).
 app/
   api/                 Rotas da API
   dashboard/           Telas administrativas
-  book/                Fluxo público de agendamento
+  book/                Fluxo publico de agendamento
 components/            Componentes compartilhados
-config/                Configurações da barbearia
-lib/                   Autenticação, formatação e integrações
+config/                Configuracoes da barbearia
+lib/                   Autenticacao, formatacao e integracoes
 prisma/                Schema e seed do banco
-public/                Imagens e assets públicos
-scripts/               Jobs e automações
+public/                Imagens e assets publicos
+scripts/               Jobs e automacoes
 ```
 
-## Configurações da barbearia
+## Configuracoes da barbearia
 
-Os dados institucionais — como nome, identidade visual e informações de
-contato — ficam centralizados em [`config/tenant.ts`](config/tenant.ts).
-Ajuste esse arquivo conforme a identidade da sua unidade.
+Dados institucionais, como nome, identidade e informacoes de contato, ficam
+centralizados em [config/tenant.ts](config/tenant.ts). Ajuste esse arquivo
+conforme a identidade da sua unidade.
 
-## Qualidade e validação
+## Qualidade e validacao
 
 Antes de abrir um Pull Request, execute:
 
@@ -198,8 +226,8 @@ npx tsc --noEmit
 npm run lint
 ```
 
-Ao testar uma alteração visual, valide o dashboard em desktop e em celular,
-com atenção especial às telas de Agenda, Clientes e Agendamentos.
+Para testar uma alteracao visual, valide o dashboard em desktop e celular,
+principalmente as telas de Agenda, Clientes e Agendamentos.
 
 ## Fluxo Git recomendado
 
@@ -211,17 +239,17 @@ git commit -m "Descreve a alteracao"
 git push -u origin minha-alteracao
 ```
 
-Em seguida, abra um Pull Request para `main`. Evite usar `git add .` quando
-houver alterações de outras tarefas no mesmo diretório.
+Depois, abra um Pull Request para `main`. Evite usar `git add .` quando houver
+alteracoes de outras tarefas no mesmo diretorio.
 
-## Segurança
+## Seguranca
 
-- Não compartilhe credenciais, tokens ou arquivos `.env`.
-- Valide entradas tanto no frontend quanto na API.
-- Utilize HTTPS e variáveis de ambiente protegidas em produção.
-- Revise os logs de integrações externas antes de publicar.
+- Nao compartilhe credenciais, tokens ou arquivos `.env`.
+- Valide entradas no frontend e na API.
+- Use HTTPS e variaveis protegidas no ambiente de producao.
+- Revise os logs de integracoes externas antes de publicar.
 
-## Licença
+## Licenca
 
-Uso privado e restrito ao projeto Navalha.app. Consulte os proprietários
-antes de redistribuir ou publicar este código.
+Uso privado e restrito ao projeto Navalha.app. Consulte os proprietarios antes
+de redistribuir ou publicar este codigo.
