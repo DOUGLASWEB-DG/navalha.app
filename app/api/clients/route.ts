@@ -68,10 +68,13 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(client, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Clients POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })
+    }
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: 'Já existe um cliente cadastrado com este telefone.' }, { status: 409 })
     }
     return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })
   }

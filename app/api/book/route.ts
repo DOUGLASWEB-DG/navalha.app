@@ -84,10 +84,11 @@ export async function POST(req: NextRequest) {
     finalBarberId = freeBarber.id
 
     const phone = normalizeBrazilPhone(parsed.phone)!
-    let client = await prisma.client.findUnique({ where: { phone } })
-    if (!client) {
-      client = await prisma.client.create({ data: { name: parsed.name, phone } })
-    }
+    const client = await prisma.client.upsert({
+      where: { phone },
+      update: { name: parsed.name },
+      create: { name: parsed.name, phone },
+    })
 
     const appointment = await prisma.appointment.create({
       data: {
