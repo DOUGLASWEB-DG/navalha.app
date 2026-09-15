@@ -1,17 +1,26 @@
 import { cookies } from 'next/headers'
 import prisma from '@/lib/prisma'
+import { SignJWT, jwtVerify } from 'jose'
 
 const SESSION_COOKIE = 'barberos_session'
+const SECRET_KEY = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'fallback_secret_for_development_only_123456789'
+)
 
 export async function getSession() {
   const cookieStore = await cookies()
-  const sessionId = cookieStore.get(SESSION_COOKIE)?.value
+  const token = cookieStore.get(SESSION_COOKIE)?.value
   
-  if (!sessionId) return null
+  if (!token) return null
 
   try {
+    const { payload } = await jwtVerify(token, SECRET_KEY)
+    const userId = payload.userId as string
+
+    if (!userId) return null
+
     const user = await prisma.user.findUnique({
-      where: { id: sessionId },
+      where: { id: userId },
       select: { id: true, name: true, email: true, role: true },
     })
     return user
@@ -20,8 +29,24 @@ export async function getSession() {
   }
 }
 
+export async function verifySessionToken(token: string) {
+  try {
+    const { payload } = await jwtVerify(token, SECRET_KEY)
+    return payload
+  } catch {
+    return null
+  }
+}
+
 export async function createSession(userId: string, role: string) {
   const cookieStore = await cookies()
+  
+  const token = await new SignJWT({ userId, role })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('7d')
+    .sign(SECRET_KEY)
+
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -29,12 +54,11 @@ export async function createSession(userId: string, role: string) {
     path: '/',
     maxAge: 60 * 60 * 24 * 7, // 7 dias
   }
-  cookieStore.set(SESSION_COOKIE, userId, options)
-  cookieStore.set('barberos_role', role, options)
+  
+  cookieStore.set(SESSION_COOKIE, token, options)
 }
 
 export async function destroySession() {
   const cookieStore = await cookies()
   cookieStore.delete(SESSION_COOKIE)
-  cookieStore.delete('barberos_role')
 }

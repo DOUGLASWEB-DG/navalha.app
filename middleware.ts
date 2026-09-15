@@ -1,15 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { jwtVerify } from 'jose'
 
 const SESSION_COOKIE = 'barberos_session'
+const SECRET_KEY = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'fallback_secret_for_development_only_123456789'
+)
 
 const protectedPaths = ['/dashboard']
 const publicPaths = ['/login', '/', '/book', '/api/auth/login', '/api/book']
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const sessionId = request.cookies.get(SESSION_COOKIE)?.value
+  const token = request.cookies.get(SESSION_COOKIE)?.value
 
-  const userRole = request.cookies.get('barberos_role')?.value
+  let userRole = null
+  let sessionId = null
+
+  if (token) {
+    try {
+      const { payload } = await jwtVerify(token, SECRET_KEY)
+      userRole = payload.role as string
+      sessionId = payload.userId as string
+    } catch {
+      // Invalid token, treat as no session
+      sessionId = null
+    }
+  }
 
   // Verificar se é uma rota protegida
   const isProtectedRoute = protectedPaths.some((path) => pathname.startsWith(path))
