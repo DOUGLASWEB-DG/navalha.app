@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { normalizeBrazilPhone } from '@/lib/format'
 import {
@@ -53,36 +54,6 @@ export async function POST(req: NextRequest) {
       throw new AppointmentRuleError('Barbeiro não encontrado.')
     }
 
-    const overlappingAppointments = await prisma.appointment.findMany({
-      where: {
-        date: {
-          gte: new Date(year, month - 1, day, 0, 0, 0),
-          lt: new Date(year, month - 1, day + 1, 0, 0, 0),
-        },
-        status: { not: 'CANCELED' },
-      },
-      include: { service: true, appointmentServices: true },
-    })
-
-    const candidateBarbers = finalBarberId
-      ? allBarbers.filter((barber) => barber.id === finalBarberId)
-      : allBarbers
-    const freeBarber = candidateBarbers.find((barber) => {
-      return !overlappingAppointments.some((appointment) => {
-        if (appointment.barberId !== barber.id) return false
-        const duration = appointment.appointmentServices.length
-          ? appointment.appointmentServices.reduce((total, service) => total + service.durationMins, 0)
-          : appointment.service.durationMins
-        const appointmentEnd = appointment.date.getTime() + duration * 60000
-        return datetime.getTime() < appointmentEnd && endDatetime.getTime() > appointment.date.getTime()
-      })
-    })
-
-    if (!freeBarber) {
-      throw new AppointmentRuleError('Esse horário não está mais disponível.')
-    }
-    finalBarberId = freeBarber.id
-
     const phone = normalizeBrazilPhone(parsed.phone)!
     const client = await prisma.client.upsert({
       where: { phone },
@@ -90,17 +61,50 @@ export async function POST(req: NextRequest) {
       create: { name: parsed.name, phone },
     })
 
-    const appointment = await prisma.appointment.create({
-      data: {
-        clientId: client.id,
-        serviceId: services[0].id,
-        appointmentServices: { create: appointmentServiceCreateData(services) },
-        barberId: finalBarberId,
-        date: datetime,
-        notes: parsed.notes,
-        status: 'PENDING',
-      },
-      include: { service: true, appointmentServices: { include: { service: true } }, client: true },
+    const appointment = await prisma.$transaction(async (tx) => {
+      const overlappingAppointments = await tx.appointment.findMany({
+        where: {
+          date: {
+            gte: new Date(year, month - 1, day, 0, 0, 0),
+            lt: new Date(year, month - 1, day + 1, 0, 0, 0),
+          },
+          status: { not: 'CANCELED' },
+        },
+        include: { service: true, appointmentServices: true },
+      })
+
+      const candidateBarbers = finalBarberId
+        ? allBarbers.filter((barber) => barber.id === finalBarberId)
+        : allBarbers
+      const freeBarber = candidateBarbers.find((barber) => {
+        return !overlappingAppointments.some((appointment) => {
+          if (appointment.barberId !== barber.id) return false
+          const duration = appointment.appointmentServices.length
+            ? appointment.appointmentServices.reduce((total, service) => total + service.durationMins, 0)
+            : appointment.service.durationMins
+          const appointmentEnd = appointment.date.getTime() + duration * 60000
+          return datetime.getTime() < appointmentEnd && endDatetime.getTime() > appointment.date.getTime()
+        })
+      })
+
+      if (!freeBarber) {
+        throw new AppointmentRuleError('Esse horário não está mais disponível.')
+      }
+
+      return await tx.appointment.create({
+        data: {
+          clientId: client.id,
+          serviceId: services[0].id,
+          appointmentServices: { create: appointmentServiceCreateData(services) },
+          barberId: freeBarber.id,
+          date: datetime,
+          notes: parsed.notes,
+          status: 'PENDING',
+        },
+        include: { service: true, appointmentServices: { include: { service: true } }, client: true },
+      })
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable
     })
 
     return NextResponse.json({
@@ -115,13 +119,16 @@ export async function POST(req: NextRequest) {
         date: appointment.date,
       },
     }, { status: 201 })
-  } catch (error) {
+    } catch (error: any) {
     console.error('[Book POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })
     }
     if (error instanceof AppointmentRuleError) {
       return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+    if (error.code === 'P2034') {
+      return NextResponse.json({ error: 'O horário acabou de ser reservado por outra pessoa. Escolha outro horário.' }, { status: 409 })
     }
     return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 })
   }

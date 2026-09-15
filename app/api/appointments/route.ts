@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { getSession } from '@/lib/auth'
-import { AppointmentStatus } from '@prisma/client'
+import { AppointmentStatus, Prisma } from '@prisma/client'
 import {
   AppointmentRuleError,
   getAppointmentDayRange,
@@ -123,46 +123,53 @@ export async function POST(req: NextRequest) {
       throw new AppointmentRuleError('Barbeiro não encontrado.')
     }
     const candidates = barberId ? barbers.filter((barber) => barber.id === barberId) : barbers
-    const appointments = await prisma.appointment.findMany({
-      where: { status: { not: AppointmentStatus.CANCELED }, barberId: { in: candidates.map((barber) => barber.id) } },
-      include: { service: { select: { durationMins: true } }, appointmentServices: { select: { durationMins: true } } },
-    })
-    const availableBarber = candidates.find((barber) => !appointments.some((appointment) => {
-      const duration = appointment.appointmentServices.length
-        ? appointment.appointmentServices.reduce((total, item) => total + item.durationMins, 0)
-        : appointment.service.durationMins
-      const appointmentEnd = appointment.date.getTime() + duration * 60_000
-      const requestedEnd = date.getTime() + totals.durationMins * 60_000
-      return appointment.barberId === barber.id && date.getTime() < appointmentEnd && requestedEnd > appointment.date.getTime()
-    }))
-    if (!availableBarber) throw new AppointmentRuleError('Esse horário não está mais disponível.')
+    const appointment = await prisma.$transaction(async (tx) => {
+      const appointments = await tx.appointment.findMany({
+        where: { status: { not: AppointmentStatus.CANCELED }, barberId: { in: candidates.map((barber) => barber.id) } },
+        include: { service: { select: { durationMins: true } }, appointmentServices: { select: { durationMins: true } } },
+      })
+      const availableBarber = candidates.find((barber) => !appointments.some((appointment) => {
+        const duration = appointment.appointmentServices.length
+          ? appointment.appointmentServices.reduce((total, item) => total + item.durationMins, 0)
+          : appointment.service.durationMins
+        const appointmentEnd = appointment.date.getTime() + duration * 60_000
+        const requestedEnd = date.getTime() + totals.durationMins * 60_000
+        return appointment.barberId === barber.id && date.getTime() < appointmentEnd && requestedEnd > appointment.date.getTime()
+      }))
+      if (!availableBarber) throw new AppointmentRuleError('Esse horário não está mais disponível.')
 
-    const appointment = await prisma.appointment.create({
-      data: {
-        clientId: client.id,
-        serviceId: services[0].id,
-        appointmentServices: { create: appointmentServiceCreateData(services) },
-        barberId: availableBarber.id,
-        date,
-        notes: parsed.notes,
-        status: parsed.status ?? AppointmentStatus.PENDING,
-      },
-      include: {
-        client: true,
-        service: true,
-        appointmentServices: { include: { service: true } },
-        barber: { select: { id: true, name: true } },
-      },
+      return await tx.appointment.create({
+        data: {
+          clientId: client.id,
+          serviceId: services[0].id,
+          appointmentServices: { create: appointmentServiceCreateData(services) },
+          barberId: availableBarber.id,
+          date,
+          notes: parsed.notes,
+          status: parsed.status ?? AppointmentStatus.PENDING,
+        },
+        include: {
+          client: true,
+          service: true,
+          appointmentServices: { include: { service: true } },
+          barber: { select: { id: true, name: true } },
+        },
+      })
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable
     })
 
     return NextResponse.json(appointment, { status: 201 })
-  } catch (error) {
+    } catch (error: any) {
     console.error('[Appointments POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })
     }
     if (error instanceof AppointmentRuleError) {
       return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+    if (error.code === 'P2034') {
+      return NextResponse.json({ error: 'O horário acabou de ser reservado por outra pessoa. Escolha outro horário.' }, { status: 409 })
     }
     return NextResponse.json({ error: 'Failed to create appointment' }, { status: 500 })
   }
