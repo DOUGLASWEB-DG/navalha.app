@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
+import { tenantConfig } from '@/config/tenant'
+import { sendTextMessage } from '@/lib/whatsapp'
 import { normalizeBrazilPhone } from '@/lib/format'
 import {
   AppointmentRuleError,
   parseAppointmentDate,
   validateAppointmentSchedule,
+  getAppointmentDayRange,
 } from '@/lib/appointment-rules'
 import {
   appointmentServiceCreateData,
@@ -65,8 +68,8 @@ export async function POST(req: NextRequest) {
       const overlappingAppointments = await tx.appointment.findMany({
         where: {
           date: {
-            gte: new Date(year, month - 1, day, 0, 0, 0),
-            lt: new Date(year, month - 1, day + 1, 0, 0, 0),
+            gte: getAppointmentDayRange(parsed.date).start,
+            lt: getAppointmentDayRange(parsed.date).end,
           },
           status: { not: 'CANCELED' },
         },
@@ -104,8 +107,24 @@ export async function POST(req: NextRequest) {
         include: { service: true, appointmentServices: { include: { service: true } }, client: true },
       })
     }, {
+      maxWait: 5000,
+      timeout: 15000,
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable
     })
+
+    // Send WhatsApp messages asynchronously
+    const timeFormatted = `${datetime.getHours().toString().padStart(2, '0')}:${datetime.getMinutes().toString().padStart(2, '0')}`
+    const dateFormatted = `${datetime.getDate().toString().padStart(2, '0')}/${(datetime.getMonth() + 1).toString().padStart(2, '0')}/${datetime.getFullYear()}`
+    
+    const serviceNames = services.map(s => s.name).join(', ')
+    
+    // To Client
+    const msgToClient = `✅ *Agendamento Recebido!*\n\nOlá, ${parsed.name}!\nSeu horário está agendado em *${tenantConfig.name}*.\n\n📅 Data: ${dateFormatted}\n⏰ Horário: ${timeFormatted}\n💈 Serviço(s): ${serviceNames}\n\nAgradecemos a preferência e aguardamos você!`;
+    sendTextMessage(phone, msgToClient).catch(console.error);
+
+    // To Barber
+    const msgToBarber = `💈 *Novo Agendamento!*\n\nO cliente ${parsed.name} acabou de marcar um horário.\n\n📅 Data: ${dateFormatted}\n⏰ Horário: ${timeFormatted}\n💈 Serviço(s): ${serviceNames}\n📞 Contato: ${phone}`;
+    sendTextMessage('5569999630329', msgToBarber).catch(console.error);
 
     return NextResponse.json({
       success: true,
@@ -130,7 +149,7 @@ export async function POST(req: NextRequest) {
     if (error.code === 'P2034') {
       return NextResponse.json({ error: 'O horário acabou de ser reservado por outra pessoa. Escolha outro horário.' }, { status: 409 })
     }
-    return NextResponse.json({ error: 'Failed to create booking' }, { status: 500 })
+    return NextResponse.json({ error: 'Ocorreu um problema ao processar seu agendamento. Tente novamente.' }, { status: 500 })
   }
 }
 

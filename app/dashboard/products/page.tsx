@@ -95,7 +95,7 @@ export default function ProductsPage() {
                   <div className="flex items-center gap-2 mb-1">
                     <p className="text-base font-bold text-foreground line-clamp-1">{p.name}</p>
                     {!p.active && (
-                      <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border shrink-0">Inativo</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border shrink-0">Inativo</span>
                     )}
                   </div>
                   {p.description ? (
@@ -129,7 +129,7 @@ export default function ProductsPage() {
             <div className="w-20 h-20 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]">
               <Package className="w-10 h-10 text-primary drop-shadow-[0_0_10px_rgba(245,158,11,0.4)]" />
             </div>
-            <p className="text-lg font-serif font-bold text-foreground mb-2">Nenhum produto cadastrado</p>
+            <p className="text-lg font-bold text-foreground mb-2">Nenhum produto cadastrado</p>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">
               Adicione produtos como pomadas, óleos e balms que você vende na barbearia.
             </p>

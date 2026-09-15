@@ -66,7 +66,7 @@ function HairParticles({ isPrimary = false }: { isPrimary?: boolean }) {
 
 function HeroTitle() {
   return (
-    <h1 className="text-4xl sm:text-6xl font-bold font-serif text-balance leading-tight mb-6 flex flex-col items-center tracking-tight">
+    <h1 className="text-4xl sm:text-6xl font-bold text-balance leading-tight mb-6 flex flex-col items-center tracking-tight">
       <div className="relative inline-block py-1">
         <HairParticles />
         <motion.div
@@ -244,7 +244,7 @@ export default function LandingPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-border/60 pb-3">
                     <div>
-                      <p className="text-xs text-primary font-semibold uppercase tracking-wider">Agendamento Online</p>
+                      <p className="text-xs text-primary font-semibold tracking-wider">Agendamento Online</p>
                       <h4 className="text-base font-bold text-foreground">Corte + Barba</h4>
                     </div>
                     <span className="text-base font-bold text-primary">R$ 60,00</span>
@@ -265,7 +265,7 @@ export default function LandingPage() {
                   </div>
 
                   <Button className="w-full bg-primary text-primary-foreground h-10 rounded-lg text-sm font-semibold gap-2">
-                    <Sparkles className="w-4 h-4" /> Confirmar Horário
+                    Confirmar Horário
                   </Button>
                 </div>
               ) : (
@@ -309,8 +309,8 @@ export default function LandingPage() {
       {/* Serviços */}
       <section id="servicos" className="py-16 px-6 max-w-5xl mx-auto border-t border-border/40">
         <div className="text-center mb-10">
-          <p className="text-xs text-primary tracking-widest uppercase font-semibold mb-1">O Que Oferecemos</p>
-          <h2 className="text-3xl font-bold font-serif">Nossos Serviços</h2>
+          <p className="text-xs text-primary tracking-widest font-semibold mb-1">O Que Oferecemos</p>
+          <h2 className="text-3xl font-bold ">Nossos Serviços</h2>
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -319,7 +319,7 @@ export default function LandingPage() {
               key={svc.name}
               className="bg-card border border-border/60 rounded-xl overflow-hidden flex flex-col hover:border-border transition-colors group"
             >
-              <div className="relative h-44 w-full overflow-hidden bg-muted">
+              <div className="relative aspect-square w-full overflow-hidden bg-muted">
                 <img 
                   src={svc.image} 
                   alt={svc.name}
@@ -333,7 +333,7 @@ export default function LandingPage() {
               <div className="p-4 flex flex-col flex-grow gap-2.5">
                 <div className="flex items-center justify-between">
                   <p className="text-base font-bold text-foreground">{svc.name}</p>
-                  <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground font-semibold">
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-semibold">
                     <Clock className="w-3 h-3" />
                     {svc.duration}
                   </div>
@@ -385,13 +385,12 @@ export default function LandingPage() {
       <section id="sobre" className="py-16 px-6 bg-muted/20 border-y border-border/50">
         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <p className="text-xs text-primary tracking-widest uppercase font-semibold mb-1">Sobre Nós</p>
-            <h2 className="text-3xl font-bold font-serif mb-3">
-              Feito com Precisão
+            <p className="text-xs text-primary tracking-widest font-semibold mb-1">Sobre o Sistema</p>
+            <h2 className="text-3xl font-bold mb-3">
+              Tecnologia de Ponta
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-5">
-              Acreditamos que cada cliente merece uma experiência incrível. 
-              Nossa barbearia é construída sobre habilidade, estilo e atenção aos detalhes.
+              Este salão utiliza a tecnologia do Navalha.app para oferecer a você a melhor, mais rápida e mais moderna experiência de agendamento online.
             </p>
             <div className="flex flex-col gap-2.5">
               {reasons.map((reason) => (
@@ -428,7 +427,7 @@ export default function LandingPage() {
       {/* Contato */}
       <section id="contato" className="py-16 px-6 max-w-4xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold font-serif">Encontre-nos</h2>
+          <h2 className="text-3xl font-bold ">Encontre-nos</h2>
         </div>
         <div className="grid sm:grid-cols-3 gap-3 mb-8">
           {[

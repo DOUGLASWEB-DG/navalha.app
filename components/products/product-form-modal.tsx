@@ -90,7 +90,7 @@ export function ProductFormModal({ open, onClose, product, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-foreground font-serif">
+          <DialogTitle className="text-foreground ">
             {product ? 'Editar Produto' : 'Novo Produto'}
           </DialogTitle>
         </DialogHeader>

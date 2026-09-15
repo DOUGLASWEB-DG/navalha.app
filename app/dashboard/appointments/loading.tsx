@@ -10,7 +10,7 @@ export default function AppointmentsLoading() {
             <CalendarDays className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground font-serif">Agendamentos</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground ">Agendamentos</h1>
             <p className="text-sm text-muted-foreground mt-1">Controle sua agenda diária e horários.</p>
           </div>
         </div>

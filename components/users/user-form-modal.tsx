@@ -111,7 +111,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-foreground font-serif">
+          <DialogTitle className="text-foreground ">
             {user ? 'Editar Usuário' : 'Novo Usuário (Barbeiro/Admin)'}
           </DialogTitle>
         </DialogHeader>

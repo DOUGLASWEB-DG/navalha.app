@@ -69,21 +69,21 @@ export function FinanceDashboard() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-[10px] opacity-70 mb-1 uppercase">Receita Mês</p>
+              <p className="text-[10px] opacity-70 mb-1 ">Receita Mês</p>
               <p className="text-base font-bold">{formatCurrency(currentMonth?.income ?? 0)}</p>
             </div>
             <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-[10px] opacity-70 mb-1 uppercase">Despesas Mês</p>
+              <p className="text-[10px] opacity-70 mb-1 ">Despesas Mês</p>
               <p className="text-base font-bold">{formatCurrency(currentMonth?.expense ?? 0)}</p>
             </div>
             <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-[10px] opacity-70 mb-1 uppercase">Lucro</p>
+              <p className="text-[10px] opacity-70 mb-1 ">Lucro</p>
               <p className={cn('text-base font-bold', profit < 0 && 'text-red-300')}>
                 {formatCurrency(profit)}
               </p>
             </div>
             <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-[10px] opacity-70 mb-1 uppercase">Margem</p>
+              <p className="text-[10px] opacity-70 mb-1 ">Margem</p>
               <p className="text-base font-bold">{profitMargin.toFixed(1)}%</p>
             </div>
           </div>
@@ -260,7 +260,7 @@ function KPICard({ title, value, trend, invertTrend, icon, iconBg, iconColor, va
   return (
     <div className="bg-card border border-border rounded-xl p-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{title}</p>
+        <p className="text-xs text-muted-foreground font-medium tracking-wide">{title}</p>
         <div className={cn('w-8 h-8 rounded-lg border flex items-center justify-center', iconBg)}>
           <span className={iconColor}>{icon}</span>
         </div>

@@ -70,11 +70,12 @@ async function checkReminders() {
           const serviceNames = appt.appointmentServices.length
             ? appt.appointmentServices.map((item) => item.service.name).join(', ')
             : appt.service.name;
-          const msg = `⏰ *Lembrete de Agendamento!*\n\nOlá, ${appt.client.name}! \nFalta cerca de 1 hora para o seu horário das *${timeFormatted}*.\n\nServiços: ${serviceNames}\n\nTe esperamos na barbearia! 💈✂️`;
-
+          const msgToClient = `⏰ *Lembrete de Agendamento*\n\nOlá, ${appt.client.name}! Tudo bem?\nPassando para confirmar o seu horário marcado para hoje às *${timeFormatted}*.\n\n💈 Serviço(s): ${serviceNames}\n\nAguardamos você na barbearia!`;
           console.log(`[Cron] Enviando lembrete para ${appt.client.name} (${phone}) - Faltam ${minsDiff} minutos`);
-          
-          await sendTextMessage(phone, msg);
+          await sendTextMessage(phone, msgToClient);
+
+          const msgToBarber = `💈 *Lembrete (Barbeiro)*\n\nO cliente ${appt.client.name} tem um horário agendado em breve (às *${timeFormatted}*).\n\nServiço(s): ${serviceNames}\nContato: ${phone}`;
+          await sendTextMessage('5569999630329', msgToBarber);
 
           // Atualizar no DB para não mandar de novo
           await prisma.appointment.update({

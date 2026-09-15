@@ -1,16 +1,11 @@
   import type { Metadata, Viewport } from 'next'
-  import { Inter, Playfair_Display } from 'next/font/google'
+  import { Inter } from 'next/font/google'
   import { Toaster } from 'sonner'
   import './globals.css'
 
   const inter = Inter({
     subsets: ['latin'],
     variable: '--font-inter',
-  })
-
-  const playfair = Playfair_Display({
-    subsets: ['latin'],
-    variable: '--font-playfair',
   })
 
   import { tenantConfig } from '@/config/tenant'
@@ -40,7 +35,7 @@
     return (
       <html lang="pt-BR">
         <body
-          className={`${inter.variable} ${playfair.variable} min-h-[100dvh] bg-background font-sans text-foreground antialiased`}
+          className={`${inter.variable} min-h-[100dvh] bg-background font-sans text-foreground antialiased`}
         >
           {children}
           <Toaster

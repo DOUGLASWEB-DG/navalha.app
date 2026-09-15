@@ -165,7 +165,7 @@ export default function AppointmentsPage() {
                     <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-lg border border-primary/20">
                       <p className="text-xs font-bold leading-tight text-center">
                         {format(new Date(appt.date), 'dd/MM')} <br/>
-                        <span className="text-[11px] uppercase font-semibold">{format(new Date(appt.date), 'HH:mm')}</span>
+                        <span className="text-[11px] font-semibold">{format(new Date(appt.date), 'HH:mm')}</span>
                       </p>
                     </div>
                     <StatusBadge status={appt.status} />

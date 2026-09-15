@@ -33,7 +33,7 @@ const statusConfig: Record<Status, { label: string; dot: string; text: string }>
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const config = statusConfig[status]
   return (
-    <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-card border border-border shadow-sm', config.text, className)}>
+    <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-card border border-border shadow-sm', config.text, className)}>
       <span className={cn('w-2 h-2 rounded-full', config.dot)} />
       {config.label}
     </span>

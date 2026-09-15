@@ -88,7 +88,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground font-serif">
+          <DialogTitle className="text-foreground ">
             {client ? 'Editar Cliente' : 'Novo Cliente'}
           </DialogTitle>
         </DialogHeader>

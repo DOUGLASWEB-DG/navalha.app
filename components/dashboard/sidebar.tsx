@@ -79,7 +79,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
         {open && (
           <div>
             <p className="text-sm font-bold text-foreground font-sans tracking-tight">{tenantConfig.name}</p>
-            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-widest">{tenantConfig.shortName}</p>
+            <p className="text-[10px] text-muted-foreground font-semibold tracking-widest">{tenantConfig.shortName}</p>
           </div>
         )}
       </div>

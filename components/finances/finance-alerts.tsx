@@ -141,7 +141,7 @@ export function FinanceAlerts() {
                 <span className={cn('mt-0.5 flex-shrink-0', cfg.text)}>{cfg.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className={cn('text-[10px] font-semibold uppercase tracking-wide', cfg.text)}>
+                    <span className={cn('text-[10px] font-semibold tracking-wide', cfg.text)}>
                       {cfg.label}
                     </span>
                     <span className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -175,7 +175,7 @@ export function FinanceAlerts() {
       {/* Alertas lidos (histórico) */}
       {read.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+          <p className="text-xs font-medium text-muted-foreground tracking-wide mb-3">
             Histórico ({read.length})
           </p>
           <div className="space-y-2">
@@ -192,7 +192,7 @@ export function FinanceAlerts() {
                   <span className={cn('mt-0.5 flex-shrink-0', cfg.text)}>{cfg.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className={cn('text-[10px] font-semibold uppercase tracking-wide', cfg.text)}>
+                      <span className={cn('text-[10px] font-semibold tracking-wide', cfg.text)}>
                         {cfg.label}
                       </span>
                     </div>

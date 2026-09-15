@@ -164,12 +164,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           },
         })
 
-        const ownerNumber = process.env.OWNER_WHATSAPP_NUMBER
-        if (ownerNumber) {
-          const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount)
-          const msg = `🟢 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
-          await sendTextMessage(ownerNumber, msg).catch((error) => console.error('WhatsApp message error:', error))
-        }
+        const ownerNumber = '5569999630329';
+        const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount)
+        const msg = `🟢 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
+        await sendTextMessage(ownerNumber, msg).catch((error) => console.error('WhatsApp message error:', error))
       }
     }
 

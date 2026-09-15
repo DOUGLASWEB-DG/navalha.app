@@ -135,7 +135,7 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md border-border text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground font-serif">
+          <DialogTitle className="text-foreground ">
             {defaultType === 'INCOME' ? 'Nova Receita' : 'Nova Despesa'}
           </DialogTitle>
         </DialogHeader>

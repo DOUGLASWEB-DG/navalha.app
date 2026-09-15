@@ -20,12 +20,12 @@ export const tenantConfig = {
   // Imagens e Logos
   logoUrl: "/assets/logo.png", // Você pode colocar o caminho de qualquer imagem que colocar na pasta public
   
-  // Motivos para escolher a barbearia (Aparece na seção "Sobre")
+  // Motivos para usar o app (Aparece na seção "Sobre o Sistema")
   reasons: [
-    'Barbeiros experientes e atualizados nas tendências',
-    'Ambiente climatizado e premium',
-    'Agendamento rápido pelo WhatsApp',
-    'Satisfação garantida em cada corte',
+    'Agendamento online 24h sem espera',
+    'Lembretes automáticos e histórico de serviços',
+    'Segurança total com seus dados pessoais',
+    'Acesso rápido a todos os nossos barbeiros',
   ],
 
   // Horários de Funcionamento (Aparece na seção "Sobre")

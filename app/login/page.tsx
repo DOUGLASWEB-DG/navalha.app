@@ -72,7 +72,7 @@ function LoginContent() {
               className="w-full h-full object-contain p-0" 
             />
           </div>
-          <h1 className="text-3xl font-bold font-serif text-foreground uppercase tracking-tight">{tenantConfig.name}</h1>
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">{tenantConfig.name}</h1>
           <p className="text-sm text-muted-foreground mt-2 font-medium">Painel Administrativo</p>
         </div>
 

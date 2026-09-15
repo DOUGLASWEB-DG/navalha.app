@@ -10,7 +10,7 @@ export default function DashboardLoading() {
             <LayoutDashboard className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground font-serif">Painel Inicial</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground ">Painel Inicial</h1>
             <p className="text-sm text-muted-foreground mt-1">Visão geral do sistema.</p>
           </div>
         </div>

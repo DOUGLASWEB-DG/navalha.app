@@ -89,7 +89,7 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground font-serif">
+          <DialogTitle className="text-foreground ">
             {service ? 'Editar Serviço' : 'Novo Serviço'}
           </DialogTitle>
         </DialogHeader>

@@ -62,7 +62,7 @@ export default function DashboardPage() {
       {/* Boas-vindas */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h2 className="text-balance font-serif text-2xl font-bold tracking-tight text-foreground">
+          <h2 className="text-balance text-2xl font-bold tracking-tight text-foreground">
             {getGreeting()}, Patrão
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">

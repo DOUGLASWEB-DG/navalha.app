@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
-import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target } from 'lucide-react'
+import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -47,6 +47,9 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
   const alerts = alertData?.alerts ?? []
   const unreadCount = alertData?.unreadCount ?? 0
 
+  const { data: authData } = useSWR('/api/auth/me', fetcher)
+  const isAdmin = authData?.user?.role === 'ADMIN'
+
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
     window.location.href = '/login'
@@ -65,7 +68,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
           <Menu className="h-5 w-5" />
         </Button>
         <div className="min-w-0">
-          <h1 className="truncate text-base font-bold tracking-tight text-foreground lg:text-lg uppercase font-serif">
+          <h1 className="truncate text-base font-bold tracking-tight text-foreground lg:text-lg ">
             {title}
           </h1>
           <p className="hidden text-xs capitalize text-muted-foreground sm:block">{today}</p>
@@ -91,7 +94,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden bg-card backdrop-blur-xl border-border shadow-md">
+          <DropdownMenuContent align="end" className="w-[calc(100vw-2rem)] sm:w-80 p-0 overflow-hidden bg-card backdrop-blur-xl border-border shadow-md max-sm:mr-4">
             <div className="p-4 border-b border-border flex items-center justify-between">
               <p className="text-sm font-bold text-foreground">Notificações</p>
               {unreadCount > 0 && (
@@ -110,7 +113,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                           "w-1.5 h-1.5 rounded-full shrink-0",
                           alert.severity === 'DANGER' ? 'bg-red-500' : alert.severity === 'WARNING' ? 'bg-amber-500' : 'bg-blue-500'
                         )} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <span className="text-[10px] font-bold tracking-widest text-muted-foreground">
                           {alert.severity === 'DANGER' ? 'Crítico' : alert.severity === 'WARNING' ? 'Atenção' : 'Info'}
                         </span>
                         {!alert.read && <span className="text-[10px] font-bold text-primary ml-auto">Nova</span>}
@@ -153,12 +156,28 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             align="end"
             className="w-56 rounded-2xl border border-border bg-card p-1 backdrop-blur-xl shadow-md"
           >
-            <DropdownMenuItem asChild className="min-h-12 rounded-xl">
-              <Link href="/dashboard/goals" className="cursor-pointer gap-3">
-                <Target className="h-5 w-5 shrink-0" />
-                Metas
-              </Link>
-            </DropdownMenuItem>
+            {isAdmin && (
+              <>
+                <DropdownMenuItem asChild className="min-h-12 rounded-xl">
+                  <Link href="/dashboard/goals" className="cursor-pointer gap-3">
+                    <Target className="h-5 w-5 shrink-0" />
+                    Metas
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="min-h-12 rounded-xl">
+                  <Link href="/dashboard/products" className="cursor-pointer gap-3">
+                    <Package className="h-5 w-5 shrink-0" />
+                    Produtos
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="min-h-12 rounded-xl">
+                  <Link href="/dashboard/users" className="cursor-pointer gap-3">
+                    <Shield className="h-5 w-5 shrink-0" />
+                    Equipe
+                  </Link>
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuItem asChild className="min-h-12 rounded-xl">
               <Link href="/book" target="_blank" rel="noopener noreferrer" className="cursor-pointer gap-3">
                 <Globe className="h-5 w-5 shrink-0" />

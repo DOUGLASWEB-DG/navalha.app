@@ -147,7 +147,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-foreground font-serif">
+          <DialogTitle className="text-foreground ">
             {appointment ? 'Editar Agendamento' : 'Novo Agendamento'}
           </DialogTitle>
         </DialogHeader>

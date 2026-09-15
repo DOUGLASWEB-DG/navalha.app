@@ -84,7 +84,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
         </div>
         
-        <span className="text-[10px] text-zinc-500 mt-4 font-bold uppercase">
+        <span className="text-[10px] text-zinc-500 mt-4 font-bold ">
           {point.day}
         </span>
       </div>

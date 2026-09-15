@@ -106,7 +106,7 @@ export function FinanceReports() {
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-emerald-400/30 bg-emerald-500/15">
               <TrendingUp className="h-6 w-6 text-emerald-400" />
             </div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-zinc-400">Total de receitas</p>
+            <p className="text-sm font-semibold tracking-wide text-zinc-400">Total de receitas</p>
           </div>
           <p className="text-3xl font-bold tabular-nums tracking-tight text-emerald-400">
             {formatCurrency(totals?.income ?? 0)}
@@ -118,7 +118,7 @@ export function FinanceReports() {
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-red-400/35 bg-red-500/15">
               <TrendingDown className="h-6 w-6 text-red-400" />
             </div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-zinc-400">Total de despesas</p>
+            <p className="text-sm font-semibold tracking-wide text-zinc-400">Total de despesas</p>
           </div>
           <p className="text-3xl font-bold tabular-nums tracking-tight text-red-400">
             {formatCurrency(totals?.expense ?? 0)}
@@ -139,7 +139,7 @@ export function FinanceReports() {
                 className={cn('h-6 w-6', balance >= 0 ? 'text-amber-400' : 'text-red-400')}
               />
             </div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-zinc-400">Saldo periódico</p>
+            <p className="text-sm font-semibold tracking-wide text-zinc-400">Saldo periódico</p>
           </div>
           <p
             className={cn(

@@ -10,7 +10,7 @@ export default function FinancesLoading() {
             <DollarSign className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground font-serif">Fluxo de Caixa</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground ">Fluxo de Caixa</h1>
             <p className="text-sm text-muted-foreground mt-1">Acompanhe suas receitas e despesas em tempo real.</p>
           </div>
         </div>

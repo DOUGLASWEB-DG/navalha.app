@@ -118,7 +118,7 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground font-serif">Criar Nova Meta</DialogTitle>
+          <DialogTitle className="text-foreground ">Criar Nova Meta</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 mt-4">

@@ -17,7 +17,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     
-    --primary: 221 83% 53%; /* Azul Barbearia */
+    --primary: 221 83% 53%; /* Modern Blue 500 */
     --primary-foreground: 0 0% 100%;
     
     --secondary: 210 40% 96.1%;
@@ -60,43 +60,42 @@
   }
 
   .dark {
-    /* Slate & Emerald Dark Mode (Foco no Mockup) */
-    --background: 222 47% 11%; /* Dark Slate Gray */
-    --foreground: 210 40% 98%; /* White/Slate */
-    --card: 217 33% 17%; /* Lighter Slate for Cards */
-    --card-foreground: 210 40% 98%;
-    --popover: 217 33% 17%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 221 83% 53%; /* Azul Barbearia */
+    --background: 240 6% 4%; /* Zinc 950 */
+    --foreground: 240 5% 96%; /* Zinc 50 */
+    --card: 240 6% 10%; /* Zinc 900 */
+    --card-foreground: 240 5% 96%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 240 5% 96%;
+    --primary: 221 83% 53%; /* Modern Blue 500 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 215 25% 27%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 215 25% 27%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 215 25% 27%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 240 4% 16%; /* Zinc 800 */
+    --secondary-foreground: 240 5% 96%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%; /* Zinc 400 */
+    --accent: 240 4% 16%;
+    --accent-foreground: 240 5% 96%;
     --destructive: 0 62% 30%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 240 5% 96%;
     --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
     --warning: 48 96% 53%;
     --warning-foreground: 0 0% 10%;
-    --info: 210 90% 62%;
+    --info: 221 83% 53%;
     --info-foreground: 0 0% 100%;
-    --border: 215 25% 27%;
-    --input: 217 33% 17%;
+    --border: 240 4% 16%; /* Subtle Zinc 800 border */
+    --input: 240 4% 16%;
     --ring: 221 83% 53%;
 
-    --sidebar: 217 33% 17%; /* Lighter Slate for Sidebar */
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-border: 215 25% 27%;
-    --sidebar-accent: 215 25% 27%;
+    --sidebar: 240 6% 10%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-accent: 240 4% 16%;
 
-    --chart-1: 160 84% 39%; /* Emerald */
-    --chart-2: 210 90% 62%; /* Blue */
-    --chart-3: 48 96% 53%; /* Yellow */
-    --chart-4: 280 65% 60%; /* Purple */
-    --chart-5: 0 84% 60%; /* Red */
+    --chart-1: 160 84% 39%;
+    --chart-2: 221 83% 53%;
+    --chart-3: 48 96% 53%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 0 84% 60%;
   }
 
   * {
@@ -145,3 +144,18 @@
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
   }
+
+
+/* Realistic Dark Mode Elements */
+.dark .shadow-sm,
+.dark .shadow-md,
+.dark .shadow-lg {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.dark .bg-card, 
+.dark .bg-popover, 
+.dark .bg-sidebar {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 1px solid rgba(255, 255, 255, 0.02);
+}

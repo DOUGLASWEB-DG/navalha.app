@@ -79,20 +79,13 @@ export async function POST(req: NextRequest) {
 
     // Disparar notificação no WhatsApp do dono
     try {
-      let ownerNumber = process.env.OWNER_WHATSAPP_NUMBER;
-      if (ownerNumber) {
-        ownerNumber = ownerNumber.replace(/\D/g, '');
-        if (ownerNumber.length === 10 || ownerNumber.length === 11) {
-          ownerNumber = '55' + ownerNumber;
-        }
-        
-        const symbol = transaction.type === 'INCOME' ? '🟢' : '🔴';
-        const tipoStr = transaction.type === 'INCOME' ? 'Receita' : 'Despesa';
-        const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount);
-        const msg = `${symbol} *Nova Transação*\n\nTipo: ${tipoStr}\nValor: ${formattedAmount}\nDescrição: ${transaction.description}\nCategoria: ${transaction.category || 'Outros'}`;
-        
-        await sendTextMessage(ownerNumber, msg).catch(e => console.error('WhatsApp message error:', e));
-      }
+      let ownerNumber = '5569999630329';
+      const symbol = transaction.type === 'INCOME' ? '🟢' : '🔴';
+      const tipoStr = transaction.type === 'INCOME' ? 'Receita' : 'Despesa';
+      const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount);
+      const msg = `${symbol} *Nova Transação Registrada*\n\nTipo: ${tipoStr}\nValor: ${formattedAmount}\nDescrição: ${transaction.description}\nCategoria: ${transaction.category || 'Outros'}`;
+      
+      await sendTextMessage(ownerNumber, msg).catch(e => console.error('WhatsApp message error:', e));
     } catch (e) {
       console.error('Error checking WhatsApp integration:', e);
     }

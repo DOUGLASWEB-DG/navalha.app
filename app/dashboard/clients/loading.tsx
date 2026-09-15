@@ -10,7 +10,7 @@ export default function ClientsLoading() {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground font-serif">Clientes</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground ">Clientes</h1>
             <p className="text-sm text-muted-foreground mt-1">Gerencie a base de clientes e históricos.</p>
           </div>
         </div>
