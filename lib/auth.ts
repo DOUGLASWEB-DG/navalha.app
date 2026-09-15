@@ -2,6 +2,10 @@ import { cookies } from 'next/headers'
 import prisma from '@/lib/prisma'
 import { SignJWT, jwtVerify } from 'jose'
 
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET is not defined in production environment')
+}
+
 const SESSION_COOKIE = 'barberos_session'
 const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || 'fallback_secret_for_development_only_123456789'
