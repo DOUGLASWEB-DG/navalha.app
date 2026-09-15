@@ -49,7 +49,7 @@ const fetcher = async <T,>(url: string) => {
   return body as T
 }
 
-const WHATSAPP_NUMBER = '5569992476425'
+const WHATSAPP_NUMBER = '5569999630329'
 
 const TIME_SLOTS = [
   '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
