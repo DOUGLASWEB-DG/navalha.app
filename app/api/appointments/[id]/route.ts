@@ -72,7 +72,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const nextBarberId = user.role === 'BARBER' ? user.id : (parsed.barberId === undefined ? current.barberId : parsed.barberId)
     if (!nextBarberId) throw new AppointmentRuleError('Selecione um barbeiro para o agendamento.')
-    const barber = await prisma.user.findFirst({ where: { id: nextBarberId, role: 'BARBER' } })
+    const barber = await prisma.user.findUnique({ where: { id: nextBarberId } })
     if (!barber) throw new AppointmentRuleError('Barbeiro não encontrado.')
 
     const nextDate = parsed.date
