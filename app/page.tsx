@@ -313,71 +313,22 @@ export default function LandingPage() {
           <h2 className="text-3xl font-bold ">Nossos Serviços</h2>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((svc) => (
-            <div 
+            <a
               key={svc.name}
-              className="bg-card border border-border/60 rounded-xl overflow-hidden flex flex-col hover:border-border transition-colors group"
+              href={buildWhatsAppLink(svc.name)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative block aspect-[4/5] sm:aspect-square w-full overflow-hidden rounded-2xl bg-muted"
             >
-              <div className="relative aspect-square w-full overflow-hidden bg-muted">
-                <img 
-                  src={svc.image} 
-                  alt={svc.name}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-                <div className="absolute top-2.5 right-2.5 bg-background/90 backdrop-blur-sm px-2.5 py-0.5 rounded-full border border-border text-xs font-bold text-primary">
-                  R${svc.price}
-                </div>
-              </div>
-
-              <div className="p-4 flex flex-col flex-grow gap-2.5">
-                <div className="flex items-center justify-between">
-                  <p className="text-base font-bold text-foreground">{svc.name}</p>
-                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-semibold">
-                    <Clock className="w-3 h-3" />
-                    {svc.duration}
-                  </div>
-                </div>
-                
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                  {svc.desc}
-                </p>
-
-                <a
-                  href={buildWhatsAppLink(svc.name)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-auto pt-1"
-                >
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-2 border-border/80 hover:bg-accent text-xs font-semibold rounded-lg"
-                  >
-                    <WhatsAppIcon className="w-3.5 h-3.5 text-emerald-500" />
-                    Agendar
-                  </Button>
-                </a>
-              </div>
-            </div>
-          ))}
-
-          {/* Card Personalizado */}
-          <div className="bg-muted/20 border border-dashed border-border rounded-xl p-5 flex flex-col items-center justify-center gap-3 text-center sm:col-span-2 lg:col-span-1">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <Star className="w-5 h-5 text-primary" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-base font-bold text-foreground">Pacote Personalizado?</p>
-              <p className="text-xs text-muted-foreground">Fale conosco sobre combinações sob medida</p>
-            </div>
-            <a href={buildWhatsAppLink()} target="_blank" rel="noopener noreferrer" className="w-full max-w-[180px]">
-              <Button size="sm" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 text-xs rounded-lg">
-                <WhatsAppIcon className="w-3.5 h-3.5" />
-                Fale Conosco
-              </Button>
+              <img 
+                src={svc.image} 
+                alt={svc.name}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
             </a>
-          </div>
+          ))}
         </div>
       </section>
 
