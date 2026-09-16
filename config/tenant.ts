@@ -50,13 +50,6 @@ export const tenantConfig = {
        desc: 'Alinhamento e modelagem de barba com acabamento impecável',
        image: '/assets/servico-barba.jpg' // Coloque a imagem em public/assets/servico-barba.jpg
     },
-    { 
-      name: 'Nevou', 
-      price: 50, 
-      duration: '50 min',
-      desc: 'Nosso serviço mais procurado, para eventos especiais e ocasiões únicas',
-      image: '/assets/servico-nevou.jpg' // Coloque a imagem em public/assets/servico-corte-barba.jpg
-    },
     {
        name: 'Artistico', 
        price: 60, 
