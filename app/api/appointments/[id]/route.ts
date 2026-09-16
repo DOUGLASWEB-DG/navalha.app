@@ -46,12 +46,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: 'Você não pode alterar este agendamento.' }, { status: 403 })
     }
 
+    const isAdmin = user.role === 'ADMIN'
     const nextStatus = parsed.status ?? current.status
-    assertStatusTransition(current.status, nextStatus, current.date)
+    assertStatusTransition(current.status, nextStatus, current.date, isAdmin)
     const hasServiceChange = parsed.serviceIds !== undefined || parsed.serviceId !== undefined
     const hasScheduleChange = parsed.clientId !== undefined || hasServiceChange ||
       parsed.barberId !== undefined || parsed.date !== undefined || parsed.notes !== undefined
-    if (hasScheduleChange && (current.status === 'COMPLETED' || current.status === 'CANCELED')) {
+    if (!isAdmin && hasScheduleChange && (current.status === 'COMPLETED' || current.status === 'CANCELED')) {
       throw new AppointmentRuleError('Agendamentos concluídos ou cancelados não podem ser editados.')
     }
 
@@ -81,13 +82,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (Number.isNaN(nextDate.getTime())) throw new AppointmentRuleError('Data do agendamento inválida.')
 
     if (hasScheduleChange && nextStatus !== 'CANCELED') {
-      validateAppointmentSchedule(nextDate, nextTotals.durationMins)
+      validateAppointmentSchedule(nextDate, nextTotals.durationMins, !isAdmin)
       const conflicts = await prisma.appointment.findMany({
         where: { id: { not: id }, barberId: nextBarberId, status: { not: 'CANCELED' } },
         include: { service: { select: { durationMins: true } }, appointmentServices: { select: { durationMins: true } } },
       })
       const nextEnd = nextDate.getTime() + nextTotals.durationMins * 60_000
-      if (conflicts.some((appointment) => {
+      if (!isAdmin && conflicts.some((appointment) => {
         const duration = appointment.appointmentServices.length
           ? appointment.appointmentServices.reduce((total, item) => total + item.durationMins, 0)
           : appointment.service.durationMins

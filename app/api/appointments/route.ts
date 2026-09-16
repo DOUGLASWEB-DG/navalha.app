@@ -113,7 +113,9 @@ export async function POST(req: NextRequest) {
       ? new Date(parsed.date)
       : parseIncomingAppointmentDate(parsed.date)
     if (Number.isNaN(date.getTime())) throw new AppointmentRuleError('Data do agendamento inválida.')
-    validateAppointmentSchedule(date, totals.durationMins)
+    const isAdmin = user?.role === 'ADMIN'
+    
+    validateAppointmentSchedule(date, totals.durationMins, !isAdmin)
 
     const barbers = await prisma.user.findMany({
       where: user.role === 'BARBER' ? { id: user.id } : undefined,
@@ -136,17 +138,20 @@ export async function POST(req: NextRequest) {
         const requestedEnd = date.getTime() + totals.durationMins * 60_000
         return appointment.barberId === barber.id && date.getTime() < appointmentEnd && requestedEnd > appointment.date.getTime()
       }))
-      if (!availableBarber) throw new AppointmentRuleError('Esse horário não está mais disponível.')
+      if (!isAdmin && !availableBarber) throw new AppointmentRuleError('Esse horário não está mais disponível.')
+      
+      const selectedBarber = isAdmin && !availableBarber ? candidates[0] : availableBarber
+      if (!selectedBarber) throw new AppointmentRuleError('Barbeiro não encontrado.')
 
       return await tx.appointment.create({
         data: {
-          clientId: client.id,
-          serviceId: services[0].id,
+          client: { connect: { id: client.id } },
+          service: { connect: { id: services[0].id } }, // FIXME: legacy field
           appointmentServices: { create: appointmentServiceCreateData(services) },
-          barberId: availableBarber.id,
+          barber: { connect: { id: selectedBarber.id } },
           date,
+          status: parsed.status,
           notes: parsed.notes,
-          status: parsed.status ?? AppointmentStatus.PENDING,
         },
         include: {
           client: true,

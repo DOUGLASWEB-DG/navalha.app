@@ -139,6 +139,7 @@ export function assertStatusTransition(
   current: AppointmentStatus,
   next: AppointmentStatus,
   appointmentDate: Date,
+  isAdmin: boolean = false
 ) {
   if (current === next) return
 
@@ -149,19 +150,22 @@ export function assertStatusTransition(
     CANCELED: [],
   }
 
-  if (!allowed[current].includes(next)) {
+  // Se for admin, pode transitar livremente (ex: de cancelado pra pendente, ou concluído pra cancelado se errou)
+  if (!isAdmin && !allowed[current].includes(next)) {
     throw new AppointmentRuleError(`Não é possível alterar um agendamento de ${current} para ${next}.`)
   }
-  if (next === AppointmentStatus.CONFIRMED && appointmentDate <= new Date()) {
+  
+  if (!isAdmin && next === AppointmentStatus.CONFIRMED && appointmentDate <= new Date()) {
     throw new AppointmentRuleError('Agendamentos passados não podem ser confirmados.')
   }
-  if (next === AppointmentStatus.COMPLETED && appointmentDate > new Date()) {
+  if (!isAdmin && next === AppointmentStatus.COMPLETED && appointmentDate > new Date()) {
     throw new AppointmentRuleError('O agendamento só pode ser concluído após o horário marcado.')
   }
-  if (next === AppointmentStatus.CANCELED && appointmentDate <= new Date()) {
+  if (!isAdmin && next === AppointmentStatus.CANCELED && appointmentDate <= new Date()) {
     throw new AppointmentRuleError('Agendamentos passados não podem ser cancelados.')
   }
   if (
+    !isAdmin &&
     next === AppointmentStatus.CANCELED &&
     appointmentDate.getTime() - new Date().getTime() < CANCELLATION_NOTICE_MINUTES * 60_000
   ) {
