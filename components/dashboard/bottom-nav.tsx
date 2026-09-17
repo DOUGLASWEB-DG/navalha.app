@@ -18,38 +18,38 @@ const items = [
   {
     href: '/dashboard',
     label: 'Painel',
-    icon: LayoutDashboard,
+    iconUrl: '/assets/painel-icon.png',
     match: (p: string) => p === '/dashboard',
     adminOnly: true,
   },
   {
     href: '/dashboard/appointments',
     label: 'Agenda',
-    icon: CalendarDays,
+    iconUrl: '/assets/agendamentos-icon.png',
     match: (p: string) => p.startsWith('/dashboard/appointments'),
   },
   {
     href: '/dashboard/clients',
     label: 'Clientes',
-    icon: Users,
+    iconUrl: '/assets/clientes-icon.png',
     match: (p: string) => p.startsWith('/dashboard/clients'),
     adminOnly: true,
   },
   {
     href: '/dashboard/finances',
     label: 'Finanças',
-    icon: DollarSign,
+    iconUrl: '/assets/finaces-icon.png',
     match: (p: string) => p.startsWith('/dashboard/finances'),
     adminOnly: true,
   },
   {
     href: '/dashboard/services',
     label: 'Serviços',
-    icon: Scissors,
+    iconUrl: '/assets/servicos-icon.png',
     match: (p: string) => p.startsWith('/dashboard/services'),
     adminOnly: true,
   },
-] as const
+]
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -76,7 +76,6 @@ export function BottomNav() {
         {items
           .filter(item => !('adminOnly' in item && item.adminOnly) || user?.role === 'ADMIN')
           .map((item) => {
-          const Icon = item.icon
           const active = item.match(pathname)
           const showBadge = item.href === '/dashboard/finances' && alertCount > 0
           return (
@@ -85,18 +84,18 @@ export function BottomNav() {
               href={item.href}
               prefetch
               className={cn(
-                'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl min-h-12 py-2 px-1',
+                'flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl min-h-12 py-2 px-1',
                 'transition-all duration-150 active:scale-[0.97] active:bg-muted',
                 active ? 'text-primary' : 'text-muted-foreground'
               )}
             >
-              <span className="relative inline-flex">
-                <Icon
-                  className={cn('w-6 h-6 shrink-0', active && 'text-primary')}
-                  strokeWidth={active ? 2.25 : 2}
-                />
+              <span className={cn(
+                "relative inline-flex w-7 h-7 items-center justify-center transition-all duration-200 overflow-hidden rounded-md",
+                active ? "opacity-100" : "opacity-75 grayscale-[30%]"
+              )}>
+                <img src={item.iconUrl} alt={item.label} className="w-full h-full object-contain scale-[1.4]" />
                 {showBadge && (
-                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-white tabular-nums">
+                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-white tabular-nums z-10">
                     {alertCount > 9 ? '9+' : alertCount}
                   </span>
                 )}
