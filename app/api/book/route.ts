@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { tenantConfig } from '@/config/tenant'
 import { sendTextMessage } from '@/lib/whatsapp'
+import { dispatchWebhookEvent } from '@/lib/events'
 import { normalizeBrazilPhone } from '@/lib/format'
 import {
   AppointmentRuleError,
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     let finalBarberId = parsed.barberId && parsed.barberId !== 'any' ? parsed.barberId : null
 
-    const allBarbers = await prisma.user.findMany({ select: { id: true } })
+    const allBarbers = await prisma.user.findMany({ select: { id: true, name: true } })
     if (finalBarberId && !allBarbers.some((barber) => barber.id === finalBarberId)) {
       throw new AppointmentRuleError('Barbeiro não encontrado.')
     }
@@ -125,6 +126,34 @@ export async function POST(req: NextRequest) {
     // To Barber
     const msgToBarber = `💈 *Novo Agendamento!*\n\nO cliente ${parsed.name} acabou de marcar um horário.\n\n📅 Data: ${dateFormatted}\n⏰ Horário: ${timeFormatted}\n💈 Serviço(s): ${serviceNames}\n📞 Contato: ${phone}`;
     sendTextMessage('5569999630329', msgToBarber).catch(console.error);
+
+    const finalBarber = allBarbers.find(b => b.id === appointment.barberId);
+
+    // Disparar Evento para Webhook (Fire-and-forget)
+    // Risco conhecido: Como não há Outbox/Fila nesta fase, se o processo Node morrer
+    // ou o Webhook falhar, este evento será perdido (não haverá retry).
+    dispatchWebhookEvent({
+      event: 'appointment.created',
+      appointmentId: appointment.id,
+      status: 'PENDING',
+      client: {
+        name: client.name,
+        phone: phone,
+      },
+      barber: {
+        id: finalBarber!.id,
+        name: finalBarber!.name,
+      },
+      appointment: {
+        date: datetime.toISOString(),
+        dateFormatted,
+        timeFormatted,
+        services: services.map(s => s.name),
+        totalDurationMins: totals.durationMins,
+        totalPrice: totals.price,
+        notes: parsed.notes,
+      },
+    });
 
     return NextResponse.json({
       success: true,
