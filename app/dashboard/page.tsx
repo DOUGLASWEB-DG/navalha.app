@@ -114,7 +114,7 @@ export default function DashboardPage() {
       <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 touch-pan-x lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:pb-0 lg:snap-none">
         <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl overflow-hidden">
-            <img src="/assets/pendentes-icon.png" alt="Pendentes" className="w-full h-full object-contain" />
+            <img src="/assets/pendentes-icon.png" alt="Pendentes" className="w-full h-full object-contain scale-[1.3]" />
           </div>
           <div className="mt-3 lg:mt-0">
             <p className="text-xl font-bold text-foreground">{appointmentStats?.pending ?? 0}</p>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
         </div>
         <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl overflow-hidden">
-            <img src="/assets/confirmados-icon.png" alt="Confirmados" className="w-full h-full object-contain" />
+            <img src="/assets/confirmados-icon.png" alt="Confirmados" className="w-full h-full object-contain scale-[1.3]" />
           </div>
           <div className="mt-3 lg:mt-0">
             <p className="text-xl font-bold text-foreground">{appointmentStats?.confirmed ?? 0}</p>
@@ -132,7 +132,7 @@ export default function DashboardPage() {
         </div>
         <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl overflow-hidden">
-            <img src="/assets/concluidos-icon.png" alt="Concluídos" className="w-full h-full object-contain" />
+            <img src="/assets/concluidos-icon.png" alt="Concluídos" className="w-full h-full object-contain scale-[1.3]" />
           </div>
           <div className="mt-3 lg:mt-0">
             <p className="text-xl font-bold text-foreground">{appointmentStats?.completed ?? 0}</p>

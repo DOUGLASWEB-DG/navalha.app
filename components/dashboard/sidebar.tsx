@@ -108,7 +108,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                 "flex items-center justify-center shrink-0 w-8 h-8 rounded-lg transition-all duration-200 overflow-hidden",
                 isActive ? "opacity-100" : "opacity-75 grayscale-[30%] group-hover:opacity-100 group-hover:grayscale-0"
               )}>
-                <img src={item.iconUrl} alt={item.label} className="w-full h-full object-contain" />
+                <img src={item.iconUrl} alt={item.label} className="w-full h-full object-contain scale-[1.4]" />
               </div>
               {open && (
                 <span className="text-sm font-medium">{item.label}</span>
