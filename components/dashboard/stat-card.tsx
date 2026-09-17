@@ -33,7 +33,7 @@ export function StatCard({ title, value, subtitle, icon: Icon, iconUrl, trend, a
           )}
         >
           {iconUrl ? (
-            <img src={iconUrl} alt={title} className="w-full h-full object-contain scale-[1.3]" />
+            <img src={iconUrl} alt={title} className="w-full h-full object-contain" />
           ) : (
             Icon && <Icon className="h-5 w-5" />
           )}

@@ -161,7 +161,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/goals" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/metas-icon.png" alt="Metas" className="w-full h-full object-contain scale-[1.4]" />
+                      <img src="/assets/metas-icon.png" alt="Metas" className="w-full h-full object-contain" />
                     </div>
                     Metas
                   </Link>
@@ -169,7 +169,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/products" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/produtos-icon.png" alt="Produtos" className="w-full h-full object-contain scale-[1.4]" />
+                      <img src="/assets/produtos-icon.png" alt="Produtos" className="w-full h-full object-contain" />
                     </div>
                     Produtos
                   </Link>
@@ -177,7 +177,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/users" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/equipe-icon.png" alt="Equipe" className="w-full h-full object-contain scale-[1.4]" />
+                      <img src="/assets/equipe-icon.png" alt="Equipe" className="w-full h-full object-contain" />
                     </div>
                     Equipe
                   </Link>
