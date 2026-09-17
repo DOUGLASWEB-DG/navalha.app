@@ -5,7 +5,8 @@ interface StatCardProps {
   title: string
   value: string
   subtitle?: string
-  icon: LucideIcon
+  icon?: LucideIcon
+  iconUrl?: string
   trend?: {
     value: string
     positive: boolean
@@ -20,18 +21,22 @@ const accentClasses = {
   red: 'bg-destructive/10 text-destructive border-destructive/20',
 }
 
-export function StatCard({ title, value, subtitle, icon: Icon, trend, accent = 'gold' }: StatCardProps) {
+export function StatCard({ title, value, subtitle, icon: Icon, iconUrl, trend, accent = 'gold' }: StatCardProps) {
   return (
     <div className="flex min-w-[min(100%,17rem)] snap-start flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-150 lg:min-w-0 lg:w-full">
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-medium text-muted-foreground">{title}</span>
         <div
           className={cn(
-            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border',
-            accentClasses[accent]
+            'flex shrink-0 items-center justify-center rounded-xl overflow-hidden',
+            iconUrl ? 'h-11 w-11' : cn('h-11 w-11 border', accentClasses[accent])
           )}
         >
-          <Icon className="h-5 w-5" />
+          {iconUrl ? (
+            <img src={iconUrl} alt={title} className="w-full h-full object-contain" />
+          ) : (
+            Icon && <Icon className="h-5 w-5" />
+          )}
         </div>
       </div>
       <div>
