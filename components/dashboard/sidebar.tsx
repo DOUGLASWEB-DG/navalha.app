@@ -28,14 +28,14 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, adminOnly: true },
-  { label: 'Agendamentos', href: '/dashboard/appointments', icon: CalendarDays },
-  { label: 'Clientes', href: '/dashboard/clients', icon: Users, adminOnly: true },
-  { label: 'Finanças', href: '/dashboard/finances', icon: DollarSign, adminOnly: true },
-  { label: 'Metas', href: '/dashboard/goals', icon: Target, adminOnly: true },
-  { label: 'Serviços', href: '/dashboard/services', icon: Scissors, adminOnly: true },
-  { label: 'Produtos', href: '/dashboard/products', icon: Package, adminOnly: true },
-  { label: 'Equipe', href: '/dashboard/users', icon: Shield, adminOnly: true },
+  { label: 'Painel', href: '/dashboard', iconUrl: '/assets/painel-icon.png', adminOnly: true },
+  { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/agendamentos-icon.png' },
+  { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/clientes-icon.png', adminOnly: true },
+  { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/finaces-icon.png', adminOnly: true },
+  { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/metas-icon.png', adminOnly: true },
+  { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/servicos-icon.png', adminOnly: true },
+  { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/produtos-icon.png', adminOnly: true },
+  { label: 'Equipe', href: '/dashboard/users', iconUrl: '/assets/equipe-icon.png', adminOnly: true },
 ]
 
 const bottomItems = [
@@ -89,7 +89,6 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
         {navItems
           .filter(item => !item.adminOnly || user?.role === 'ADMIN')
           .map((item) => {
-          const Icon = item.icon
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
           const showBadge = item.href === '/dashboard/finances' && alertCount > 0
           return (
@@ -101,15 +100,15 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                 'flex min-h-12 items-center rounded-xl transition-all duration-150 active:scale-[0.98] group relative',
                 open ? 'gap-3 px-3 py-2.5' : 'justify-center p-2.5',
                 isActive
-                  ? 'bg-primary/10 text-primary font-semibold'
+                  ? 'bg-primary/5 text-primary font-semibold'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80'
               )}
             >
               <div className={cn(
-                "flex items-center justify-center shrink-0 rounded-lg p-1.5 transition-all duration-200",
-                isActive ? "bg-primary text-white shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2),0_4px_8px_rgba(var(--primary),0.3)]" : "bg-transparent text-muted-foreground group-hover:bg-muted-foreground/10 group-hover:text-primary"
+                "flex items-center justify-center shrink-0 w-8 h-8 rounded-lg transition-all duration-200 overflow-hidden",
+                isActive ? "opacity-100" : "opacity-75 grayscale-[30%] group-hover:opacity-100 group-hover:grayscale-0"
               )}>
-                <Icon className={cn("w-5 h-5", isActive && "drop-shadow-sm")} strokeWidth={isActive ? 2.5 : 2} />
+                <img src={item.iconUrl} alt={item.label} className="w-full h-full object-contain" />
               </div>
               {open && (
                 <span className="text-sm font-medium">{item.label}</span>
@@ -144,7 +143,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                 open ? 'gap-3 px-3 py-2.5' : 'justify-center p-2.5'
               )}
             >
-              <div className="flex items-center justify-center shrink-0 rounded-lg p-1.5 transition-all duration-200 bg-transparent text-muted-foreground group-hover:bg-muted-foreground/10 group-hover:text-primary">
+              <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg transition-all duration-200 bg-transparent text-muted-foreground group-hover:bg-muted-foreground/10 group-hover:text-primary">
                 <Icon className="w-5 h-5" strokeWidth={2} />
               </div>
               {open && <span className="text-sm font-medium">{item.label}</span>}
@@ -161,7 +160,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
             open ? 'gap-3 px-3 py-2.5' : 'justify-center p-2.5'
           )}
         >
-          <div className="flex items-center justify-center shrink-0 rounded-lg p-1.5 transition-all duration-200 bg-transparent text-destructive/70 group-hover:bg-destructive/10">
+          <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg transition-all duration-200 bg-transparent text-destructive/70 group-hover:bg-destructive/10">
             <LogOut className="w-5 h-5" strokeWidth={2} />
           </div>
           {open && <span className="text-sm font-medium">Sair</span>}
