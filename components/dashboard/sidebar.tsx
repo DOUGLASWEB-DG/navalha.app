@@ -105,7 +105,12 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80'
               )}
             >
-              <Icon className="w-5 h-5 shrink-0" />
+              <div className={cn(
+                "flex items-center justify-center shrink-0 rounded-lg p-1.5 transition-all duration-200",
+                isActive ? "bg-primary text-white shadow-[inset_0_-2px_4px_rgba(0,0,0,0.2),0_4px_8px_rgba(var(--primary),0.3)]" : "bg-transparent text-muted-foreground group-hover:bg-muted-foreground/10 group-hover:text-primary"
+              )}>
+                <Icon className={cn("w-5 h-5", isActive && "drop-shadow-sm")} strokeWidth={isActive ? 2.5 : 2} />
+              </div>
               {open && (
                 <span className="text-sm font-medium">{item.label}</span>
               )}
@@ -135,11 +140,13 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
               target={item.external ? '_blank' : undefined}
               title={!open ? item.label : undefined}
               className={cn(
-                'flex min-h-12 items-center rounded-xl transition-all duration-150 text-muted-foreground hover:bg-muted hover:text-foreground active:scale-[0.98] active:bg-muted/80',
+                'flex min-h-12 items-center rounded-xl transition-all duration-150 text-muted-foreground hover:bg-muted hover:text-foreground active:scale-[0.98] active:bg-muted/80 group',
                 open ? 'gap-3 px-3 py-2.5' : 'justify-center p-2.5'
               )}
             >
-              <Icon className="w-5 h-5 shrink-0" />
+              <div className="flex items-center justify-center shrink-0 rounded-lg p-1.5 transition-all duration-200 bg-transparent text-muted-foreground group-hover:bg-muted-foreground/10 group-hover:text-primary">
+                <Icon className="w-5 h-5" strokeWidth={2} />
+              </div>
               {open && <span className="text-sm font-medium">{item.label}</span>}
             </Link>
           )
@@ -150,27 +157,16 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
           onClick={handleLogout}
           title={!open ? 'Sair' : undefined}
           className={cn(
-            'flex min-h-12 w-full items-center rounded-xl transition-all duration-150 text-destructive/70 hover:bg-destructive/10 hover:text-destructive active:scale-[0.98]',
+            'flex min-h-12 w-full items-center rounded-xl transition-all duration-150 text-destructive/70 hover:bg-destructive/10 hover:text-destructive active:scale-[0.98] group',
             open ? 'gap-3 px-3 py-2.5' : 'justify-center p-2.5'
           )}
         >
-          <LogOut className="w-5 h-5 shrink-0" />
+          <div className="flex items-center justify-center shrink-0 rounded-lg p-1.5 transition-all duration-200 bg-transparent text-destructive/70 group-hover:bg-destructive/10">
+            <LogOut className="w-5 h-5" strokeWidth={2} />
+          </div>
           {open && <span className="text-sm font-medium">Sair</span>}
         </button>
       </div>
-
-      {/* Botão de toggle */}
-      <button
-        onClick={onToggle}
-        className="absolute -right-3 top-20 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center hover:bg-muted shadow-sm transition-colors z-10"
-        aria-label={open ? 'Recolher menu' : 'Expandir menu'}
-      >
-        {open ? (
-          <ChevronLeft className="w-3 h-3 text-foreground" />
-        ) : (
-          <ChevronRight className="w-3 h-3 text-foreground" />
-        )}
-      </button>
     </aside>
   )
 }
