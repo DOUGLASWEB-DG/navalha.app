@@ -160,19 +160,25 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
               <>
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/goals" className="cursor-pointer gap-3">
-                    <Target className="h-5 w-5 shrink-0" />
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
+                      <img src="/assets/metas-icon.png" alt="Metas" className="w-full h-full object-contain scale-[1.4]" />
+                    </div>
                     Metas
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/products" className="cursor-pointer gap-3">
-                    <Package className="h-5 w-5 shrink-0" />
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
+                      <img src="/assets/produtos-icon.png" alt="Produtos" className="w-full h-full object-contain scale-[1.4]" />
+                    </div>
                     Produtos
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/users" className="cursor-pointer gap-3">
-                    <Shield className="h-5 w-5 shrink-0" />
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
+                      <img src="/assets/equipe-icon.png" alt="Equipe" className="w-full h-full object-contain scale-[1.4]" />
+                    </div>
                     Equipe
                   </Link>
                 </DropdownMenuItem>
@@ -180,7 +186,9 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             )}
             <DropdownMenuItem asChild className="min-h-12 rounded-xl">
               <Link href="/book" target="_blank" rel="noopener noreferrer" className="cursor-pointer gap-3">
-                <Globe className="h-5 w-5 shrink-0" />
+                <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded-md bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground">
+                  <Globe className="h-3.5 w-3.5 drop-shadow-sm" strokeWidth={2.5} />
+                </div>
                 Página de agendamento
               </Link>
             </DropdownMenuItem>
@@ -189,7 +197,9 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
               onClick={handleLogout}
               className="min-h-12 cursor-pointer gap-3 rounded-xl text-destructive focus:bg-destructive/10 focus:text-destructive"
             >
-              <LogOut className="h-5 w-5 shrink-0" />
+              <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded-md bg-gradient-to-b from-destructive/20 to-transparent border border-destructive/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-destructive/80">
+                <LogOut className="h-3.5 w-3.5 drop-shadow-sm" strokeWidth={2.5} />
+              </div>
               Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
