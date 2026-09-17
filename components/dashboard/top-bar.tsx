@@ -83,10 +83,10 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-muted-foreground"
+              className="relative bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground hover:text-foreground hover:from-muted hover:to-muted/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200"
               aria-label="Notificações"
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-4 w-4 drop-shadow-sm" strokeWidth={2.5} />
               {unreadCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card animate-in zoom-in">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -146,10 +146,10 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground lg:hidden"
+              className="lg:hidden relative bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground hover:text-foreground hover:from-muted hover:to-muted/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200"
               aria-label="Mais opções"
             >
-              <MoreHorizontal className="h-5 w-5" />
+              <MoreHorizontal className="h-4 w-4 drop-shadow-sm" strokeWidth={2.5} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent

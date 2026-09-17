@@ -129,7 +129,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
       </nav>
 
       {/* Itens inferiores */}
-      <div className="py-4 px-2 border-t border-border flex flex-col gap-1">
+      <div className="py-4 px-2 border-t border-border flex flex-col gap-2">
         {bottomItems.map((item) => {
           const Icon = item.icon
           return (
@@ -139,12 +139,12 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
               target={item.external ? '_blank' : undefined}
               title={!open ? item.label : undefined}
               className={cn(
-                'flex min-h-12 items-center rounded-xl transition-all duration-150 text-muted-foreground hover:bg-muted hover:text-foreground active:scale-[0.98] active:bg-muted/80 group',
-                open ? 'gap-3 px-3 py-2.5' : 'justify-center p-2.5'
+                'flex min-h-12 items-center rounded-xl transition-all duration-150 text-muted-foreground hover:text-foreground active:scale-[0.98] group',
+                open ? 'gap-3 px-3 py-2.5 hover:bg-muted/30' : 'justify-center p-2.5'
               )}
             >
-              <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg transition-all duration-200 bg-transparent text-muted-foreground group-hover:bg-muted-foreground/10 group-hover:text-primary">
-                <Icon className="w-5 h-5" strokeWidth={2} />
+              <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground group-hover:from-muted group-hover:to-muted/30 group-hover:text-primary group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200">
+                <Icon className="w-4 h-4 drop-shadow-sm" strokeWidth={2.5} />
               </div>
               {open && <span className="text-sm font-medium">{item.label}</span>}
             </Link>
@@ -156,12 +156,12 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
           onClick={handleLogout}
           title={!open ? 'Sair' : undefined}
           className={cn(
-            'flex min-h-12 w-full items-center rounded-xl transition-all duration-150 text-destructive/70 hover:bg-destructive/10 hover:text-destructive active:scale-[0.98] group',
-            open ? 'gap-3 px-3 py-2.5' : 'justify-center p-2.5'
+            'flex min-h-12 w-full items-center rounded-xl transition-all duration-150 text-destructive/70 hover:text-destructive active:scale-[0.98] group',
+            open ? 'gap-3 px-3 py-2.5 hover:bg-destructive/5' : 'justify-center p-2.5'
           )}
         >
-          <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg transition-all duration-200 bg-transparent text-destructive/70 group-hover:bg-destructive/10">
-            <LogOut className="w-5 h-5" strokeWidth={2} />
+          <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-gradient-to-b from-destructive/20 to-transparent border border-destructive/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-destructive/80 group-hover:from-destructive/30 group-hover:to-destructive/10 group-hover:text-destructive group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200">
+            <LogOut className="w-4 h-4 drop-shadow-sm" strokeWidth={2.5} />
           </div>
           {open && <span className="text-sm font-medium">Sair</span>}
         </button>
