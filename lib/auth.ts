@@ -41,11 +41,12 @@ export async function verifySessionToken(token: string) {
 
 export async function createSession(userId: string, role: string) {
   const cookieStore = await cookies()
+  const sessionStart = Date.now()
   
-  const token = await new SignJWT({ userId, role })
+  const token = await new SignJWT({ userId, role, sessionStart })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime('2h')
     .sign(SECRET_KEY)
 
   const options = {
@@ -53,7 +54,7 @@ export async function createSession(userId: string, role: string) {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7 dias
+    maxAge: 60 * 60 * 2, // 2 horas (Idle timeout)
   }
   
   cookieStore.set(SESSION_COOKIE, token, options)

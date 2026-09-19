@@ -85,6 +85,27 @@ export async function POST(req: NextRequest) {
       const msg = `${symbol} *Nova Transação Registrada*\n\nTipo: ${tipoStr}\nValor: ${formattedAmount}\nDescrição: ${transaction.description}\nCategoria: ${transaction.category || 'Outros'}`;
       
       await sendTextMessage(adminPhone, msg).catch(e => console.error('WhatsApp message error:', e));
+
+      // Disparar Evento para Webhook (Fire-and-forget)
+      import('crypto').then(({ randomUUID }) => {
+        const eventId = randomUUID();
+        import('@/lib/events').then(({ dispatchWebhookEvent }) => {
+          dispatchWebhookEvent({
+            eventId,
+            event: 'finance.transaction.created',
+            occurredAt: new Date().toISOString(),
+            data: {
+              transaction: {
+                id: transaction.id,
+                amount: Number(transaction.amount),
+                type: transaction.type,
+                description: transaction.description,
+                category: transaction.category || 'Outros'
+              }
+            }
+          });
+        });
+      });
     } catch (e) {
       console.error('Error checking WhatsApp integration:', e);
     }

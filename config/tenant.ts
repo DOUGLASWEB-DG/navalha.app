@@ -58,10 +58,10 @@ export const tenantConfig = {
        image: '/assets/servico-artistico.jpg' // Coloque a imagem em public/assets/servico-artistico.jpg
     },
     { 
-      name: 'Listra', 
+      name: 'Pesonalizado', 
       price: 25, 
       duration: '25 min', 
-      desc: 'Listra na barba ou cabelo com precisão e estilo',
+      desc: 'Corte Personalizado, feito sob medida para o seu estilo e preferências, garantindo um visual único e exclusivo.',
       image: '/assets/servico-listra.jpg' // Coloque a imagem em public/assets/servico-listra.jpg
     },
   ]

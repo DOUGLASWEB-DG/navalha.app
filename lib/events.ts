@@ -2,32 +2,21 @@
 const WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || '';
 const WEBHOOK_SECRET = process.env.N8N_WEBHOOK_SECRET || '';
 
-export type AppointmentCreatedPayload = {
-  event: 'appointment.created';
-  appointmentId: string;
-  status: string;
-  client: {
-    name: string;
-    phone: string;
-  };
-  barber: {
-    id: string;
-    name: string;
-  };
-  appointment: {
-    date: string;
-    dateFormatted: string;
-    timeFormatted: string;
-    services: string[];
-    totalDurationMins: number;
-    totalPrice: number;
-    notes?: string;
-  };
+export type DomainEventPayload = {
+  eventId: string;
+  event: 'appointment.created' | 'appointment.confirmed' | 'appointment.reminder_due' | 'finance.transaction.created';
+  occurredAt: string;
+  data: any;
 };
 
-export async function dispatchWebhookEvent(payload: AppointmentCreatedPayload) {
+export async function dispatchWebhookEvent(payload: DomainEventPayload) {
   if (!WEBHOOK_URL) {
     console.warn('[Events] N8N_WEBHOOK_URL não configurada. Evento ignorado:', payload.event);
+    return;
+  }
+
+  if (process.env.NODE_ENV === 'production' && !WEBHOOK_SECRET) {
+    console.error('[Events] N8N_WEBHOOK_SECRET não configurado em PRODUÇÃO. Segurança comprometida. Abortando evento:', payload.event);
     return;
   }
 

@@ -142,29 +142,34 @@ export async function POST(req: NextRequest) {
     }
 
     // Disparar Evento para Webhook (Fire-and-forget)
-    // Risco conhecido: Como não há Outbox/Fila nesta fase, se o processo Node morrer
-    // ou o Webhook falhar, este evento será perdido (não haverá retry).
-    dispatchWebhookEvent({
-      event: 'appointment.created',
-      appointmentId: appointment.id,
-      status: 'PENDING',
-      client: {
-        name: client.name,
-        phone: phone,
-      },
-      barber: {
-        id: finalBarber!.id,
-        name: finalBarber!.name,
-      },
-      appointment: {
-        date: datetime.toISOString(),
-        dateFormatted,
-        timeFormatted,
-        services: services.map(s => s.name),
-        totalDurationMins: totals.durationMins,
-        totalPrice: totals.price,
-        notes: parsed.notes,
-      },
+    import('crypto').then(({ randomUUID }) => {
+      const eventId = randomUUID();
+      dispatchWebhookEvent({
+        eventId,
+        event: 'appointment.created',
+        occurredAt: new Date().toISOString(),
+        data: {
+          appointment: {
+            id: appointment.id,
+            date: appointment.date.toISOString(),
+            status: appointment.status,
+            totalPrice: Number(totals.price),
+            durationMins: totals.durationMins,
+            notes: parsed.notes
+          },
+          client: {
+            id: client.id,
+            name: client.name,
+            phone: client.phone
+          },
+          barber: finalBarber ? {
+            id: finalBarber.id,
+            name: finalBarber.name,
+            phone: finalBarber.phone || ''
+          } : null,
+          services: services.map(s => ({ id: s.id, name: s.name }))
+        }
+      });
     });
 
     return NextResponse.json({

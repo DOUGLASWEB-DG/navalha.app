@@ -151,6 +151,39 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           await sendTextMessage(number, msg).catch(e => console.error('WhatsApp client msg error:', e));
           }
         }
+
+        // Disparar Evento para Webhook (Fire-and-forget)
+        import('crypto').then(({ randomUUID }) => {
+          const eventId = randomUUID();
+          import('@/lib/events').then(({ dispatchWebhookEvent }) => {
+            dispatchWebhookEvent({
+              eventId,
+              event: 'appointment.confirmed',
+              occurredAt: new Date().toISOString(),
+              data: {
+                appointment: {
+                  id: appointment.id,
+                  date: appointment.date.toISOString(),
+                  status: appointment.status,
+                  totalPrice: Number(nextTotals.price),
+                  durationMins: nextTotals.durationMins,
+                  notes: appointment.notes
+                },
+                client: {
+                  id: appointment.client.id,
+                  name: appointment.client.name,
+                  phone: appointment.client.phone
+                },
+                barber: {
+                  id: barber.id,
+                  name: barber.name,
+                  phone: barber.phone || ''
+                },
+                services: nextServices.map(s => ({ id: s.id, name: s.name }))
+              }
+            });
+          });
+        });
       } catch (e) {
         console.error('Error with WA client notification:', e);
       }
@@ -180,6 +213,27 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount)
         const msg = `🟢 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
         await sendTextMessage(adminPhone, msg).catch((error) => console.error('WhatsApp message error:', error))
+
+        // Disparar Evento para Webhook (Fire-and-forget)
+        import('crypto').then(({ randomUUID }) => {
+          const eventId = randomUUID();
+          import('@/lib/events').then(({ dispatchWebhookEvent }) => {
+            dispatchWebhookEvent({
+              eventId,
+              event: 'finance.transaction.created',
+              occurredAt: new Date().toISOString(),
+              data: {
+                transaction: {
+                  id: newTx.id,
+                  amount: Number(newTx.amount),
+                  type: newTx.type,
+                  description: newTx.description,
+                  category: newTx.category
+                }
+              }
+            });
+          });
+        });
       }
     }
 

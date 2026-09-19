@@ -86,6 +86,38 @@ async function checkReminders() {
             where: { id: appt.id },
             data: { reminderSent: true }
           });
+
+          // Disparar Evento para Webhook (Fire-and-forget)
+          import('crypto').then(({ randomUUID }) => {
+            const eventId = randomUUID();
+            import('../lib/events').then(({ dispatchWebhookEvent }) => {
+              dispatchWebhookEvent({
+                eventId,
+                event: 'appointment.reminder_due',
+                occurredAt: new Date().toISOString(),
+                data: {
+                  appointment: {
+                    id: appt.id,
+                    date: appt.date.toISOString(),
+                    status: appt.status
+                  },
+                  client: {
+                    id: appt.client.id,
+                    name: appt.client.name,
+                    phone: phone
+                  },
+                  barber: appt.barber ? {
+                    id: appt.barber.id,
+                    name: appt.barber.name,
+                    phone: appt.barber.phone || ''
+                  } : null,
+                  services: appt.appointmentServices.length
+                    ? appt.appointmentServices.map(item => ({ id: item.service.id, name: item.service.name }))
+                    : [{ id: appt.service.id, name: appt.service.name }]
+                }
+              });
+            });
+          });
         }
       }
     }

@@ -82,3 +82,261 @@ Após a implementação:
 - Manter o raio de arredondamento padrão do projeto (`rounded-2xl` para cards, `rounded-xl` para botões secundários);
 - Estados de hover suaves (`transition-all duration-200 hover:scale-[1.02]`);
 - Sempre prever estados: default, hover, focus-visible, disabled e loading.
+# Tarefa: Investigar desacoplamento das notificações via eventos + n8n
+
+## Contexto
+
+O Navalha.app possui atualmente integrações de WhatsApp diretamente no código, incluindo lógica relacionada a mensagens e lembretes.
+
+Queremos evoluir a arquitetura para desacoplar a regra de negócio das automações externas.
+
+A arquitetura desejada é:
+
+Navalha.app
+    ↓
+Evento de domínio/aplicação
+    ↓
+Webhook n8n
+    ↓
+Automação n8n
+    ├── mensagem para cliente
+    ├── mensagem para barbeiro
+    └── futuras automações
+
+O Navalha NÃO deve ser responsável por montar o texto da mensagem nem por controlar o fluxo da automação.
+
+O Navalha deve ser responsável por informar que um evento de negócio aconteceu e fornecer os dados necessários.
+
+## Exemplo
+
+Quando um agendamento é criado:
+
+event = appointment.created
+
+O Navalha deverá futuramente emitir um payload semelhante a:
+
+{
+  "event": "appointment.created",
+  "appointmentId": "...",
+  "status": "CONFIRMED",
+
+  "client": {
+    "id": "...",
+    "name": "...",
+    "phone": "..."
+  },
+
+  "barber": {
+    "id": "...",
+    "name": "...",
+    "phone": "..."
+  },
+
+  "appointment": {
+    "date": "...",
+    "startTime": "...",
+    "duration": "...",
+    "services": [],
+    "total": "...",
+    "notes": "..."
+  }
+}
+
+IMPORTANTE:
+
+Esse payload é apenas uma proposta inicial.
+
+Antes de implementar, investigue o modelo atual do Navalha e determine quais desses dados já existem, onde estão armazenados e como são obtidos.
+
+Não invente campos nem altere o banco apenas para encaixar o exemplo.
+
+---
+
+# Objetivo desta etapa
+
+NÃO implementar ainda.
+
+Primeiro investigar e apresentar um plano.
+
+Mapear:
+
+1. Onde um agendamento é criado.
+2. Onde um agendamento é atualizado.
+3. Onde um agendamento é cancelado.
+4. Onde atualmente o Navalha dispara mensagens WhatsApp.
+5. Onde está implementada a integração com Evolution API.
+6. Onde está implementado o cron de lembretes.
+7. Quais APIs/services/utilitários participam desse fluxo.
+8. Quais dados do cliente estão disponíveis.
+9. Quais dados do barbeiro estão disponíveis.
+10. Se o telefone do barbeiro está disponível no modelo atual.
+11. Se os serviços do agendamento estão disponíveis através do relacionamento atual.
+12. Em que ponto da transação o evento poderia ser disparado com segurança.
+
+---
+
+# Regra arquitetural importante
+
+Não devemos disparar o webhook simplesmente no começo da criação do agendamento.
+
+Precisamos analisar o momento correto para evitar:
+
+Banco:
+    agendamento criado
+    ↓
+    erro posteriormente
+    ↓
+Webhook enviado indevidamente
+
+O evento deve representar um fato de negócio confirmado.
+
+Investigue como garantir que:
+
+"appointment.created"
+
+somente seja emitido quando o agendamento realmente tiver sido persistido com sucesso.
+
+Também investigar o risco de:
+
+Banco confirmou
+    ↓
+Webhook falhou
+
+Nesse caso, analisar possíveis estratégias futuras de retry, fila/outbox ou outra solução apropriada.
+
+NÃO implementar uma solução de fila/outbox sem autorização.
+
+---
+
+# Segurança
+
+O webhook n8n não deve receber informações sensíveis desnecessárias.
+
+Investigar:
+
+- autenticação do webhook;
+- segredo/token;
+- armazenamento das credenciais;
+- headers;
+- timeout;
+- tratamento de erro;
+- logs;
+- exposição de dados pessoais;
+- possibilidade de replay;
+- idempotência.
+
+Segredos NÃO podem ser colocados no código ou commitados no Git.
+
+---
+
+# Compatibilidade
+
+Não remover ainda:
+
+- lib/whatsapp.ts;
+- scripts/cron.ts;
+- chamadas atuais da Evolution API;
+- qualquer integração existente.
+
+Primeiro precisamos entender o fluxo atual e provar a nova arquitetura.
+
+A migração deverá ser incremental.
+
+---
+
+# Resultado esperado da investigação
+
+Antes de alterar código, apresentar:
+
+## 1. Fluxo atual
+
+Exemplo:
+
+agendamento
+→ arquivo X
+→ função Y
+→ integração Z
+→ WhatsApp
+
+## 2. Fluxo proposto
+
+agendamento
+→ persistência
+→ evento appointment.created
+→ webhook n8n
+
+## 3. Arquivos envolvidos
+
+Listar arquivos reais encontrados no projeto.
+
+## 4. Dados disponíveis
+
+Informar quais dados já podem compor o evento.
+
+Separar:
+
+- disponíveis imediatamente;
+- disponíveis através de relacionamento;
+- inexistentes atualmente;
+- que exigiriam alteração de banco.
+
+## 5. Riscos
+
+Principalmente:
+
+- evento enviado antes da confirmação;
+- webhook indisponível;
+- duplicidade;
+- retry;
+- alteração de comportamento existente;
+- vazamento de dados;
+- acoplamento entre Navalha e n8n.
+
+## 6. Plano incremental
+
+Propor fases pequenas, por exemplo:
+
+Fase A
+Mapear fluxo atual.
+
+Fase B
+Definir contrato do evento.
+
+Fase C
+Criar emissor de eventos sem remover WhatsApp atual.
+
+Fase D
+Testar webhook n8n.
+
+Fase E
+Provar evento appointment.created.
+
+Fase F
+Migrar uma notificação para n8n.
+
+Fase G
+Validar produção.
+
+Fase H
+Somente depois avaliar remoção da integração antiga.
+
+Aguardar autorização antes de implementar qualquer uma dessas fases.
+
+---
+
+# Regra de aprendizado
+
+Não quero apenas uma solução pronta.
+
+Explique:
+
+- por que o evento deve existir;
+- por que o Navalha não deve montar a mensagem;
+- por que o n8n deve cuidar da automação;
+- onde existe risco de inconsistência;
+- como provar que o evento representa um agendamento realmente criado;
+- como evitar notificações duplicadas.
+
+Não declarar a arquitetura como correta apenas porque o workflow do n8n executou com sucesso.
+
+Precisamos validar o comportamento ponta a ponta.
