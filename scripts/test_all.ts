@@ -28,19 +28,21 @@ async function runTests() {
   await sleep(500);
 
   await dispatchWebhookEvent({
+     eventId: 'mock-123',
      event: 'appointment.created',
-     appointmentId: 'mock-123',
-     status: 'PENDING',
-     client: { name: 'Test Client', phone: '5511999999999' },
-     barber: { id: 'barber-1', name: 'Barber Name' },
-     appointment: {
-       date: new Date().toISOString(),
-       dateFormatted: '17/09/2026',
-       timeFormatted: '15:00',
-       services: ['Corte'],
-       totalDurationMins: 30,
-       totalPrice: 50,
-       notes: 'test notes'
+     occurredAt: new Date().toISOString(),
+     data: {
+       appointment: {
+         id: 'mock-123',
+         date: new Date().toISOString(),
+         status: 'PENDING',
+         totalDurationMins: 30,
+         totalPrice: 50,
+         notes: 'test notes'
+       },
+       client: { id: 'client-1', name: 'Test Client', phone: '5511999999999' },
+       barber: { id: 'barber-1', name: 'Barber Name', phone: '' },
+       services: [{ id: 'svc-1', name: 'Corte' }]
      }
   });
   
@@ -53,12 +55,15 @@ async function runTests() {
   
   // mock server is closed now
   await dispatchWebhookEvent({
+     eventId: 'mock-fail',
      event: 'appointment.created',
-     appointmentId: 'mock-fail',
-     status: 'PENDING',
-     client: { name: 'Fail Client', phone: '5511999999999' },
-     barber: { id: 'barber-1', name: 'Barber Name' },
-     appointment: { date: new Date().toISOString(), dateFormatted: '17/09/2026', timeFormatted: '16:00', services: [], totalDurationMins: 0, totalPrice: 0 }
+     occurredAt: new Date().toISOString(),
+     data: {
+       appointment: { id: 'mock-fail', date: new Date().toISOString(), status: 'PENDING', totalDurationMins: 0, totalPrice: 0, notes: '' },
+       client: { id: 'client-2', name: 'Fail Client', phone: '5511999999999' },
+       barber: { id: 'barber-1', name: 'Barber Name', phone: '' },
+       services: []
+     }
   });
   console.log('[Test 2] Process survived the failure gracefully!');
 

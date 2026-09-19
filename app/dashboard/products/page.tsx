@@ -16,12 +16,14 @@ import {
 import { ProductFormModal } from '@/components/products/product-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
 
+import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export default function ProductsPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<any>(null)
-  const { data: products, mutate } = useSWR('/api/products', fetcher)
+  const { data: products, error, isLoading, mutate } = useSWR('/api/products', fetcher)
 
   async function deleteProduct(id: string, name: string) {
     const ok = await confirmAction({
@@ -53,7 +55,11 @@ export default function ProductsPage() {
       </PageHeader>
 
       <div className="w-full">
-        {products && products.length > 0 ? (
+        {isLoading ? (
+          <GridSkeleton message="Carregando produtos..." />
+        ) : error ? (
+          <ErrorState message="Não foi possível carregar os produtos." onRetry={() => mutate()} />
+        ) : products && products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {products.map((p: any) => (
               <div

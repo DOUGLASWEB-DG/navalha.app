@@ -39,7 +39,7 @@ export default function FinancesPage() {
 
   // Dados de transações (para aba Transações)
   const url = `/api/finances?month=${month}&type=${typeFilter}`
-  const { data, mutate, isLoading } = useSWR(url, fetcher)
+  const { data, mutate, isLoading, error } = useSWR(url, fetcher)
 
   // Contagem de alertas não lidos
   const { data: alertData } = useSWR('/api/finances/alerts', fetcher)
@@ -106,6 +106,8 @@ export default function FinancesPage() {
           summary={summary}
           deleteTransaction={deleteTransaction}
           isLoading={isLoading}
+          error={error}
+          mutate={mutate}
         />
       )}
 
@@ -126,6 +128,8 @@ export default function FinancesPage() {
 
 // ─── Aba de Transações (extraída da versão anterior) ──────────────────────────
 
+import { ErrorState } from '@/components/shared/data-state'
+
 interface TransactionsViewProps {
   month: string
   setMonth: (m: string) => void
@@ -135,15 +139,21 @@ interface TransactionsViewProps {
   summary: { income: number; expense: number; profit: number }
   deleteTransaction: (id: string) => void
   isLoading?: boolean
+  error?: any
+  mutate?: () => void
 }
 
 function TransactionsView({
   month, setMonth, typeFilter, setTypeFilter,
-  transactions, summary, deleteTransaction, isLoading
+  transactions, summary, deleteTransaction, isLoading, error, mutate
 }: TransactionsViewProps) {
   
   if (isLoading) {
     return <TransactionsSkeleton />
+  }
+
+  if (error) {
+    return <ErrorState message="Não foi possível carregar as informações financeiras." onRetry={mutate} />
   }
 
   return (
@@ -313,6 +323,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 function TransactionsSkeleton() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <p className="text-sm text-muted-foreground font-medium animate-pulse mb-2">Carregando informações financeiras...</p>
       <div className="flex gap-4 overflow-hidden">
         <Skeleton className="h-[104px] w-full min-w-[13rem] rounded-2xl" />
         <Skeleton className="h-[104px] w-full min-w-[13rem] rounded-2xl" />

@@ -16,12 +16,14 @@ import {
 import { UserFormModal } from '@/components/users/user-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
 
+import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export default function UsersPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<any>(null)
-  const { data: users, mutate } = useSWR('/api/users', fetcher)
+  const { data: users, error, isLoading, mutate } = useSWR('/api/users', fetcher)
 
   async function deleteUser(id: string, name: string) {
     const ok = await confirmAction({
@@ -54,7 +56,11 @@ export default function UsersPage() {
       </PageHeader>
 
       <div className="w-full">
-        {users && users.length > 0 ? (
+        {isLoading ? (
+          <GridSkeleton message="Carregando usuários..." />
+        ) : error ? (
+          <ErrorState message="Não foi possível carregar os usuários." onRetry={() => mutate()} />
+        ) : users && users.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {users.map((u: any) => (
               <div

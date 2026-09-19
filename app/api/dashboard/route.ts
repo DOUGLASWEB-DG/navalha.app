@@ -9,8 +9,22 @@ export async function GET() {
     const weekStart = startOfWeek(now, { weekStartsOn: 1 })
     const todayStart = startOfDay(now)
 
-    // --- Otimização: Buscas em Paralelo ---
-    const [totalClients, goals, todayAppointments] = await Promise.all([
+    // chart covers last 7 days (today included)
+    const chartStart = new Date(now)
+    chartStart.setDate(chartStart.getDate() - 6)
+    chartStart.setHours(0, 0, 0, 0)
+
+    const earliestTxDate = new Date(Math.min(weekStart.getTime(), chartStart.getTime()))
+
+    // --- Otimização: Buscas em Paralelo e Agregações ---
+    const [
+      totalClients,
+      goals,
+      todayAppointments,
+      monthlyIncomeResult,
+      recentTransactions,
+      recentTxForCalculations
+    ] = await Promise.all([
       prisma.client.count({ where: { isActive: true } }),
       prisma.goal.findMany({
         where: { startDate: { lte: now }, endDate: { gte: now } },
@@ -23,38 +37,44 @@ export async function GET() {
         include: { client: true, service: true, appointmentServices: { include: { service: true } }, barber: true },
         orderBy: { date: 'asc' },
       }),
+      prisma.transaction.aggregate({
+        where: { date: { gte: monthStart }, type: 'INCOME' },
+        _sum: { amount: true }
+      }),
+      prisma.transaction.findMany({
+        orderBy: { date: 'desc' },
+        take: 5,
+        select: { id: true, type: true, description: true, date: true, amount: true }
+      }),
+      prisma.transaction.findMany({
+        where: { date: { gte: earliestTxDate } },
+        select: { date: true, type: true, amount: true }
+      })
     ])
 
-    // --- Otimização: Uma Única Busca para Transações ---
-    // Buscamos todas as transações desde o início do mês para calcular tudo em memória
-    const transactions = await prisma.transaction.findMany({
-      where: { date: { gte: monthStart } },
-      orderBy: { date: 'desc' },
-    })
-    
-    // --- Processamento em Memória (Super Rápido) ---
+    // --- Processamento em Memória Otimizado ---
     let dailyRevenue = 0
     let weeklyRevenue = 0
-    const monthlyRevenue = transactions
-      .filter(t => t.type === 'INCOME')
-      .reduce((sum, t) => sum + t.amount, 0)
-    
+    const monthlyRevenue = monthlyIncomeResult._sum.amount ?? 0
+
     const chartDataMap = new Map<string, { income: number; expense: number }>()
 
-    for (const t of transactions) {
+    for (const t of recentTxForCalculations) {
       if (t.type === 'INCOME') {
         if (t.date >= weekStart) weeklyRevenue += t.amount
         if (t.date >= todayStart) dailyRevenue += t.amount
       }
 
-      // Dados do Gráfico (últimos 7 dias)
-      const dayKey = t.date.toISOString().slice(0, 10)
-      if (!chartDataMap.has(dayKey)) {
-        chartDataMap.set(dayKey, { income: 0, expense: 0 })
+      // Apenas processa para o gráfico se a transação estiver na janela de 7 dias do gráfico
+      if (t.date >= chartStart) {
+        const dayKey = t.date.toISOString().slice(0, 10)
+        if (!chartDataMap.has(dayKey)) {
+          chartDataMap.set(dayKey, { income: 0, expense: 0 })
+        }
+        const dayData = chartDataMap.get(dayKey)!
+        if (t.type === 'INCOME') dayData.income += t.amount
+        else dayData.expense += t.amount
       }
-      const dayData = chartDataMap.get(dayKey)!
-      if (t.type === 'INCOME') dayData.income += t.amount
-      else dayData.expense += t.amount
     }
 
     const chartData = Array.from({ length: 7 }, (_, i) => {
@@ -84,7 +104,7 @@ export async function GET() {
       },
       totalClients,
       appointmentStats,
-      recentTransactions: transactions.slice(0, 5),
+      recentTransactions,
       goals,
       chartData,
     })

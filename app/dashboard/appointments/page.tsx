@@ -31,6 +31,8 @@ import { cn } from '@/lib/utils'
 
 import { PageHeader } from '@/components/dashboard/page-header'
 
+import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 const statusFilters = [
@@ -52,7 +54,7 @@ export default function AppointmentsPage() {
 
   const monthStr = format(selectedDate, 'yyyy-MM')
   const queryParams = `?month=${monthStr}&status=${statusFilter}`
-  const { data: appointments, mutate } = useSWR(`/api/appointments${queryParams}`, fetcher)
+  const { data: appointments, error, isLoading, mutate } = useSWR(`/api/appointments${queryParams}`, fetcher)
 
   async function updateStatus(id: string, status: AppointmentStatus) {
     try {
@@ -145,14 +147,20 @@ export default function AppointmentsPage() {
         <h3 className="text-base font-semibold text-foreground capitalize">
           {format(selectedDate, "MMMM 'de' yyyy", { locale: ptBR })}
         </h3>
-        <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full">
-          {appointments?.length ?? 0} agendamentos
-        </span>
+        {!isLoading && !error && appointments && (
+          <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full">
+            {appointments.length} agendamentos
+          </span>
+        )}
       </div>
 
       {/* Lista Inteligente de Agendamentos */}
       <div className="w-full">
-        {appointments && appointments.length > 0 ? (
+        {isLoading ? (
+          <GridSkeleton message="Procurando agendamentos..." />
+        ) : error ? (
+          <ErrorState message="Não foi possível carregar os agendamentos." onRetry={() => mutate()} />
+        ) : appointments && appointments.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {appointments.map((appt: any) => (
               <div
