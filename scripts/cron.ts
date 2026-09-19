@@ -53,6 +53,7 @@ async function checkReminders() {
         client: true,
         service: true,
         appointmentServices: { include: { service: true } },
+        barber: true,
       }
     });
 
@@ -66,7 +67,8 @@ async function checkReminders() {
           phone = normalizeBrazilPhone(phone) || '';
           if (!phone) continue;
 
-          const timeFormatted = format(new Date(appt.date), "HH:mm", { locale: ptBR });
+          const timeFormatter = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Porto_Velho', hour: '2-digit', minute: '2-digit' });
+          const timeFormatted = timeFormatter.format(new Date(appt.date));
           const serviceNames = appt.appointmentServices.length
             ? appt.appointmentServices.map((item) => item.service.name).join(', ')
             : appt.service.name;
@@ -74,8 +76,10 @@ async function checkReminders() {
           console.log(`[Cron] Enviando lembrete para ${appt.client.name} (${phone}) - Faltam ${minsDiff} minutos`);
           await sendTextMessage(phone, msgToClient);
 
-          const msgToBarber = `💈 *Lembrete (Barbeiro)*\n\nO cliente ${appt.client.name} tem um horário agendado em breve (às *${timeFormatted}*).\n\nServiço(s): ${serviceNames}\nContato: ${phone}`;
-          await sendTextMessage('5569999630329', msgToBarber);
+          if (appt.barber?.phone) {
+            const msgToBarber = `💈 *Lembrete (Barbeiro)*\n\nO cliente ${appt.client.name} tem um horário agendado em breve (às *${timeFormatted}*).\n\nServiço(s): ${serviceNames}\nContato: ${phone}`;
+            await sendTextMessage(appt.barber.phone, msgToBarber);
+          }
 
           // Atualizar no DB para não mandar de novo
           await prisma.appointment.update({

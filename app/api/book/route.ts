@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     let finalBarberId = parsed.barberId && parsed.barberId !== 'any' ? parsed.barberId : null
 
-    const allBarbers = await prisma.user.findMany({ select: { id: true, name: true } })
+    const allBarbers = await prisma.user.findMany({ select: { id: true, name: true, phone: true } })
     if (finalBarberId && !allBarbers.some((barber) => barber.id === finalBarberId)) {
       throw new AppointmentRuleError('Barbeiro não encontrado.')
     }
@@ -114,8 +114,18 @@ export async function POST(req: NextRequest) {
     })
 
     // Send WhatsApp messages asynchronously
-    const timeFormatted = `${datetime.getHours().toString().padStart(2, '0')}:${datetime.getMinutes().toString().padStart(2, '0')}`
-    const dateFormatted = `${datetime.getDate().toString().padStart(2, '0')}/${(datetime.getMonth() + 1).toString().padStart(2, '0')}/${datetime.getFullYear()}`
+    const formatter = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Porto_Velho',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    const parts = formatter.formatToParts(datetime);
+    const p = Object.fromEntries(parts.map(part => [part.type, part.value]));
+    const timeFormatted = `${p.hour}:${p.minute}`;
+    const dateFormatted = `${p.day}/${p.month}/${p.year}`;
     
     const serviceNames = services.map(s => s.name).join(', ')
     
@@ -123,11 +133,13 @@ export async function POST(req: NextRequest) {
     const msgToClient = `✅ *Agendamento Recebido!*\n\nOlá, ${parsed.name}!\nSeu horário está agendado em *${tenantConfig.name}*.\n\n📅 Data: ${dateFormatted}\n⏰ Horário: ${timeFormatted}\n💈 Serviço(s): ${serviceNames}\n\nAgradecemos a preferência e aguardamos você!`;
     sendTextMessage(phone, msgToClient).catch(console.error);
 
-    // To Barber
-    const msgToBarber = `💈 *Novo Agendamento!*\n\nO cliente ${parsed.name} acabou de marcar um horário.\n\n📅 Data: ${dateFormatted}\n⏰ Horário: ${timeFormatted}\n💈 Serviço(s): ${serviceNames}\n📞 Contato: ${phone}`;
-    sendTextMessage('5569999630329', msgToBarber).catch(console.error);
-
     const finalBarber = allBarbers.find(b => b.id === appointment.barberId);
+
+    // To Barber
+    if (finalBarber?.phone) {
+      const msgToBarber = `💈 *Novo Agendamento!*\n\nO cliente ${parsed.name} acabou de marcar um horário.\n\n📅 Data: ${dateFormatted}\n⏰ Horário: ${timeFormatted}\n💈 Serviço(s): ${serviceNames}\n📞 Contato: ${phone}`;
+      sendTextMessage(finalBarber.phone, msgToBarber).catch(console.error);
+    }
 
     // Disparar Evento para Webhook (Fire-and-forget)
     // Risco conhecido: Como não há Outbox/Fila nesta fase, se o processo Node morrer

@@ -99,6 +99,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       }
     }
 
+    const mudouHorario = current.date.getTime() !== nextDate.getTime()
+
     const data: Prisma.AppointmentUpdateInput = {
       client: parsed.clientId ? { connect: { id: nextClientId } } : undefined,
       service: hasServiceChange ? { connect: { id: nextService.id } } : undefined,
@@ -109,6 +111,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       date: nextDate,
       notes: parsed.notes,
       status: nextStatus,
+      ...(mudouHorario && { reminderSent: false }),
     }
 
     const appointment = await prisma.appointment.update({
@@ -127,10 +130,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             console.error(`[Appointments PATCH] Invalid client phone for ${appointment.client.id}`);
           } else {
           
-          // Formatar data e hora
-          const { format } = require('date-fns');
-          const { ptBR } = require('date-fns/locale');
-          const dataFormatada = format(new Date(appointment.date), "EEEE, d 'de' MMMM 'às' HH:mm", { locale: ptBR });
+          // Formatar data e hora usando fuso horário correto
+          const formatter = new Intl.DateTimeFormat('pt-BR', {
+            timeZone: 'America/Porto_Velho',
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          const parts = formatter.formatToParts(new Date(appointment.date));
+          const p = Object.fromEntries(parts.map(part => [part.type, part.value]));
+          const dataFormatada = `${p.weekday}, ${p.day} de ${p.month} às ${p.hour}:${p.minute}`;
           
           const serviceNames = appointment.appointmentServices.length
             ? appointment.appointmentServices.map((item) => item.service.name).join(', ')
@@ -165,10 +176,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           },
         })
 
-        const ownerNumber = '5569999630329';
+        const adminPhone = process.env.ADMIN_PHONE || '5569999630329';
         const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount)
         const msg = `🟢 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
-        await sendTextMessage(ownerNumber, msg).catch((error) => console.error('WhatsApp message error:', error))
+        await sendTextMessage(adminPhone, msg).catch((error) => console.error('WhatsApp message error:', error))
       }
     }
 
