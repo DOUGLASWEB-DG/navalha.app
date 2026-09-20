@@ -3,8 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { tenantConfig } from '@/config/tenant'
-import { sendTextMessage } from '@/lib/whatsapp'
-import { dispatchWebhookEvent } from '@/lib/events'
+import { notifyAppointmentCreated } from '@/lib/notifications'
 import { normalizeBrazilPhone } from '@/lib/format'
 import {
   AppointmentRuleError,
@@ -113,64 +112,16 @@ export async function POST(req: NextRequest) {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable
     })
 
-    // Send WhatsApp messages asynchronously
-    const formatter = new Intl.DateTimeFormat('pt-BR', {
-      timeZone: 'America/Porto_Velho',
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    const parts = formatter.formatToParts(datetime);
-    const p = Object.fromEntries(parts.map(part => [part.type, part.value]));
-    const timeFormatted = `${p.hour}:${p.minute}`;
-    const dateFormatted = `${p.day}/${p.month}/${p.year}`;
-    
-    const serviceNames = services.map(s => s.name).join(', ')
-    
-    // To Client
-    const msgToClient = `✅ *Agendamento Recebido!*\n\nOlá, ${parsed.name}!\nSeu horário está agendado em *${tenantConfig.name}*.\n\n📅 Data: ${dateFormatted}\n⏰ Horário: ${timeFormatted}\n💈 Serviço(s): ${serviceNames}\n\nAgradecemos a preferência e aguardamos você!`;
-    sendTextMessage(phone, msgToClient).catch(console.error);
-
     const finalBarber = allBarbers.find(b => b.id === appointment.barberId);
-
-    // To Barber
-    if (finalBarber?.phone) {
-      const msgToBarber = `💈 *Novo Agendamento!*\n\nO cliente ${parsed.name} acabou de marcar um horário.\n\n📅 Data: ${dateFormatted}\n⏰ Horário: ${timeFormatted}\n💈 Serviço(s): ${serviceNames}\n📞 Contato: ${phone}`;
-      sendTextMessage(finalBarber.phone, msgToBarber).catch(console.error);
-    }
-
-    // Disparar Evento para Webhook (Fire-and-forget)
-    import('crypto').then(({ randomUUID }) => {
-      const eventId = randomUUID();
-      dispatchWebhookEvent({
-        eventId,
-        event: 'appointment.created',
-        occurredAt: new Date().toISOString(),
-        data: {
-          appointment: {
-            id: appointment.id,
-            date: appointment.date.toISOString(),
-            status: appointment.status,
-            totalPrice: Number(totals.price),
-            durationMins: totals.durationMins,
-            notes: parsed.notes
-          },
-          client: {
-            id: client.id,
-            name: client.name,
-            phone: client.phone
-          },
-          barber: finalBarber ? {
-            id: finalBarber.id,
-            name: finalBarber.name,
-            phone: finalBarber.phone || ''
-          } : null,
-          services: services.map(s => ({ id: s.id, name: s.name }))
-        }
-      });
-    });
+    
+    notifyAppointmentCreated({
+      appointment,
+      client,
+      barber: finalBarber,
+      services,
+      totalPrice: totals.price,
+      totalDurationMins: totals.durationMins
+    }).catch(console.error);
 
     return NextResponse.json({
       success: true,

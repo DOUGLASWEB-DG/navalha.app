@@ -15,6 +15,7 @@ import {
   getServiceTotals,
   normalizeServiceIds,
 } from '@/lib/appointment-services'
+import { notifyAppointmentCreated } from '@/lib/notifications'
 
 const createSchema = z.object({
   clientId: z.string().min(1),
@@ -163,6 +164,15 @@ export async function POST(req: NextRequest) {
     }, {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable
     })
+
+    notifyAppointmentCreated({
+      appointment,
+      client,
+      barber: appointment.barber,
+      services,
+      totalPrice: totals.price,
+      totalDurationMins: totals.durationMins
+    }).catch(console.error);
 
     return NextResponse.json(appointment, { status: 201 })
     } catch (error: any) {
