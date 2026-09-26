@@ -10,6 +10,28 @@ export interface NotificationPayload {
   totalDurationMins: number
 }
 
+export function resolvePhone(originalPhone: string | undefined | null): string | undefined {
+  if (!originalPhone) return undefined
+
+  const isSandboxEnabled = process.env.ENABLE_WHATSAPP_SANDBOX === 'true'
+  const sandboxPhone = process.env.TEST_OVERRIDE_PHONE
+
+  if (isSandboxEnabled) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[Sandbox] ERRO CRÍTICO: Sandbox ativado em PRODUÇÃO! Cancelando envio WhatsApp por segurança.')
+      return undefined
+    } else if (!sandboxPhone) {
+      console.error('[Sandbox] ERRO: ENABLE_WHATSAPP_SANDBOX ativo, mas TEST_OVERRIDE_PHONE ausente. Cancelando envio.')
+      return undefined
+    } else {
+      console.log(`[Sandbox] ATIVO: Redirecionando de ${originalPhone} para ${sandboxPhone}`)
+      return sandboxPhone
+    }
+  }
+
+  return originalPhone
+}
+
 export async function notifyAppointmentCreated(payload: NotificationPayload) {
   const { appointment, client, barber, services, totalPrice, totalDurationMins } = payload
   
@@ -28,27 +50,8 @@ export async function notifyAppointmentCreated(payload: NotificationPayload) {
   const serviceNames = services.map(s => s.name).join(', ')
 
   // --- HOMOLOGATION SANDBOX ---
-  let targetClientPhone: string | undefined = client.phone
-  let targetBarberPhone: string | undefined = barber?.phone
-
-  const isSandboxEnabled = process.env.ENABLE_WHATSAPP_SANDBOX === 'true'
-  const sandboxPhone = process.env.TEST_OVERRIDE_PHONE
-
-  if (isSandboxEnabled) {
-    if (process.env.NODE_ENV === 'production') {
-      console.error('[Sandbox] ERRO CRÍTICO: Sandbox ativado em PRODUÇÃO! Para proteger os clientes, TODAS as mensagens WhatsApp foram canceladas nesta requisição.')
-      targetClientPhone = undefined
-      targetBarberPhone = undefined
-    } else if (!sandboxPhone) {
-      console.error('[Sandbox] ERRO: ENABLE_WHATSAPP_SANDBOX ativo, mas TEST_OVERRIDE_PHONE ausente. Para evitar envios acidentais, as mensagens foram canceladas.')
-      targetClientPhone = undefined
-      targetBarberPhone = undefined
-    } else {
-      targetClientPhone = sandboxPhone
-      targetBarberPhone = sandboxPhone
-      console.log(`[Sandbox] ATIVO: Destinatários reais preservados. Redirecionando para ${sandboxPhone}`)
-    }
-  }
+  const targetClientPhone = resolvePhone(client.phone)
+  const targetBarberPhone = resolvePhone(barber?.phone)
 
   // 1. WhatsApp Evolution API (Mensagem Direta)
   if (targetClientPhone) {
