@@ -8,32 +8,63 @@ export async function GET(req: NextRequest) {
     const period = parseInt(searchParams.get('period') || '6')
     const now = new Date()
 
-    // ─── Dados mensais por período ────────────────────────────────────
-    const monthlyData: { month: string; receitas: number; despesas: number; saldo: number }[] = []
-    for (let i = period - 1; i >= 0; i--) {
+    const periodStart = startOfMonth(subMonths(now, period - 1))
+    const periodEnd = endOfMonth(now)
+
+    // ─── Disparo Paralelo Massivo ──────────────────────────────────────
+    const [
+      periodTransactions,
+      allIncomeReq,
+      allExpenseReq,
+      catBreakdown,
+    ] = await Promise.all([
+      // 1. Histórico do período
+      prisma.transaction.findMany({
+        where: { date: { gte: periodStart, lte: periodEnd } },
+        select: { amount: true, type: true, date: true }
+      }),
+      // 2. Totais de toda a vida
+      prisma.transaction.aggregate({ where: { type: 'INCOME' }, _sum: { amount: true } }),
+      // 3. Totais de toda a vida
+      prisma.transaction.aggregate({ where: { type: 'EXPENSE' }, _sum: { amount: true } }),
+      // 4. Breakdown de categorias do período
+      prisma.transaction.groupBy({
+        by: ['categoryId'] as any,
+        where: { type: 'EXPENSE', date: { gte: periodStart, lte: periodEnd }, categoryId: { not: null } } as any,
+        _sum: { amount: true },
+        orderBy: { _sum: { amount: 'desc' } } as any
+      })
+    ])
+
+    // ─── Processamento em Memória ────────────────────────────────────
+    const monthBoundaries = Array.from({ length: period }, (_, idx) => {
+      const i = period - 1 - idx
       const date = subMonths(now, i)
-      const start = startOfMonth(date)
-      const end = endOfMonth(date)
-
-      const income = await prisma.transaction.aggregate({
-        where: { type: 'INCOME', date: { gte: start, lte: end } },
-        _sum: { amount: true },
-      })
-      const expense = await prisma.transaction.aggregate({
-        where: { type: 'EXPENSE', date: { gte: start, lte: end } },
-        _sum: { amount: true },
-      })
-
-      const incomeVal = income._sum.amount ?? 0
-      const expenseVal = expense._sum.amount ?? 0
-
-      monthlyData.push({
+      return {
         month: date.toLocaleString('pt-BR', { month: 'short', year: '2-digit' }),
-        receitas: incomeVal,
-        despesas: expenseVal,
-        saldo: incomeVal - expenseVal,
-      })
+        start: startOfMonth(date),
+        end: endOfMonth(date),
+        receitas: 0,
+        despesas: 0
+      }
+    })
+
+    for (const t of periodTransactions) {
+      for (const m of monthBoundaries) {
+        if (t.date >= m.start && t.date <= m.end) {
+          if (t.type === 'INCOME') m.receitas += t.amount
+          else m.despesas += t.amount
+          break
+        }
+      }
     }
+
+    const monthlyData = monthBoundaries.map(m => ({
+      month: m.month,
+      receitas: m.receitas,
+      despesas: m.despesas,
+      saldo: m.receitas - m.despesas
+    }))
 
     // ─── Evolução do patrimônio (acumulado) ───────────────────────────
     const netWorthData = monthlyData.map((m, i) => {
@@ -42,33 +73,10 @@ export async function GET(req: NextRequest) {
     })
 
     // ─── Totais gerais ────────────────────────────────────────────────
-    const allIncome = await prisma.transaction.aggregate({
-      where: { type: 'INCOME' },
-      _sum: { amount: true },
-    })
-    const allExpense = await prisma.transaction.aggregate({
-      where: { type: 'EXPENSE' },
-      _sum: { amount: true },
-    })
-
-    const totalIncome = allIncome._sum.amount ?? 0
-    const totalExpense = allExpense._sum.amount ?? 0
+    const totalIncome = allIncomeReq._sum.amount ?? 0
+    const totalExpense = allExpenseReq._sum.amount ?? 0
 
     // ─── Breakdown por categoria (todo o período) ─────────────────────
-    const periodStart = startOfMonth(subMonths(now, period - 1))
-    const periodEnd = endOfMonth(now)
-
-    const catBreakdown = await prisma.transaction.groupBy({
-      by: ['categoryId'] as any,
-      where: {
-        type: 'EXPENSE',
-        date: { gte: periodStart, lte: periodEnd },
-        categoryId: { not: null },
-      } as any,
-      _sum: { amount: true },
-      orderBy: { _sum: { amount: 'desc' } } as any,
-    })
-
     const categoryIds = (catBreakdown as any[])
       .map((c: any) => c.categoryId)
       .filter((id: string | null): id is string => id !== null)

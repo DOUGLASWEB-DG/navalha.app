@@ -123,32 +123,33 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     // Enviar mensagem para o cliente quando for CONFIRMADO
     if (current.status !== 'CONFIRMED' && nextStatus === 'CONFIRMED') {
       try {
-        const clientPhone = appointment.client.phone;
-        if (clientPhone) {
-          const number = normalizeBrazilPhone(clientPhone);
+        const { resolvePhone } = await import('@/lib/notifications')
+        const targetPhone = resolvePhone(appointment.client.phone);
+        
+        if (targetPhone) {
+          const number = normalizeBrazilPhone(targetPhone);
           if (!number) {
-            console.error(`[Appointments PATCH] Invalid client phone for ${appointment.client.id}`);
+            console.error(`[Appointments PATCH] Invalid target phone for ${appointment.client.id}`);
           } else {
-          
-          // Formatar data e hora usando fuso horário correto
-          const formatter = new Intl.DateTimeFormat('pt-BR', {
-            timeZone: 'America/Porto_Velho',
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-          const parts = formatter.formatToParts(new Date(appointment.date));
-          const p = Object.fromEntries(parts.map(part => [part.type, part.value]));
-          const dataFormatada = `${p.weekday}, ${p.day} de ${p.month} às ${p.hour}:${p.minute}`;
-          
-          const serviceNames = appointment.appointmentServices.length
-            ? appointment.appointmentServices.map((item) => item.service.name).join(', ')
-            : appointment.service.name
-          const msg = `Olá, ${appointment.client.name}! Tudo bem?\n\nPassando para confirmar o seu agendamento de *${serviceNames}*.\n\n📅 Data: ${dataFormatada}\n\nSeu horário está confirmadíssimo! Te esperamos na barbearia. 💈✂️`;
-          
-          await sendTextMessage(number, msg).catch(e => console.error('WhatsApp client msg error:', e));
+            // Formatar data e hora usando fuso horário correto
+            const formatter = new Intl.DateTimeFormat('pt-BR', {
+              timeZone: 'America/Porto_Velho',
+              weekday: 'long',
+              day: 'numeric',
+              month: 'long',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            const parts = formatter.formatToParts(new Date(appointment.date));
+            const p = Object.fromEntries(parts.map(part => [part.type, part.value]));
+            const dataFormatada = `${p.weekday}, ${p.day} de ${p.month} às ${p.hour}:${p.minute}`;
+            
+            const serviceNames = appointment.appointmentServices.length
+              ? appointment.appointmentServices.map((item) => item.service.name).join(', ')
+              : appointment.service.name
+            const msg = `Olá, ${appointment.client.name}! Tudo bem?\n\nPassando para confirmar o seu agendamento de *${serviceNames}*.\n\n📅 Data: ${dataFormatada}\n\nSeu horário está confirmadíssimo! Te esperamos na barbearia. 💈✂️`;
+            
+            await sendTextMessage(number, msg).catch(e => console.error('WhatsApp client msg error:', e));
           }
         }
 
@@ -211,8 +212,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
         const adminPhone = process.env.ADMIN_PHONE || '5569999630329';
         const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount)
-        const msg = `🟢 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
-        await sendTextMessage(adminPhone, msg).catch((error) => console.error('WhatsApp message error:', error))
+        const msgToAdmin = `💰 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
+        await sendTextMessage(adminPhone, msgToAdmin).catch((error) => console.error('WhatsApp admin message error:', error))
+
+        // Notify client about completion
+        const { resolvePhone } = await import('@/lib/notifications')
+        const targetClientPhone = resolvePhone(appt.client.phone);
+        if (targetClientPhone) {
+           const number = normalizeBrazilPhone(targetClientPhone);
+           if (number) {
+             const msgToClient = `✅ *Atendimento Concluído*\n\nOlá, ${appt.client.name}! Seu atendimento foi finalizado.\n\nMuito obrigado pela preferência! Esperamos ver você novamente em breve. 💈✂️`;
+             await sendTextMessage(number, msgToClient).catch(e => console.error('WhatsApp client completion error:', e));
+           }
+        }
 
         // Disparar Evento para Webhook (Fire-and-forget)
         import('crypto').then(({ randomUUID }) => {

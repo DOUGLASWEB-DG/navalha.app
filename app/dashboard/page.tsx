@@ -22,10 +22,12 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 
+import { ErrorState } from '@/components/shared/data-state'
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export default function DashboardPage() {
-  const { data, error, isLoading } = useSWR('/api/dashboard', fetcher, {
+  const { data, error, isLoading, mutate } = useSWR('/api/dashboard', fetcher, {
     refreshInterval: 30000,
   })
 
@@ -34,17 +36,7 @@ export default function DashboardPage() {
   }
 
   if (error) {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-xl font-semibold text-destructive">
-          Oops! Algo deu errado.
-        </h2>
-        <p className="text-muted-foreground mt-2">
-          Não foi possível carregar os dados do dashboard. Tente novamente mais
-          tarde.
-        </p>
-      </div>
-    )
+    return <ErrorState message="Não foi possível carregar os dados do painel." onRetry={() => mutate()} />
   }
 
   const {
@@ -342,7 +334,8 @@ function getGreeting() {
 
 function DashboardSkeleton() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6 animate-in fade-in duration-500">
+      <p className="text-sm text-muted-foreground font-medium animate-pulse mb-2">Atualizando seu painel...</p>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Skeleton className="mb-2 h-7 w-52" />

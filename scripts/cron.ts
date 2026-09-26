@@ -62,62 +62,67 @@ async function checkReminders() {
       
       // Se faltar entre 30 a 70 minutos (1 hora em média), enviamos.
       if (minsDiff <= 70 && minsDiff >= 30) {
-        let phone = appt.client.phone;
-        if (phone) {
-          phone = normalizeBrazilPhone(phone) || '';
-          if (!phone) continue;
+        
+        // --- HOMOLOGATION SANDBOX ---
+        const { resolvePhone } = await import('../lib/notifications');
+        const targetClientPhone = resolvePhone(appt.client.phone);
+        const targetBarberPhone = resolvePhone(appt.barber?.phone);
 
-          const timeFormatter = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Porto_Velho', hour: '2-digit', minute: '2-digit' });
-          const timeFormatted = timeFormatter.format(new Date(appt.date));
-          const serviceNames = appt.appointmentServices.length
-            ? appt.appointmentServices.map((item) => item.service.name).join(', ')
-            : appt.service.name;
-          const msgToClient = `⏰ *Lembrete de Agendamento*\n\nOlá, ${appt.client.name}! Tudo bem?\nPassando para confirmar o seu horário marcado para hoje às *${timeFormatted}*.\n\n💈 Serviço(s): ${serviceNames}\n\nAguardamos você na barbearia!`;
-          console.log(`[Cron] Enviando lembrete para ${appt.client.name} (${phone}) - Faltam ${minsDiff} minutos`);
-          await sendTextMessage(phone, msgToClient);
+        if (targetClientPhone) {
+          const phone = normalizeBrazilPhone(targetClientPhone);
+          if (phone) {
+            const timeFormatter = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Porto_Velho', hour: '2-digit', minute: '2-digit' });
+            const timeFormatted = timeFormatter.format(new Date(appt.date));
+            const serviceNames = appt.appointmentServices.length
+              ? appt.appointmentServices.map((item) => item.service.name).join(', ')
+              : appt.service.name;
+            const msgToClient = `⏰ *Lembrete de Agendamento*\n\nOlá, ${appt.client.name}! Tudo bem?\nPassando para confirmar o seu horário marcado para hoje às *${timeFormatted}*.\n\n💈 Serviço(s): ${serviceNames}\n\nAguardamos você na barbearia!`;
+            console.log(`[Cron] Enviando lembrete para ${appt.client.name} (${phone}) - Faltam ${minsDiff} minutos`);
+            await sendTextMessage(phone, msgToClient);
 
-          if (appt.barber?.phone) {
-            const msgToBarber = `💈 *Lembrete (Barbeiro)*\n\nO cliente ${appt.client.name} tem um horário agendado em breve (às *${timeFormatted}*).\n\nServiço(s): ${serviceNames}\nContato: ${phone}`;
-            await sendTextMessage(appt.barber.phone, msgToBarber);
-          }
+            if (targetBarberPhone) {
+              const msgToBarber = `💈 *Lembrete (Barbeiro)*\n\nO cliente ${appt.client.name} tem um horário agendado em breve (às *${timeFormatted}*).\n\nServiço(s): ${serviceNames}\nContato: ${appt.client.phone}`;
+              await sendTextMessage(targetBarberPhone, msgToBarber);
+            }
 
-          // Atualizar no DB para não mandar de novo
-          await prisma.appointment.update({
-            where: { id: appt.id },
-            data: { reminderSent: true }
-          });
+            // Atualizar no DB para não mandar de novo
+            await prisma.appointment.update({
+              where: { id: appt.id },
+              data: { reminderSent: true }
+            });
 
-          // Disparar Evento para Webhook (Fire-and-forget)
-          import('crypto').then(({ randomUUID }) => {
-            const eventId = randomUUID();
-            import('../lib/events').then(({ dispatchWebhookEvent }) => {
-              dispatchWebhookEvent({
-                eventId,
-                event: 'appointment.reminder_due',
-                occurredAt: new Date().toISOString(),
-                data: {
-                  appointment: {
-                    id: appt.id,
-                    date: appt.date.toISOString(),
-                    status: appt.status
-                  },
-                  client: {
-                    id: appt.client.id,
-                    name: appt.client.name,
-                    phone: phone
-                  },
-                  barber: appt.barber ? {
-                    id: appt.barber.id,
-                    name: appt.barber.name,
-                    phone: appt.barber.phone || ''
-                  } : null,
-                  services: appt.appointmentServices.length
-                    ? appt.appointmentServices.map(item => ({ id: item.service.id, name: item.service.name }))
-                    : [{ id: appt.service.id, name: appt.service.name }]
-                }
+            // Disparar Evento para Webhook (Fire-and-forget)
+            import('crypto').then(({ randomUUID }) => {
+              const eventId = randomUUID();
+              import('../lib/events').then(({ dispatchWebhookEvent }) => {
+                dispatchWebhookEvent({
+                  eventId,
+                  event: 'appointment.reminder_due',
+                  occurredAt: new Date().toISOString(),
+                  data: {
+                    appointment: {
+                      id: appt.id,
+                      date: appt.date.toISOString(),
+                      status: appt.status
+                    },
+                    client: {
+                      id: appt.client.id,
+                      name: appt.client.name,
+                      phone: phone
+                    },
+                    barber: appt.barber ? {
+                      id: appt.barber.id,
+                      name: appt.barber.name,
+                      phone: appt.barber.phone || ''
+                    } : null,
+                    services: appt.appointmentServices.length
+                      ? appt.appointmentServices.map(item => ({ id: item.service.id, name: item.service.name }))
+                      : [{ id: appt.service.id, name: appt.service.name }]
+                  }
+                });
               });
             });
-          });
+          }
         }
       }
     }

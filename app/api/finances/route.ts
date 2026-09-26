@@ -32,20 +32,56 @@ export async function GET(req: NextRequest) {
       where.type = type
     }
 
-    const transactions = await prisma.transaction.findMany({
-      where,
-      orderBy: { date: 'desc' },
-      include: {
-        appointment: {
-          include: { client: true, service: true },
+    const [transactions, groupedSummary] = await Promise.all([
+      prisma.transaction.findMany({
+        where,
+        orderBy: { date: 'desc' },
+        select: {
+          id: true,
+          type: true,
+          amount: true,
+          description: true,
+          category: true,
+          categoryId: true,
+          appointmentId: true,
+          date: true,
+          createdAt: true,
+          updatedAt: true,
+          appointment: {
+            select: {
+              id: true,
+              client: { select: { id: true, name: true } },
+              service: { select: { id: true, name: true } },
+            },
+          },
+          categoryRef: {
+            select: {
+              id: true,
+              name: true,
+              icon: true,
+              color: true,
+            },
+          },
         },
-        categoryRef: true,
-      },
-    })
+      }),
+      prisma.transaction.groupBy({
+        by: ['type'],
+        where,
+        _sum: { amount: true },
+      }),
+    ])
 
     // Summary
-    const income = transactions.filter((t) => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0)
-    const expense = transactions.filter((t) => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0)
+    let income = 0
+    let expense = 0
+
+    for (const group of groupedSummary) {
+      if (group.type === 'INCOME') {
+        income = group._sum.amount ?? 0
+      } else if (group.type === 'EXPENSE') {
+        expense = group._sum.amount ?? 0
+      }
+    }
 
     return NextResponse.json({
       transactions,

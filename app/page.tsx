@@ -309,8 +309,8 @@ export default function LandingPage() {
       {/* Serviços */}
       <section id="servicos" className="py-16 px-6 max-w-5xl mx-auto border-t border-border/40">
         <div className="text-center mb-10">
-          <p className="text-xs text-primary tracking-widest font-semibold mb-1">O Que Oferecemos</p>
-          <h2 className="text-3xl font-bold ">Nossos Serviços</h2>
+          <p className="text-xs text-primary tracking-widest font-semibold mb-1">Nosso Portifólio</p>
+          <h2 className="text-3xl font-bold ">Nossa Galeria </h2>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

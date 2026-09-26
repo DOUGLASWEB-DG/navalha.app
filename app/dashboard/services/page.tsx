@@ -17,12 +17,14 @@ import { ServiceFormModal } from '@/components/services/service-form-modal'
 
 import { PageHeader } from '@/components/dashboard/page-header'
 
+import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export default function ServicesPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingService, setEditingService] = useState<any>(null)
-  const { data: services, mutate } = useSWR('/api/services', fetcher)
+  const { data: services, error, isLoading, mutate } = useSWR('/api/services', fetcher)
 
   async function deleteService(id: string, name: string) {
     const ok = await confirmAction({
@@ -55,7 +57,11 @@ export default function ServicesPage() {
 
       {/* Lista Inteligente de Serviços */}
       <div className="w-full">
-        {services && services.length > 0 ? (
+        {isLoading ? (
+          <GridSkeleton message="Carregando serviços..." />
+        ) : error ? (
+          <ErrorState message="Não foi possível carregar os serviços." onRetry={() => mutate()} />
+        ) : services && services.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {services.map((svc: any) => (
               <div

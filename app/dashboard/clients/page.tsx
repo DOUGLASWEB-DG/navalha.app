@@ -28,6 +28,8 @@ import { ClientFormModal } from '@/components/clients/client-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { formatBrazilPhone, getInitial, normalizeBrazilPhone } from '@/lib/format'
 
+import { ErrorState, ListSkeleton } from '@/components/shared/data-state'
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 export default function ClientsPage() {
@@ -36,7 +38,7 @@ export default function ClientsPage() {
   const [editingClient, setEditingClient] = useState<any>(null)
 
   const url = `/api/clients${search ? `?search=${encodeURIComponent(search)}` : ''}`
-  const { data: clients, mutate } = useSWR(url, fetcher)
+  const { data: clients, error, isLoading, mutate } = useSWR(url, fetcher)
 
   async function deleteClient(id: string, name: string) {
     const ok = await confirmAction({
@@ -68,7 +70,7 @@ export default function ClientsPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       <PageHeader
         title="Clientes"
-        description={`${clients?.length ?? 0} clientes cadastrados no sistema`}
+        description={!isLoading && !error ? `${clients?.length ?? 0} clientes cadastrados no sistema` : "Gerencie seus clientes"}
       >
         <Button
           onClick={() => { setEditingClient(null); setModalOpen(true) }}
@@ -94,7 +96,11 @@ export default function ClientsPage() {
 
       {/* Lista Inteligente de Clientes */}
       <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-        {clients && clients.length > 0 ? (
+        {isLoading ? (
+          <div className="p-4"><ListSkeleton message="Carregando clientes..." /></div>
+        ) : error ? (
+          <ErrorState message="Não foi possível carregar os clientes." onRetry={() => mutate()} />
+        ) : clients && clients.length > 0 ? (
           <div className="flex flex-col gap-3 p-3 lg:gap-0 lg:divide-y lg:divide-border lg:p-0">
             {clients.map((client: any) => {
               const lastAppt = client.appointments?.[0]
