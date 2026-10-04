@@ -58,13 +58,14 @@ export async function POST(req: NextRequest) {
     }
 
     const phone = normalizeBrazilPhone(parsed.phone)!
-    const client = await prisma.client.upsert({
-      where: { phone },
-      update: { name: parsed.name },
-      create: { name: parsed.name, phone },
-    })
 
     const appointment = await prisma.$transaction(async (tx) => {
+      const client = await tx.client.upsert({
+        where: { phone },
+        update: { name: parsed.name },
+        create: { name: parsed.name, phone },
+      })
+
       const overlappingAppointments = await tx.appointment.findMany({
         where: {
           date: {
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
           appointmentServices: { create: appointmentServiceCreateData(services) },
           barberId: freeBarber.id,
           date: datetime,
-          notes: parsed.notes,
+          notes: parsed.notes ? parsed.notes.slice(0, 50) : undefined,
           status: 'PENDING',
         },
         include: { service: true, appointmentServices: { include: { service: true } }, client: true },
@@ -116,7 +117,7 @@ export async function POST(req: NextRequest) {
     
     notifyAppointmentCreated({
       appointment,
-      client,
+      client: appointment.client,
       barber: finalBarber,
       services,
       totalPrice: totals.price,
