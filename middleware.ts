@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify, SignJWT } from 'jose'
 
-// Throwing at module level breaks Next.js build if env var is missing during build time
+import { getJwtSecretKey } from '@/lib/jwt'
 
 const SESSION_COOKIE = 'barberos_session'
-const SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_for_development_only_123456789'
-)
 
 const protectedPaths = ['/dashboard']
 const publicPaths = ['/login', '/', '/book', '/api/auth/login', '/api/book']
@@ -23,7 +20,8 @@ export async function middleware(request: NextRequest) {
 
   if (token) {
     try {
-      const { payload } = await jwtVerify(token, SECRET_KEY)
+      const secretKey = getJwtSecretKey()
+      const { payload } = await jwtVerify(token, secretKey)
       userRole = payload.role as string
       sessionId = payload.userId as string
       sessionStart = (payload.sessionStart as number) || Date.now()
@@ -52,7 +50,7 @@ export async function middleware(request: NextRequest) {
           .setProtectedHeader({ alg: 'HS256' })
           .setIssuedAt()
           .setExpirationTime('2h')
-          .sign(SECRET_KEY)
+          .sign(secretKey)
       }
     } catch {
       // Invalid or expired token

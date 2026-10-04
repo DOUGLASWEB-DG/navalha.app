@@ -1,12 +1,9 @@
 import { cookies } from 'next/headers'
 import prisma from '@/lib/prisma'
 import { SignJWT, jwtVerify } from 'jose'
-// Throwing at module level breaks Next.js build if env var is missing during build time
+import { getJwtSecretKey } from '@/lib/jwt'
 
 const SESSION_COOKIE = 'barberos_session'
-const SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_for_development_only_123456789'
-)
 
 export async function getSession() {
   const cookieStore = await cookies()
@@ -15,7 +12,8 @@ export async function getSession() {
   if (!token) return null
 
   try {
-    const { payload } = await jwtVerify(token, SECRET_KEY)
+    const secretKey = getJwtSecretKey()
+    const { payload } = await jwtVerify(token, secretKey)
     const userId = payload.userId as string
 
     if (!userId) return null
@@ -30,9 +28,21 @@ export async function getSession() {
   }
 }
 
+export async function requireAdmin() {
+  const user = await getSession()
+  if (!user) {
+    return { error: 'Não autenticado.', status: 401 as const, user: null }
+  }
+  if (user.role !== 'ADMIN') {
+    return { error: 'Acesso negado. Apenas administradores podem executar esta ação.', status: 403 as const, user: null }
+  }
+  return { error: null, status: 200 as const, user }
+}
+
 export async function verifySessionToken(token: string) {
   try {
-    const { payload } = await jwtVerify(token, SECRET_KEY)
+    const secretKey = getJwtSecretKey()
+    const { payload } = await jwtVerify(token, secretKey)
     return payload
   } catch {
     return null
@@ -42,12 +52,13 @@ export async function verifySessionToken(token: string) {
 export async function createSession(userId: string, role: string) {
   const cookieStore = await cookies()
   const sessionStart = Date.now()
+  const secretKey = getJwtSecretKey()
   
   const token = await new SignJWT({ userId, role, sessionStart })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('2h')
-    .sign(SECRET_KEY)
+    .sign(secretKey)
 
   const options = {
     httpOnly: true,
