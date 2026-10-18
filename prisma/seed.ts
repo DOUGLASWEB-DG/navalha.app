@@ -2,7 +2,10 @@ import { PrismaClient, Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { DEFAULT_BARBEARIA_ID } from '../lib/tenant-host'
 import { seedDefaultCategories } from './seed-data'
+import { assertLocalDatabase } from '../scripts/local-db-guard'
 
+// Antes de criar o client: o seed escreve dados e nunca roda fora do banco local
+assertLocalDatabase('seed')
 const prisma = new PrismaClient()
 
 async function main() {

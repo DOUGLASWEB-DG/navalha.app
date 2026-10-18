@@ -1,5 +1,9 @@
 import crypto from 'node:crypto'
 import { DEFAULT_BARBEARIA_ID } from './lib/tenant-host'
+import { assertLocalDatabase } from './scripts/local-db-guard'
+
+// Cria e apaga dados de teste: nunca fora do banco local
+assertLocalDatabase('test-concurrency')
 
 async function runTest() {
   const url = 'http://localhost:3000/api/book'

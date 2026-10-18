@@ -2,21 +2,16 @@
 // ids fixos "b-*", e usuários de teste da América (smoke-*). Senha de todos: Smoke-Teste-2026.
 // Recria do zero a cada execução (apaga B e os usuários smoke antes). SÓ roda em banco local.
 //
-// Uso: DATABASE_URL="postgresql://...@localhost:5440/barberos" npx tsx tests/fixtures/tenant-b.ts
+// Uso: npm run test:fixture
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { DEFAULT_BARBEARIA_ID } from '../../lib/tenant-host'
 import { seedDefaultCategories } from '../../prisma/seed-data'
+import { assertLocalDatabase } from '../../scripts/local-db-guard'
 import { B_ID, FIXTURE_PASSWORD } from './constants'
 
-const databaseUrl = process.env.DATABASE_URL ?? ''
-const host = (() => { try { return new URL(databaseUrl).hostname } catch { return '' } })()
-if (!['localhost', '127.0.0.1'].includes(host)) {
-  // Senhas conhecidas e exclusão de dados: nunca em banco remoto (o .env aponta para produção)
-  console.error(`[fixture] Recusado: DATABASE_URL precisa ser local (host atual: "${host || 'vazio'}").`)
-  process.exit(1)
-}
-
+// Senhas conhecidas e exclusão de dados: nunca em banco remoto
+assertLocalDatabase('test:fixture')
 const prisma = new PrismaClient()
 
 async function reset() {

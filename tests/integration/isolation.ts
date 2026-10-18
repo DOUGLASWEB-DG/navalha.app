@@ -1,9 +1,9 @@
 // Suíte de isolamento entre barbearias, contra um servidor real.
 //
 // Preparo (banco LOCAL; a fixture e esta suíte recusam banco remoto):
-//   1. DATABASE_URL=<local> npx tsx tests/fixtures/tenant-b.ts
+//   1. npm run test:fixture
 //   2. npm run build && TENANT_ROOT_DOMAIN=navalha.app npx next start -p 3130
-//   3. DATABASE_URL=<local> TEST_PORT=3130 npm run test:isolation
+//   3. TEST_PORT=3130 npm run test:isolation
 //
 // O Host é enviado explicitamente para 127.0.0.1 (america.navalha.app e teste-b.navalha.app não precisam
 // existir no DNS). Os dados da barbearia B não podem mudar e nada pode ser criado em nenhuma barbearia.
@@ -12,6 +12,9 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { PrismaClient } from '@prisma/client'
 import { B_ID, FIXTURE_PASSWORD } from '../fixtures/constants'
+import { assertLocalDatabase } from '../../scripts/local-db-guard'
+
+assertLocalDatabase('test:isolation')
 
 const port = Number(process.env.TEST_PORT ?? 3130)
 const A = 'america.navalha.app'
@@ -80,8 +83,6 @@ const route = (method: string, template: string) => covered.add(`${method} ${tem
 const leaks = (text: string) => B_MARKERS.filter((marker) => text.includes(marker))
 
 async function main() {
-  const host = (() => { try { return new URL(process.env.DATABASE_URL ?? '').hostname } catch { return '' } })()
-  if (!['localhost', '127.0.0.1'].includes(host)) throw new Error(`DATABASE_URL precisa ser local (host atual: "${host || 'vazio'}")`)
 
   const bBefore = await scalar(B_SNAPSHOT_SQL)
   const countsBefore = await scalar(COUNTS_SQL)
