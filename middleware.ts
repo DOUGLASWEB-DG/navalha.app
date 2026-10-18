@@ -2,14 +2,31 @@ import { NextRequest, NextResponse } from 'next/server'
 import { jwtVerify, SignJWT } from 'jose'
 
 import { getJwtSecretKey } from '@/lib/jwt'
+import { resolveBarbeariaByHost } from '@/lib/tenant'
 
 const SESSION_COOKIE = 'barberos_session'
 
 const protectedPaths = ['/dashboard']
 const publicPaths = ['/login', '/', '/book', '/api/auth/login', '/api/book']
 
+function tenantNotFound(pathname: string) {
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.json({ error: 'Barbearia não encontrada.' }, { status: 404 })
+  }
+  return new NextResponse(
+    '<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Página não encontrada</title><p>Página não encontrada.</p></html>',
+    { status: 404, headers: { 'content-type': 'text/html; charset=utf-8' } }
+  )
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // Barreira de tenant: host sem barbearia ativa (desconhecido, inativo, domínio raiz, reservado) é 404
+  // em páginas e APIs. Os handlers revalidam por conta própria; esta barreira não substitui o filtro deles.
+  const barbearia = await resolveBarbeariaByHost(request.headers.get('host'))
+  if (!barbearia) return tenantNotFound(pathname)
+
   const token = request.cookies.get(SESSION_COOKIE)?.value
 
   let userRole = null
@@ -104,6 +121,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+  // Node.js (estável desde o Next 15.5): a barreira de tenant consulta o banco via Prisma.
+  runtime: 'nodejs',
   matcher: [
     /*
      * Match all request paths except:

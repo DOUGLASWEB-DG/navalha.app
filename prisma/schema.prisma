@@ -15,6 +15,7 @@ model Barbearia {
   id           String         @id @default(cuid())
   name         String
   subdomain    String         @unique // ex.: "america" em america.navalha.app
+  customDomain String?        @unique // domínio próprio, normalizado (ex.: "americabarbearia.tech")
   timezone     String         @default("America/Porto_Velho") // IANA; usado para agenda e lembretes
   active       Boolean        @default(true)
   createdAt    DateTime       @default(now())
@@ -156,6 +157,7 @@ model Category {
   barbearia    Barbearia     @relation(fields: [barbeariaId], references: [id])
   transactions Transaction[]
 
+  @@unique([barbeariaId, name])
   @@index([barbeariaId])
 }
 

@@ -1,6 +1,6 @@
 import { PrismaClient, CategoryType, Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-import { DEFAULT_BARBEARIA_ID } from '../lib/tenant'
+import { DEFAULT_BARBEARIA_ID } from '../lib/tenant-host'
 
 const prisma = new PrismaClient()
 

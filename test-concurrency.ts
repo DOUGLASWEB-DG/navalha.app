@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { DEFAULT_BARBEARIA_ID } from './lib/tenant'
+import { DEFAULT_BARBEARIA_ID } from './lib/tenant-host'
 
 async function runTest() {
   const url = 'http://localhost:3000/api/book'
