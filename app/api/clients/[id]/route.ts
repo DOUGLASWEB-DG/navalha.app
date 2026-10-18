@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { normalizeBrazilPhone } from '@/lib/format'
+import { requireAdmin } from '@/lib/auth'
 
 const updateSchema = z.object({
   name: z.string().trim().min(1).optional(),
@@ -37,6 +38,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const auth = await requireAdmin()
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
     const { id } = await params
     // Soft delete: inativar em vez de deletar
     await prisma.client.update({

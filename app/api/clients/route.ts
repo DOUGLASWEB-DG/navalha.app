@@ -37,16 +37,34 @@ export async function GET(req: NextRequest) {
       },
       include: {
         _count: { select: { appointments: true } },
-        appointments: {
-          take: 1,
-          orderBy: { date: 'desc' },
-          include: { service: true },
-        },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { name: 'asc' },
     })
 
-    return NextResponse.json(clients)
+    // Estatísticas por cliente em duas agregações (sem consulta por cliente).
+    const clientIds = clients.map((client) => client.id)
+    const [completed, upcoming] = await Promise.all([
+      prisma.appointment.groupBy({
+        by: ['clientId'],
+        where: { clientId: { in: clientIds }, status: 'COMPLETED' },
+        _count: { _all: true },
+        _max: { date: true },
+      }),
+      prisma.appointment.groupBy({
+        by: ['clientId'],
+        where: { clientId: { in: clientIds }, status: { in: ['PENDING', 'CONFIRMED'] }, date: { gte: new Date() } },
+        _min: { date: true },
+      }),
+    ])
+    const completedByClient = new Map(completed.map((row) => [row.clientId, row]))
+    const upcomingByClient = new Map(upcoming.map((row) => [row.clientId, row]))
+
+    return NextResponse.json(clients.map((client) => ({
+      ...client,
+      completedCount: completedByClient.get(client.id)?._count._all ?? 0,
+      lastCompletedAt: completedByClient.get(client.id)?._max.date ?? null,
+      nextAppointmentAt: upcomingByClient.get(client.id)?._min.date ?? null,
+    })))
   } catch (error) {
     console.error('[Clients GET]', error)
     return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 })
