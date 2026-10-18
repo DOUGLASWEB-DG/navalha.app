@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 const createSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -30,6 +31,7 @@ export async function POST(req: NextRequest) {
 
     const goal = await prisma.goal.create({
       data: {
+        barbeariaId: await getCurrentBarbeariaId(),
         title: parsed.title,
         type: parsed.type,
         targetAmount: parsed.targetAmount,

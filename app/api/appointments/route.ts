@@ -17,6 +17,7 @@ import {
   normalizeServiceIds,
 } from '@/lib/appointment-services'
 import { notifyAppointmentCreated } from '@/lib/notifications'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 const createSchema = z.object({
   clientId: z.string().min(1),
@@ -127,6 +128,7 @@ export async function POST(req: NextRequest) {
       throw new AppointmentRuleError('Barbeiro não encontrado.')
     }
     const candidates = barberId ? barbers.filter((barber) => barber.id === barberId) : barbers
+    const barbeariaId = await getCurrentBarbeariaId()
     const appointment = await prisma.$transaction(async (tx) => {
       const appointments = await tx.appointment.findMany({
         where: { status: { not: AppointmentStatus.CANCELED }, barberId: { in: candidates.map((barber) => barber.id) } },
@@ -145,6 +147,7 @@ export async function POST(req: NextRequest) {
 
       return await tx.appointment.create({
         data: {
+          barbearia: { connect: { id: barbeariaId } },
           client: { connect: { id: client.id } },
           service: { connect: { id: services[0].id } }, // FIXME: legacy field
           appointmentServices: { create: appointmentServiceCreateData(services) },

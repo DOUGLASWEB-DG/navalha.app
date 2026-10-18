@@ -1,5 +1,6 @@
 import { PrismaClient, CategoryType, Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { DEFAULT_BARBEARIA_ID } from '../lib/tenant'
 
 const prisma = new PrismaClient()
 
@@ -8,6 +9,19 @@ async function main() {
   if (!adminPassword || adminPassword.length < 12) {
     throw new Error('SEED_ADMIN_PASSWORD precisa estar definido (mínimo 12 caracteres).')
   }
+
+  // Barbearia padrão. Via migrate deploy ela já existe (criada pela migration do Bloco 2);
+  // via db push não, por isso o upsert. Barbearia existente nunca é alterada.
+  await prisma.barbearia.upsert({
+    where: { id: DEFAULT_BARBEARIA_ID },
+    update: {},
+    create: {
+      id: DEFAULT_BARBEARIA_ID,
+      name: 'América Barbearia',
+      subdomain: 'america',
+      timezone: 'America/Porto_Velho',
+    },
+  })
 
   // ─── Seed Categorias Financeiras ────────────────────────────────────
   const categoriesData = [
@@ -34,7 +48,7 @@ async function main() {
     await prisma.category.upsert({
       where: { id: cat.id },
       update: {},
-      create: cat,
+      create: { ...cat, barbeariaId: DEFAULT_BARBEARIA_ID },
     })
   }
 
@@ -48,6 +62,7 @@ async function main() {
     },
     create: {
       id: 'user-admin',
+      barbeariaId: DEFAULT_BARBEARIA_ID,
       name: 'Administrador',
       email: 'admin@administrador.com',
       password: hashedPassword,

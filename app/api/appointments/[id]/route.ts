@@ -198,6 +198,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           where: { appointmentId: id },
           update: {},
           create: {
+            barbeariaId: appt.barbeariaId, // a receita pertence à mesma barbearia do agendamento
             type: 'INCOME',
             amount: getAppointmentServiceTotals(appt).price,
             description: `${getAppointmentServiceSummary(appt).namesJoined} — ${appt.client.name}`,

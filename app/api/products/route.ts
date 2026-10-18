@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 export async function GET() {
   try {
@@ -19,6 +20,7 @@ export async function POST(req: NextRequest) {
     
     const product = await prisma.product.create({
       data: {
+        barbeariaId: await getCurrentBarbeariaId(),
         name,
         description,
         price: Number(price),

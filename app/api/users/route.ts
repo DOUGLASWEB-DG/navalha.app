@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 const createUserSchema = z.object({
   name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres'),
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
     
     const user = await prisma.user.create({
       data: {
+        barbeariaId: await getCurrentBarbeariaId(),
         name: parsed.name,
         email: parsed.email,
         password: hashedPassword,

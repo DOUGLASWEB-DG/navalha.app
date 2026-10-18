@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { requireAdmin } from '@/lib/auth'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 const createSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const parsed = createSchema.parse(body)
 
-    const service = await prisma.service.create({ data: parsed })
+    const service = await prisma.service.create({ data: { ...parsed, barbeariaId: await getCurrentBarbeariaId() } })
     return NextResponse.json(service, { status: 201 })
   } catch (error) {
     console.error('[Services POST]', error)

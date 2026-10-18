@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 export async function GET() {
   try {
@@ -112,9 +113,11 @@ export async function POST(req: NextRequest) {
       }
 
       // Salvar alertas no banco
+      const barbeariaId = await getCurrentBarbeariaId()
       for (const alert of newAlerts) {
         await prisma.financeAlert.create({
           data: {
+            barbeariaId,
             type: alert.type as any,
             message: alert.message,
             severity: alert.severity as any,

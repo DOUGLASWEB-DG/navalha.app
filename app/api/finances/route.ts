@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import { sendTextMessage } from '@/lib/whatsapp'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 const createSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE']),
@@ -111,6 +112,7 @@ export async function POST(req: NextRequest) {
 
     const transaction = await prisma.transaction.create({
       data: {
+        barbeariaId: await getCurrentBarbeariaId(),
         type: parsed.type,
         amount: parsed.amount,
         description: parsed.description,

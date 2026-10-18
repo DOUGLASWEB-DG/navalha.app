@@ -10,56 +10,96 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+// Tenant: cada barbearia isola seus dados operacionais pelo barbeariaId.
+model Barbearia {
+  id           String         @id @default(cuid())
+  name         String
+  subdomain    String         @unique // ex.: "america" em america.navalha.app
+  timezone     String         @default("America/Porto_Velho") // IANA; usado para agenda e lembretes
+  active       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  users        User[]
+  clients      Client[]
+  services     Service[]
+  appointments Appointment[]
+  transactions Transaction[]
+  categories   Category[]
+  alerts       FinanceAlert[]
+  goals        Goal[]
+  products     Product[]
+}
+
 model Client {
   id           String        @id @default(cuid())
+  barbeariaId  String
   name         String
-  phone        String        @unique
+  phone        String
   email        String?
   notes        String?
   isActive     Boolean       @default(true) // <-- Campo para soft delete
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  barbearia    Barbearia     @relation(fields: [barbeariaId], references: [id])
   appointments Appointment[]
+
+  // Mesmo telefone pode ser cliente de barbearias diferentes
+  @@unique([barbeariaId, phone])
 }
 
 model Service {
-  id           String        @id @default(cuid())
-  name         String
-  description  String?
-  price        Float
-  durationMins Int           @default(30)
-  active       Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  appointments Appointment[]
+  id                  String               @id @default(cuid())
+  barbeariaId         String
+  name                String
+  description         String?
+  price               Float
+  durationMins        Int                  @default(30)
+  imageUrl            String?
+  active              Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  barbearia           Barbearia            @relation(fields: [barbeariaId], references: [id])
+  appointments        Appointment[]
   appointmentServices AppointmentService[]
+
+  @@index([barbeariaId])
 }
 
 model Appointment {
-  id          String            @id @default(cuid())
-  clientId    String
-  serviceId   String
-  date        DateTime
-  status      AppointmentStatus @default(PENDING)
-  notes       String?
-  barberId    String? // ID do barbeiro que realizará o serviço
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  reminderSent Boolean           @default(false)
-  client       Client            @relation(fields: [clientId], references: [id])
-  service     Service           @relation(fields: [serviceId], references: [id])
-  barber      User?             @relation(fields: [barberId], references: [id]) // Relacionamento com o barbeiro
-  transaction Transaction?
+  id                  String               @id @default(cuid())
+  barbeariaId         String
+  clientId            String
+  serviceId           String
+  date                DateTime
+  status              AppointmentStatus    @default(PENDING)
+  notes               String?
+  barberId            String? // ID do barbeiro que realizará o serviço
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  reminderSent        Boolean              @default(false)
+  // Exclusão lógica ("excluído por engano"): somente ADMIN, com motivo obrigatório
+  deletedAt           DateTime?
+  deletedById         String?
+  deletionReason      String?
+  barbearia           Barbearia            @relation(fields: [barbeariaId], references: [id])
+  client              Client               @relation(fields: [clientId], references: [id])
+  service             Service              @relation(fields: [serviceId], references: [id])
+  barber              User?                @relation("AppointmentBarber", fields: [barberId], references: [id]) // Relacionamento com o barbeiro
+  deletedBy           User?                @relation("AppointmentDeletedBy", fields: [deletedById], references: [id], onDelete: Restrict)
+  transaction         Transaction?
   appointmentServices AppointmentService[]
+
+  @@index([barbeariaId, date])
 }
 
+// Herda a barbearia pelo agendamento (sem barbeariaId próprio)
 model AppointmentService {
   appointmentId String
-  serviceId    String
-  price        Float
-  durationMins Int
-  appointment  Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
-  service      Service     @relation(fields: [serviceId], references: [id])
+  serviceId     String
+  price         Float
+  durationMins  Int
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  service       Service     @relation(fields: [serviceId], references: [id])
 
   @@id([appointmentId, serviceId])
   @@index([serviceId])
@@ -74,6 +114,7 @@ enum AppointmentStatus {
 
 model Transaction {
   id            String          @id @default(cuid())
+  barbeariaId   String
   type          TransactionType
   amount        Float
   description   String
@@ -83,8 +124,18 @@ model Transaction {
   date          DateTime        @default(now())
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+  // Estorno auditado: a transação de estorno aponta para a original (no máximo um estorno por transação)
+  reversalOfId  String?         @unique
+  createdById   String?
+  reason        String?
+  barbearia     Barbearia       @relation(fields: [barbeariaId], references: [id])
   appointment   Appointment?    @relation(fields: [appointmentId], references: [id])
   categoryRef   Category?       @relation(fields: [categoryId], references: [id])
+  reversalOf    Transaction?    @relation("TransactionReversal", fields: [reversalOfId], references: [id], onDelete: Restrict)
+  reversal      Transaction?    @relation("TransactionReversal")
+  createdBy     User?           @relation("TransactionCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([barbeariaId, date])
 }
 
 enum TransactionType {
@@ -94,6 +145,7 @@ enum TransactionType {
 
 model Category {
   id           String        @id @default(cuid())
+  barbeariaId  String
   name         String
   icon         String        @default("CircleDollarSign")
   color        String        @default("#6b7280")
@@ -101,7 +153,10 @@ model Category {
   active       Boolean       @default(true)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  barbearia    Barbearia     @relation(fields: [barbeariaId], references: [id])
   transactions Transaction[]
+
+  @@index([barbeariaId])
 }
 
 enum CategoryType {
@@ -111,13 +166,17 @@ enum CategoryType {
 }
 
 model FinanceAlert {
-  id        String              @id @default(cuid())
-  type      FinanceAlertType
-  message   String
-  severity  AlertSeverity       @default(INFO)
-  read      Boolean             @default(false)
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+  id          String           @id @default(cuid())
+  barbeariaId String
+  type        FinanceAlertType
+  message     String
+  severity    AlertSeverity    @default(INFO)
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  barbearia   Barbearia        @relation(fields: [barbeariaId], references: [id])
+
+  @@index([barbeariaId])
 }
 
 enum FinanceAlertType {
@@ -135,15 +194,19 @@ enum AlertSeverity {
 }
 
 model Goal {
-  id          String   @id @default(cuid())
-  title       String
-  type        GoalType
+  id           String    @id @default(cuid())
+  barbeariaId  String
+  title        String
+  type         GoalType
   targetAmount Float
-  period      String   // "daily" | "weekly" | "monthly"
-  startDate   DateTime
-  endDate     DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  period       String // "daily" | "weekly" | "monthly"
+  startDate    DateTime
+  endDate      DateTime
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  barbearia    Barbearia @relation(fields: [barbeariaId], references: [id])
+
+  @@index([barbeariaId])
 }
 
 enum GoalType {
@@ -158,24 +221,35 @@ enum Role {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  name         String
-  email        String        @unique
-  password     String
-  phone        String?
-  role         Role          @default(ADMIN) // Papel do usuário (Admin ou Barbeiro)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  appointments Appointment[] // Agendamentos vinculados a este barbeiro
+  id                  String        @id @default(cuid())
+  barbeariaId         String
+  name                String
+  email               String        @unique // Único em todo o sistema (login global)
+  password            String
+  phone               String?
+  avatarUrl           String?
+  role                Role          @default(ADMIN) // Papel do usuário (Admin ou Barbeiro)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  barbearia           Barbearia     @relation(fields: [barbeariaId], references: [id])
+  appointments        Appointment[] @relation("AppointmentBarber") // Agendamentos vinculados a este barbeiro
+  deletedAppointments Appointment[] @relation("AppointmentDeletedBy")
+  createdTransactions Transaction[] @relation("TransactionCreatedBy")
+
+  @@index([barbeariaId])
 }
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
+  barbeariaId String
   name        String
   description String?
   price       Float
-  stock       Int      @default(0) // Controle de estoque
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  stock       Int       @default(0) // Controle de estoque
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  barbearia   Barbearia @relation(fields: [barbeariaId], references: [id])
+
+  @@index([barbeariaId])
 }

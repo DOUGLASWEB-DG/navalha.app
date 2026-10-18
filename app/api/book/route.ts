@@ -18,6 +18,7 @@ import {
   normalizeServiceIds,
 } from '@/lib/appointment-services'
 import { checkLimited, getClientIp, hit, tooManyRequestsHeaders } from '@/lib/rate-limit'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 const HOUR_MS = 60 * 60 * 1000
 const MAX_ACTIVE_APPOINTMENTS_PER_PHONE = 3
@@ -85,12 +86,14 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const barbeariaId = await getCurrentBarbeariaId()
     const appointment = await prisma.$transaction(async (tx) => {
       const client = await tx.client.upsert({
-        where: { phone },
+        // Telefone é único por barbearia: o mesmo número pode ser cliente de outra barbearia.
+        where: { barbeariaId_phone: { barbeariaId, phone } },
         // Reserva pública não altera cadastro existente: quem conhece o telefone não pode renomear o cliente.
         update: {},
-        create: { name: parsed.name, phone },
+        create: { barbeariaId, name: parsed.name, phone },
       })
 
       const activeAppointments = await tx.appointment.count({
@@ -135,6 +138,7 @@ export async function POST(req: NextRequest) {
 
       return await tx.appointment.create({
         data: {
+          barbeariaId,
           clientId: client.id,
           serviceId: services[0].id,
           appointmentServices: { create: appointmentServiceCreateData(services) },

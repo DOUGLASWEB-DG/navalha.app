@@ -1,4 +1,5 @@
 import crypto from 'node:crypto'
+import { DEFAULT_BARBEARIA_ID } from './lib/tenant'
 
 async function runTest() {
   const url = 'http://localhost:3000/api/book'
@@ -24,13 +25,13 @@ async function runTest() {
   const barber = await prisma.user.upsert({
     where: { email: 'barber@test.com' },
     update: { role: 'BARBER' },
-    create: { email: 'barber@test.com', name: 'Barber Test', password: '123', role: 'BARBER' }
+    create: { barbeariaId: DEFAULT_BARBEARIA_ID, email: 'barber@test.com', name: 'Barber Test', password: '123', role: 'BARBER' }
   })
   
   const service = await prisma.service.upsert({
     where: { id: 'test_service_123' },
     update: { active: true },
-    create: { id: 'test_service_123', name: 'Test Service', price: 50, durationMins: 30, active: true, description: 'Test' }
+    create: { id: 'test_service_123', barbeariaId: DEFAULT_BARBEARIA_ID, name: 'Test Service', price: 50, durationMins: 30, active: true, description: 'Test' }
   })
   
   payload.serviceId = service.id

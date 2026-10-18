@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { normalizeBrazilPhone } from '@/lib/format'
+import { getCurrentBarbeariaId } from '@/lib/tenant'
 
 const createSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
 
     const client = await prisma.client.create({
       data: {
+        barbeariaId: await getCurrentBarbeariaId(),
         name: parsed.name,
         phone: normalizeBrazilPhone(parsed.phone)!,
         email: parsed.email || undefined,
