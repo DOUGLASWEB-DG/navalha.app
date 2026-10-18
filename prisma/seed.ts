@@ -56,7 +56,7 @@ async function main() {
   })
 
   console.log('✅ Dados base inseridos com sucesso (Categorias e Admin)! Dados fictícios removidos.')
-  console.log('📧 Login: admin@administrador.com (senha definida por SEED_ADMIN_PASSWORD; admin existente mantém a senha atual)')
+  console.log('Login: admin@administrador.com (senha definida por SEED_ADMIN_PASSWORD; admin existente mantém a senha atual)')
 }
 
 main()

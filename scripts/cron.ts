@@ -11,7 +11,7 @@ const EVO_API_KEY = process.env.EVO_API_KEY ?? '';
 
 // Sem valores padrão: o robô não inicia com credenciais embutidas no código.
 if (!EVO_URL || !EVO_API_KEY) {
-  console.error('❌ [Cron] NEXT_PUBLIC_EVO_URL e EVO_API_KEY precisam estar configurados. Encerrando.');
+  console.error('[Cron] NEXT_PUBLIC_EVO_URL e EVO_API_KEY precisam estar configurados. Encerrando.');
   process.exit(1);
 }
 const INSTANCE_NAME = 'barberos_main';
