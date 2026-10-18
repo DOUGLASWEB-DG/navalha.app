@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { connectInstance, EvolutionConfigError } from '@/lib/whatsapp';
-import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api';
+import { requireWhatsappAdmin, tenantErrorResponse } from '@/lib/api';
 
-// A instância do WhatsApp ainda é única para o sistema todo (não é por barbearia): ver relatório do Bloco 3.
+// Instância única para o sistema todo: só a barbearia padrão acessa (requireWhatsappAdmin).
 export async function GET() {
   try {
-    await requireTenantAdmin();
+    await requireWhatsappAdmin();
     const result = await connectInstance();
     return NextResponse.json(result);
   } catch (error) {

@@ -46,17 +46,6 @@ export async function getSession() {
   }
 }
 
-export async function requireAdmin() {
-  const user = await getSession()
-  if (!user) {
-    return { error: 'Não autenticado.', status: 401 as const, user: null }
-  }
-  if (user.role !== 'ADMIN') {
-    return { error: 'Acesso negado. Apenas administradores podem executar esta ação.', status: 403 as const, user: null }
-  }
-  return { error: null, status: 200 as const, user }
-}
-
 export async function verifySessionToken(token: string) {
   try {
     const secretKey = getJwtSecretKey()

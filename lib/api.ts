@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { getTenantSession } from '@/lib/auth'
-import { getCurrentBarbearia, TenantNotFoundError } from '@/lib/tenant'
-import { ApiError } from '@/lib/api-error'
+import { DEFAULT_BARBEARIA_ID, getCurrentBarbearia, TenantNotFoundError } from '@/lib/tenant'
+import { ApiError, notFound } from '@/lib/api-error'
 
 export { ApiError, notFound } from '@/lib/api-error'
 
@@ -24,6 +24,15 @@ export async function requireTenantAdmin() {
 // Rotas públicas (reserva): sem sessão, mas sempre presas à barbearia do Host.
 export async function requireTenant() {
   return getCurrentBarbearia()
+}
+
+// A instância do WhatsApp (Evolution) ainda é única para o sistema todo: quem a controla controla o
+// número de todas as barbearias. Até existir instância por barbearia, só o admin da barbearia padrão
+// acessa; as demais recebem 404, como se a rota não existisse (a checagem vem antes da sessão).
+export async function requireWhatsappAdmin() {
+  const barbearia = await getCurrentBarbearia()
+  if (barbearia.id !== DEFAULT_BARBEARIA_ID) throw notFound()
+  return requireTenantAdmin()
 }
 
 // Mapeamento central dos erros de tenant. Cada rota chama no início do seu catch:
