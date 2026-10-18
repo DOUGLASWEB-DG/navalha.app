@@ -1,0 +1,14 @@
+# Fim de linha normalizado: o repositório guarda LF e a cópia de trabalho também usa LF,
+# independente do core.autocrlf de cada máquina (Windows no desenvolvimento, Linux na VPS).
+* text=auto eol=lf
+
+# Binários: nunca converter.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
