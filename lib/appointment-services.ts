@@ -60,3 +60,47 @@ export function appointmentServiceCreateData(
     durationMins: service.durationMins,
   }))
 }
+
+export function getAppointmentServiceSummary(
+  appointment: {
+    service?: { name: string; price?: number; durationMins?: number } | null
+    appointmentServices?: Array<{
+      service?: { name: string } | null
+      price: number
+      durationMins: number
+    }>
+  },
+) {
+  const hasPivot = Boolean(appointment.appointmentServices && appointment.appointmentServices.length > 0)
+  
+  if (hasPivot && appointment.appointmentServices) {
+    const names = appointment.appointmentServices
+      .map((item) => item.service?.name)
+      .filter((name): name is string => Boolean(name))
+
+    const totals = appointment.appointmentServices.reduce(
+      (acc, item) => ({
+        price: acc.price + item.price,
+        durationMins: acc.durationMins + item.durationMins,
+      }),
+      { price: 0, durationMins: 0 },
+    )
+
+    return {
+      names,
+      namesJoined: names.join(', ') || (appointment.service?.name ?? ''),
+      totalPrice: totals.price,
+      totalDurationMins: totals.durationMins,
+      count: appointment.appointmentServices.length,
+    }
+  }
+
+  const fallbackName = appointment.service?.name ? [appointment.service.name] : []
+  return {
+    names: fallbackName,
+    namesJoined: appointment.service?.name ?? '',
+    totalPrice: appointment.service?.price ?? 0,
+    totalDurationMins: appointment.service?.durationMins ?? 0,
+    count: fallbackName.length,
+  }
+}

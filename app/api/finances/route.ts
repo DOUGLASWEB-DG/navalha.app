@@ -52,6 +52,13 @@ export async function GET(req: NextRequest) {
               id: true,
               client: { select: { id: true, name: true } },
               service: { select: { id: true, name: true } },
+              appointmentServices: {
+                select: {
+                  price: true,
+                  durationMins: true,
+                  service: { select: { id: true, name: true } },
+                },
+              },
             },
           },
           categoryRef: {

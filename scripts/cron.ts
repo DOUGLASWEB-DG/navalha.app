@@ -3,6 +3,7 @@ import { format, addHours, differenceInMinutes } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import 'dotenv/config';
 import { normalizeBrazilPhone } from '../lib/format';
+import { getAppointmentServiceSummary } from '../lib/appointment-services';
 
 const prisma = new PrismaClient();
 const EVO_URL = process.env.NEXT_PUBLIC_EVO_URL || 'http://localhost:8080';
@@ -73,9 +74,7 @@ async function checkReminders() {
           if (phone) {
             const timeFormatter = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Porto_Velho', hour: '2-digit', minute: '2-digit' });
             const timeFormatted = timeFormatter.format(new Date(appt.date));
-            const serviceNames = appt.appointmentServices.length
-              ? appt.appointmentServices.map((item) => item.service.name).join(', ')
-              : appt.service.name;
+            const serviceNames = getAppointmentServiceSummary(appt).namesJoined;
             const msgToClient = `⏰ *Lembrete de Agendamento*\n\nOlá, ${appt.client.name}! Tudo bem?\nPassando para confirmar o seu horário marcado para hoje às *${timeFormatted}*.\n\n💈 Serviço(s): ${serviceNames}\n\nAguardamos você na barbearia!`;
             console.log(`[Cron] Enviando lembrete para ${appt.client.name} (${phone}) - Faltam ${minsDiff} minutos`);
             await sendTextMessage(phone, msgToClient);
@@ -117,7 +116,7 @@ async function checkReminders() {
                     } : null,
                     services: appt.appointmentServices.length
                       ? appt.appointmentServices.map(item => ({ id: item.service.id, name: item.service.name }))
-                      : [{ id: appt.service.id, name: appt.service.name }]
+                      : (appt.service ? [{ id: appt.service.id, name: appt.service.name }] : [])
                   }
                 });
               });

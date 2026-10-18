@@ -13,6 +13,7 @@ import {
   appointmentServiceCreateData,
   getActiveServices,
   getServiceTotals,
+  getAppointmentServiceTotals,
   normalizeServiceIds,
 } from '@/lib/appointment-services'
 import { notifyAppointmentCreated } from '@/lib/notifications'
@@ -129,12 +130,10 @@ export async function POST(req: NextRequest) {
     const appointment = await prisma.$transaction(async (tx) => {
       const appointments = await tx.appointment.findMany({
         where: { status: { not: AppointmentStatus.CANCELED }, barberId: { in: candidates.map((barber) => barber.id) } },
-        include: { service: { select: { durationMins: true } }, appointmentServices: { select: { durationMins: true } } },
+        include: { service: { select: { price: true, durationMins: true } }, appointmentServices: { select: { price: true, durationMins: true } } },
       })
       const availableBarber = candidates.find((barber) => !appointments.some((appointment) => {
-        const duration = appointment.appointmentServices.length
-          ? appointment.appointmentServices.reduce((total, item) => total + item.durationMins, 0)
-          : appointment.service.durationMins
+        const duration = getAppointmentServiceTotals(appointment).durationMins
         const appointmentEnd = appointment.date.getTime() + duration * 60_000
         const requestedEnd = date.getTime() + totals.durationMins * 60_000
         return appointment.barberId === barber.id && date.getTime() < appointmentEnd && requestedEnd > appointment.date.getTime()

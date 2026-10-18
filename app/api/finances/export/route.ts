@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { getAppointmentServiceSummary } from '@/lib/appointment-services'
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,7 +19,11 @@ export async function GET(req: NextRequest) {
       orderBy: { date: 'desc' },
       include: {
         appointment: {
-          include: { client: true, service: true },
+          include: {
+            client: true,
+            service: true,
+            appointmentServices: { include: { service: true } },
+          },
         },
         categoryRef: true,
       } as any,
@@ -33,7 +38,7 @@ export async function GET(req: NextRequest) {
       t.categoryRef?.name || t.category || '',
       t.amount.toFixed(2),
       t.appointment?.client?.name || '',
-      t.appointment?.service?.name || '',
+      t.appointment ? getAppointmentServiceSummary(t.appointment).namesJoined : '',
     ])
 
     const csvContent = [

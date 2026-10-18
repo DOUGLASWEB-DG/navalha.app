@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { AppointmentRuleError, getAppointmentDayRange } from '@/lib/appointment-rules'
-import { getActiveServices, getServiceTotals, normalizeServiceIds } from '@/lib/appointment-services'
+import { getActiveServices, getAppointmentServiceTotals, getServiceTotals, normalizeServiceIds } from '@/lib/appointment-services'
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
       select: {
         barberId: true,
         date: true,
-        service: { select: { durationMins: true } },
-        appointmentServices: { select: { durationMins: true } },
+        service: { select: { price: true, durationMins: true } },
+        appointmentServices: { select: { price: true, durationMins: true } },
       },
     })
 
@@ -40,9 +40,7 @@ export async function GET(req: NextRequest) {
         barberId: appointment.barberId,
         date: appointment.date,
         service: {
-          durationMins: appointment.appointmentServices.length
-            ? appointment.appointmentServices.reduce((total, service) => total + service.durationMins, 0)
-            : appointment.service.durationMins,
+          durationMins: getAppointmentServiceTotals(appointment).durationMins,
         },
       })),
     })

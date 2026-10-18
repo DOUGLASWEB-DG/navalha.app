@@ -14,6 +14,7 @@ import {
 import {
   appointmentServiceCreateData,
   getActiveServices,
+  getAppointmentServiceSummary,
   getAppointmentServiceTotals,
   getServiceTotals,
   normalizeServiceIds,
@@ -85,13 +86,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       validateAppointmentSchedule(nextDate, nextTotals.durationMins, !isAdmin)
       const conflicts = await prisma.appointment.findMany({
         where: { id: { not: id }, barberId: nextBarberId, status: { not: 'CANCELED' } },
-        include: { service: { select: { durationMins: true } }, appointmentServices: { select: { durationMins: true } } },
+        include: { service: { select: { price: true, durationMins: true } }, appointmentServices: { select: { price: true, durationMins: true } } },
       })
       const nextEnd = nextDate.getTime() + nextTotals.durationMins * 60_000
       if (!isAdmin && conflicts.some((appointment) => {
-        const duration = appointment.appointmentServices.length
-          ? appointment.appointmentServices.reduce((total, item) => total + item.durationMins, 0)
-          : appointment.service.durationMins
+        const duration = getAppointmentServiceTotals(appointment).durationMins
         const appointmentEnd = appointment.date.getTime() + duration * 60_000
         return nextDate.getTime() < appointmentEnd && nextEnd > appointment.date.getTime()
       })) {
@@ -144,9 +143,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             const p = Object.fromEntries(parts.map(part => [part.type, part.value]));
             const dataFormatada = `${p.weekday}, ${p.day} de ${p.month} às ${p.hour}:${p.minute}`;
             
-            const serviceNames = appointment.appointmentServices.length
-              ? appointment.appointmentServices.map((item) => item.service.name).join(', ')
-              : appointment.service.name
+            const serviceNames = getAppointmentServiceSummary(appointment).namesJoined
             const msg = `Olá, ${appointment.client.name}! Tudo bem?\n\nPassando para confirmar o seu agendamento de *${serviceNames}*.\n\n📅 Data: ${dataFormatada}\n\nSeu horário está confirmadíssimo! Te esperamos na barbearia. 💈✂️`;
             
             await sendTextMessage(number, msg).catch(e => console.error('WhatsApp client msg error:', e));
@@ -203,7 +200,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           create: {
             type: 'INCOME',
             amount: getAppointmentServiceTotals(appt).price,
-            description: `${(appt.appointmentServices.length ? appt.appointmentServices.map((item) => item.service.name).join(', ') : appt.service.name)} — ${appt.client.name}`,
+            description: `${getAppointmentServiceSummary(appt).namesJoined} — ${appt.client.name}`,
             category: 'Service',
             appointmentId: id,
             date: new Date(),
