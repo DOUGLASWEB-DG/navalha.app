@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { Plus, User, Shield, ShieldCheck, Pencil, Trash2, MoreVertical, Mail } from 'lucide-react'
+import { Plus, User, Shield, ShieldCheck, Pencil, UserX, UserCheck, MoreVertical, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import { confirmAction } from '@/lib/confirm-toast'
 import { Button } from '@/components/ui/button'
@@ -25,19 +25,29 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<any>(null)
   const { data: users, error, isLoading, mutate } = useSWR('/api/users', fetcher)
 
-  async function deleteUser(id: string, name: string) {
-    const ok = await confirmAction({
-      title: `Excluir usuário "${name}"?`,
-      confirmLabel: 'Excluir',
-    })
-    if (!ok) return
+  // Desativar no lugar de excluir: o histórico de agendamentos do barbeiro continua íntegro.
+  async function setUserActive(id: string, name: string, active: boolean) {
+    if (!active) {
+      const ok = await confirmAction({
+        title: `Desativar "${name}"?`,
+        description: 'O usuário perde o acesso e deixa de receber agendamentos novos. O histórico é mantido.',
+        confirmLabel: 'Desativar',
+      })
+      if (!ok) return
+    }
     try {
-      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error()
+      const res = await fetch(`/api/users/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) throw new Error(data?.error)
       mutate()
-      toast.success('Sucesso!', { description: 'Usuário excluído.' })
-    } catch {
-      toast.error('Erro', { description: 'Falha ao excluir usuário.' })
+      toast.success('Sucesso!', { description: active ? 'Usuário reativado.' : 'Usuário desativado.' })
+    } catch (error) {
+      const message = error instanceof Error && error.message ? error.message : 'Falha ao atualizar o usuário.'
+      toast.error('Erro', { description: message })
     }
   }
 
@@ -65,7 +75,9 @@ export default function UsersPage() {
             {users.map((u: any) => (
               <div
                 key={u.id}
-                className="group relative flex flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
+                className={`group relative flex flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40 ${
+                  u.active === false ? 'opacity-60' : ''
+                }`}
               >
                 {/* Header (Ícone e Ações) */}
                 <div className="flex items-start justify-between">
@@ -91,16 +103,29 @@ export default function UsersPage() {
                         <Pencil className="w-4 h-4" /> Editar
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="bg-border" />
-                      <DropdownMenuItem onClick={() => deleteUser(u.id, u.name)} className="gap-2 cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive">
-                        <Trash2 className="w-4 h-4" /> Excluir
-                      </DropdownMenuItem>
+                      {u.active === false ? (
+                        <DropdownMenuItem onClick={() => setUserActive(u.id, u.name, true)} className="gap-2 cursor-pointer">
+                          <UserCheck className="w-4 h-4" /> Reativar
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem onClick={() => setUserActive(u.id, u.name, false)} className="gap-2 cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive">
+                          <UserX className="w-4 h-4" /> Desativar
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
 
                 {/* Corpo do Card */}
                 <div className="flex-1 mt-1">
-                  <p className="text-base font-bold text-foreground line-clamp-1">{u.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-base font-bold text-foreground line-clamp-1">{u.name}</p>
+                    {u.active === false && (
+                      <span className="shrink-0 rounded-lg border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        Inativo
+                      </span>
+                    )}
+                  </div>
                   
                   <div className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">

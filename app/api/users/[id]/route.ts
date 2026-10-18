@@ -9,6 +9,7 @@ const updateUserSchema = z.object({
   email: z.string().trim().toLowerCase().email('E-mail inválido').optional(),
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').optional(),
   role: z.enum(['ADMIN', 'BARBER']).optional(),
+  active: z.boolean().optional(),
 }).strict()
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -25,19 +26,29 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const targetUser = await prisma.user.findUnique({
       where: { id: targetUserId },
-      select: { id: true, role: true, email: true }
+      select: { id: true, role: true, email: true, active: true }
     })
 
     if (!targetUser) {
       return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
     }
 
-    // Regra de integridade: impedir que o último ADMIN seja rebaixado para BARBER
-    if (targetUser.role === 'ADMIN' && parsed.role && parsed.role !== 'ADMIN') {
-      const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } })
-      if (adminCount <= 1) {
+    const deactivating = parsed.active === false && targetUser.active
+    if (deactivating && auth.user?.id === targetUserId) {
+      return NextResponse.json({ error: 'Você não pode desativar sua própria conta.' }, { status: 400 })
+    }
+
+    // Regra de integridade: sempre sobra ao menos um ADMIN ativo (rebaixar ou desativar o último trava o sistema).
+    // Conta só ativos: um admin desativado não consegue administrar.
+    const losingActiveAdmin = targetUser.role === 'ADMIN' && targetUser.active
+      && ((parsed.role && parsed.role !== 'ADMIN') || deactivating)
+    if (losingActiveAdmin) {
+      const activeAdminCount = await prisma.user.count({ where: { role: 'ADMIN', active: true } })
+      if (activeAdminCount <= 1) {
         return NextResponse.json(
-          { error: 'Não é possível rebaixar o único administrador do sistema.' },
+          { error: deactivating
+            ? 'Não é possível desativar o único administrador ativo.'
+            : 'Não é possível rebaixar o único administrador ativo.' },
           { status: 400 }
         )
       }
@@ -51,10 +62,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       }
     }
 
-    const data: { name?: string; email?: string; role?: 'ADMIN' | 'BARBER'; password?: string } = {}
+    const data: { name?: string; email?: string; role?: 'ADMIN' | 'BARBER'; password?: string; active?: boolean } = {}
     if (parsed.name) data.name = parsed.name
     if (parsed.email) data.email = parsed.email
     if (parsed.role) data.role = parsed.role
+    if (parsed.active !== undefined) data.active = parsed.active
     if (parsed.password) {
       data.password = await bcrypt.hash(parsed.password, 10)
     }
@@ -67,6 +79,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         name: true,
         email: true,
         role: true,
+        active: true,
       }
     })
 

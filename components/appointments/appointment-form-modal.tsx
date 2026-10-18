@@ -219,7 +219,8 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="any">Qualquer Barbeiro</SelectItem>
-                    {users?.map((u: any) => (
+                    {/* Desativado não recebe agendamento novo; continua listado só se já for o barbeiro deste agendamento */}
+                    {(Array.isArray(users) ? users : []).filter((u: any) => u.active !== false || u.id === watch('barberId')).map((u: any) => (
                       <SelectItem key={u.id} value={u.id}>
                         {u.name}
                       </SelectItem>

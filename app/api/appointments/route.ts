@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
     validateAppointmentSchedule(date, totals.durationMins, !isAdmin)
 
     const barbers = await prisma.user.findMany({
-      where: user.role === 'BARBER' ? { id: user.id } : undefined,
+      where: user.role === 'BARBER' ? { id: user.id, active: true } : { active: true },
       select: { id: true },
     })
     if (barberId && !barbers.some((barber) => barber.id === barberId)) {

@@ -20,9 +20,12 @@ export async function getSession() {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, role: true },
+      select: { id: true, name: true, email: true, role: true, active: true },
     })
-    return user
+    // Usuário desativado perde a sessão já aberta na próxima requisição, mesmo com o JWT ainda válido.
+    if (!user || !user.active) return null
+    const { active: _active, ...sessionUser } = user
+    return sessionUser
   } catch {
     return null
   }

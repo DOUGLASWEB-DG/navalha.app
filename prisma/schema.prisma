@@ -229,6 +229,7 @@ model User {
   phone               String?
   avatarUrl           String?
   role                Role          @default(ADMIN) // Papel do usuário (Admin ou Barbeiro)
+  active              Boolean       @default(true) // Desativado: sem login, sem sessão e sem agendamentos novos
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   barbearia           Barbearia     @relation(fields: [barbeariaId], references: [id])

@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     let finalBarberId = parsed.barberId && parsed.barberId !== 'any' ? parsed.barberId : null
 
-    const allBarbers = await prisma.user.findMany({ select: { id: true, name: true, phone: true } })
+    const allBarbers = await prisma.user.findMany({ where: { active: true }, select: { id: true, name: true, phone: true } })
     if (finalBarberId && !allBarbers.some((barber) => barber.id === finalBarberId)) {
       throw new AppointmentRuleError('Barbeiro não encontrado.')
     }
@@ -204,6 +204,7 @@ export async function GET() {
     })
 
     const barbers = await prisma.user.findMany({
+      where: { active: true },
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     })

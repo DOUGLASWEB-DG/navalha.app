@@ -76,6 +76,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (!nextBarberId) throw new AppointmentRuleError('Selecione um barbeiro para o agendamento.')
     const barber = await prisma.user.findUnique({ where: { id: nextBarberId } })
     if (!barber) throw new AppointmentRuleError('Barbeiro não encontrado.')
+    // Agendamento antigo de barbeiro desativado continua editável (ex.: concluir); só não pode ser transferido a ele.
+    if (!barber.active && nextBarberId !== current.barberId) throw new AppointmentRuleError('Barbeiro desativado.')
 
     const nextDate = parsed.date
       ? parseIncomingAppointmentDate(parsed.date)

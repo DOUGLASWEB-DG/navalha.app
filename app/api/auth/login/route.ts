@@ -49,6 +49,14 @@ export async function POST(req: NextRequest) {
 
     clear([`login:email:${normalizedEmail}`])
 
+    // Só depois da senha correta: não revela a quem não tem a senha que a conta existe.
+    if (!user.active) {
+      return NextResponse.json(
+        { error: 'Usuário desativado. Fale com o administrador da barbearia.' },
+        { status: 403 }
+      )
+    }
+
     await createSession(user.id, user.role)
 
     return NextResponse.json({
