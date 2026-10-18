@@ -68,19 +68,19 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
       )}
     >
       {/* Logo */}
-      <div className={cn('flex items-center h-16 border-b border-sidebar-border px-4 shrink-0', open ? 'gap-3' : 'justify-center')}>
-        <div className="flex items-center justify-center w-9 h-9 bg-primary rounded-xl shrink-0 overflow-hidden shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-          <img 
-            src={tenantConfig.logoUrl} 
-            alt="Logo" 
-            className="w-full h-full object-contain p-0" 
+      <div className={cn('flex items-center h-16 border-b border-sidebar-border px-4 shrink-0', !open && 'justify-center')}>
+        {open ? (
+          <img
+            src={tenantConfig.logoWordmarkUrl}
+            alt={tenantConfig.name}
+            className="h-9 w-auto max-w-full object-contain"
           />
-        </div>
-        {open && (
-          <div>
-            <p className="text-sm font-bold text-foreground font-sans tracking-tight">{tenantConfig.name}</p>
-            <p className="text-[10px] text-muted-foreground font-semibold tracking-widest">{tenantConfig.shortName}</p>
-          </div>
+        ) : (
+          <img
+            src={tenantConfig.logoIconUrl}
+            alt={tenantConfig.name}
+            className="w-9 h-9 object-contain"
+          />
         )}
       </div>
 

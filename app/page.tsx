@@ -9,23 +9,21 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { tenantConfig } from '@/config/tenant'
 import { WhatsAppIcon } from '@/components/shared/whatsapp-icon'
 
-// Logotipo Tipográfico Minimalista (Sem ícone, com .app em azul sem duplicação)
+// Logotipo em imagem (o nome já faz parte da arte)
 function AppBrand({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const textSizes = {
-    sm: "text-sm",
-    md: "text-base",
-    lg: "text-xl"
+  const heights = {
+    sm: "h-7",
+    md: "h-9",
+    lg: "h-11"
   }
 
-  // Tratamento para remover .app do nome caso já exista no tenantConfig e evitar duplicar
-  const baseName = tenantConfig.name.toLowerCase().replace(/\.?app$/i, '')
-
   return (
-    <div className="flex items-center font-sans select-none tracking-tight">
-      <span className={cn("font-bold text-foreground", textSizes[size])}>
-        {baseName}
-        <span className="text-primary font-semibold">.app</span>
-      </span>
+    <div className="flex items-center select-none">
+      <img
+        src={tenantConfig.logoWordmarkUrl}
+        alt={tenantConfig.name}
+        className={cn("w-auto object-contain", heights[size])}
+      />
     </div>
   )
 }

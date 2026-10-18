@@ -19,6 +19,9 @@ export const tenantConfig = {
   
   // Imagens e Logos
   logoUrl: "/assets/logo.png", // Você pode colocar o caminho de qualquer imagem que colocar na pasta public
+  logoWordmarkUrl: "/assets/logo-wordmark.png", // Logo com o nome, recortada e com fundo transparente (cabeçalhos)
+  logoIconUrl: "/assets/logo-icon.png", // Apenas o símbolo, quadrado (favicon e menu recolhido)
+  logoAppleIconUrl: "/assets/logo-apple.png", // Símbolo com fundo branco (iOS preenche transparência com preto)
   
   // Motivos para usar o app (Aparece na seção "Sobre o Sistema")
   reasons: [

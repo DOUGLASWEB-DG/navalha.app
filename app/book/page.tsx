@@ -400,16 +400,11 @@ function BookingContent() {
     <div className="min-h-[100dvh] bg-background text-foreground flex flex-col font-sans selection:bg-primary/30 overflow-x-hidden">
       <header className="h-16 border-b border-border bg-card/80 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 sticky top-0 z-50">
         <Link href="/" className="flex items-center gap-3 transition-transform active:scale-95 shrink-0">
-          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-sm overflow-hidden">
-            <img 
-              src={tenantConfig.logoUrl} 
-              alt="Logo" 
-              className="w-full h-full object-contain p-0" 
-            />
-          </div>
-          <span className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate max-w-[120px] sm:max-w-none ">
-            {tenantConfig.name}
-          </span>
+          <img
+            src={tenantConfig.logoWordmarkUrl}
+            alt={tenantConfig.name}
+            className="h-8 sm:h-9 w-auto object-contain"
+          />
         </Link>
         <a
           href={buildWhatsAppLink(booking)}

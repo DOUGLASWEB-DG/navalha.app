@@ -66,14 +66,13 @@ function LoginContent() {
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg mb-4 overflow-hidden">
-            <img 
-              src={tenantConfig.logoUrl} 
-              alt="Logo" 
-              className="w-full h-full object-contain p-0" 
+          <h1 className="flex justify-center">
+            <img
+              src={tenantConfig.logoWordmarkUrl}
+              alt={tenantConfig.name}
+              className="h-14 w-auto max-w-full object-contain"
             />
-          </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight">{tenantConfig.name}</h1>
+          </h1>
           <p className="text-sm text-muted-foreground mt-2 font-medium">Painel Administrativo</p>
         </div>
 

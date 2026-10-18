@@ -15,8 +15,8 @@
     description: tenantConfig.description,
     generator: 'Navalha.app',
     icons: {
-      icon: tenantConfig.logoUrl,
-      apple: tenantConfig.logoUrl,
+      icon: tenantConfig.logoIconUrl,
+      apple: tenantConfig.logoAppleIconUrl,
     },
   }
 
