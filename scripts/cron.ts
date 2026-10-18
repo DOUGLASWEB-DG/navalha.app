@@ -61,6 +61,8 @@ async function checkReminders() {
         service: true,
         appointmentServices: { include: { service: true } },
         barber: true,
+        // Job global (todas as barbearias); o horário da mensagem usa o fuso de cada uma
+        barbearia: { select: { timezone: true } },
       }
     });
 
@@ -78,7 +80,7 @@ async function checkReminders() {
         if (targetClientPhone) {
           const phone = normalizeBrazilPhone(targetClientPhone);
           if (phone) {
-            const timeFormatter = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Porto_Velho', hour: '2-digit', minute: '2-digit' });
+            const timeFormatter = new Intl.DateTimeFormat('pt-BR', { timeZone: appt.barbearia.timezone, hour: '2-digit', minute: '2-digit' });
             const timeFormatted = timeFormatter.format(new Date(appt.date));
             const serviceNames = getAppointmentServiceSummary(appt).namesJoined;
             const msgToClient = `⏰ *Lembrete de Agendamento*\n\nOlá, ${appt.client.name}! Tudo bem?\nPassando para confirmar o seu horário marcado para hoje às *${timeFormatted}*.\n\n💈 Serviço(s): ${serviceNames}\n\nAguardamos você na barbearia!`;

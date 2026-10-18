@@ -8,6 +8,7 @@ export interface NotificationPayload {
   services: { id: string; name: string; durationMins: number; price: number }[]
   totalPrice: number
   totalDurationMins: number
+  timeZone: string // fuso da barbearia: data e hora da mensagem no relógio dela
 }
 
 export function resolvePhone(originalPhone: string | undefined | null): string | undefined {
@@ -33,12 +34,12 @@ export function resolvePhone(originalPhone: string | undefined | null): string |
 }
 
 export async function notifyAppointmentCreated(payload: NotificationPayload) {
-  const { appointment, client, barber, services, totalPrice, totalDurationMins } = payload
-  
+  const { appointment, client, barber, services, totalPrice, totalDurationMins, timeZone } = payload
+
   const datetime = typeof appointment.date === 'string' ? new Date(appointment.date) : appointment.date
-  
+
   const formatter = new Intl.DateTimeFormat('pt-BR', {
-    timeZone: 'America/Porto_Velho',
+    timeZone,
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
   })

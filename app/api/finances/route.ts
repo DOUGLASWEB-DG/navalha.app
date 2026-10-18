@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { startOfMonth, endOfMonth } from 'date-fns'
 import { sendTextMessage } from '@/lib/whatsapp'
 import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { parseZonedDate, zonedMonthRange } from '@/lib/time-zone'
 
 const createSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE']),
@@ -25,9 +25,9 @@ export async function GET(req: NextRequest) {
 
     if (monthParam) {
       const [year, month] = monthParam.split('-').map(Number)
-      const start = startOfMonth(new Date(year, month - 1))
-      const end = endOfMonth(new Date(year, month - 1))
-      where.date = { gte: start, lte: end }
+      // Mês do calendário no fuso da barbearia, intervalo [início, próximo mês)
+      const { start, end } = zonedMonthRange(year, month, barbearia.timezone)
+      where.date = { gte: start, lt: end }
     }
 
     if (type && type !== 'ALL') {
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
         description: parsed.description,
         category: parsed.category,
         categoryId: parsed.categoryId || null,
-        date: new Date(parsed.date),
+        date: parseZonedDate(parsed.date, barbearia.timezone),
       },
     })
 

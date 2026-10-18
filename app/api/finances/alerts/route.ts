@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { getZonedParts, startOfZonedMonth } from '@/lib/time-zone'
 
 export async function GET() {
   try {
@@ -48,21 +48,23 @@ export async function POST(req: NextRequest) {
 
     if (action === 'generate') {
       const now = new Date()
-      const currentStart = startOfMonth(now)
-      const currentEnd = endOfMonth(now)
-      const prevStart = startOfMonth(subMonths(now, 1))
-      const prevEnd = endOfMonth(subMonths(now, 1))
+      const timeZone = barbearia.timezone
+      // Mês atual e anterior no fuso da barbearia, intervalos [início, próximo início)
+      const currentStart = startOfZonedMonth(now, timeZone)
+      const currentEnd = startOfZonedMonth(now, timeZone, 1)
+      const prevStart = startOfZonedMonth(now, timeZone, -1)
+      const prevEnd = currentStart
 
       const currentExpense = await prisma.transaction.aggregate({
-        where: { barbeariaId, type: 'EXPENSE', date: { gte: currentStart, lte: currentEnd } },
+        where: { barbeariaId, type: 'EXPENSE', date: { gte: currentStart, lt: currentEnd } },
         _sum: { amount: true },
       })
       const prevExpense = await prisma.transaction.aggregate({
-        where: { barbeariaId, type: 'EXPENSE', date: { gte: prevStart, lte: prevEnd } },
+        where: { barbeariaId, type: 'EXPENSE', date: { gte: prevStart, lt: prevEnd } },
         _sum: { amount: true },
       })
       const currentIncome = await prisma.transaction.aggregate({
-        where: { barbeariaId, type: 'INCOME', date: { gte: currentStart, lte: currentEnd } },
+        where: { barbeariaId, type: 'INCOME', date: { gte: currentStart, lt: currentEnd } },
         _sum: { amount: true },
       })
 
@@ -101,7 +103,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Sem receitas registradas após dia 10
-      if (currInc === 0 && now.getDate() > 10) {
+      if (currInc === 0 && getZonedParts(now, timeZone).day > 10) {
         newAlerts.push({
           type: 'MONTH_COMPARISON',
           message: 'Nenhuma receita registrada este mês. Lembre-se de registrar seus recebimentos.',

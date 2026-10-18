@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { startOfZonedMonth } from '@/lib/time-zone'
+
+const DAY_MS = 24 * 60 * 60 * 1000
 
 export async function GET(req: NextRequest) {
   try {
     const { barbearia } = await requireTenantAdmin()
     const barbeariaId = barbearia.id
+    const timeZone = barbearia.timezone
     const { searchParams } = new URL(req.url)
     const period = parseInt(searchParams.get('period') || '6')
     const now = new Date()
 
-    const periodStart = startOfMonth(subMonths(now, period - 1))
-    const periodEnd = endOfMonth(now)
+    // Meses do calendário no fuso da barbearia; periodEnd é o início do mês seguinte (exclusivo)
+    const periodStart = startOfZonedMonth(now, timeZone, -(period - 1))
+    const periodEnd = startOfZonedMonth(now, timeZone, 1)
 
     // ─── Disparo Paralelo Massivo ──────────────────────────────────────
     const [
@@ -23,7 +27,7 @@ export async function GET(req: NextRequest) {
     ] = await Promise.all([
       // 1. Histórico do período
       prisma.transaction.findMany({
-        where: { barbeariaId, date: { gte: periodStart, lte: periodEnd } },
+        where: { barbeariaId, date: { gte: periodStart, lt: periodEnd } },
         select: { amount: true, type: true, date: true }
       }),
       // 2. Totais de toda a vida
@@ -33,7 +37,7 @@ export async function GET(req: NextRequest) {
       // 4. Breakdown de categorias do período
       prisma.transaction.groupBy({
         by: ['categoryId'] as any,
-        where: { barbeariaId, type: 'EXPENSE', date: { gte: periodStart, lte: periodEnd }, categoryId: { not: null } } as any,
+        where: { barbeariaId, type: 'EXPENSE', date: { gte: periodStart, lt: periodEnd }, categoryId: { not: null } } as any,
         _sum: { amount: true },
         orderBy: { _sum: { amount: 'desc' } } as any
       })
@@ -42,11 +46,13 @@ export async function GET(req: NextRequest) {
     // ─── Processamento em Memória ────────────────────────────────────
     const monthBoundaries = Array.from({ length: period }, (_, idx) => {
       const i = period - 1 - idx
-      const date = subMonths(now, i)
+      const start = startOfZonedMonth(now, timeZone, -i)
+      // Dia 15 do mês para o rótulo: longe das bordas, nunca cai no mês vizinho
+      const label = new Date(start.getTime() + 14 * DAY_MS)
       return {
-        month: date.toLocaleString('pt-BR', { month: 'short', year: '2-digit' }),
-        start: startOfMonth(date),
-        end: endOfMonth(date),
+        month: label.toLocaleString('pt-BR', { month: 'short', year: '2-digit', timeZone }),
+        start,
+        end: startOfZonedMonth(now, timeZone, -i + 1),
         receitas: 0,
         despesas: 0
       }
@@ -54,7 +60,7 @@ export async function GET(req: NextRequest) {
 
     for (const t of periodTransactions) {
       for (const m of monthBoundaries) {
-        if (t.date >= m.start && t.date <= m.end) {
+        if (t.date >= m.start && t.date < m.end) {
           if (t.type === 'INCOME') m.receitas += t.amount
           else m.despesas += t.amount
           break

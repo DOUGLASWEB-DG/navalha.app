@@ -1,21 +1,22 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { startOfZonedDay, startOfZonedMonth, startOfZonedWeek, zonedDayKey } from '@/lib/time-zone'
 
 export async function GET() {
   try {
     const { barbearia } = await requireTenantAdmin()
     const barbeariaId = barbearia.id
+    const timeZone = barbearia.timezone
     const now = new Date()
-    const monthStart = startOfMonth(now)
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 })
-    const todayStart = startOfDay(now)
+    // "Hoje", "semana" e "mês" no relógio da barbearia, não no fuso do servidor
+    const monthStart = startOfZonedMonth(now, timeZone)
+    const weekStart = startOfZonedWeek(now, timeZone)
+    const todayStart = startOfZonedDay(now, timeZone)
+    const tomorrowStart = startOfZonedDay(now, timeZone, 1)
 
     // chart covers last 7 days (today included)
-    const chartStart = new Date(now)
-    chartStart.setDate(chartStart.getDate() - 6)
-    chartStart.setHours(0, 0, 0, 0)
+    const chartStart = startOfZonedDay(now, timeZone, -6)
 
     const earliestTxDate = new Date(Math.min(weekStart.getTime(), chartStart.getTime()))
 
@@ -35,7 +36,7 @@ export async function GET() {
       prisma.appointment.findMany({
         where: {
           barbeariaId,
-          date: { gte: todayStart, lte: endOfDay(now) },
+          date: { gte: todayStart, lt: tomorrowStart },
           status: { not: 'CANCELED' },
         },
         include: { client: true, service: true, appointmentServices: { include: { service: true } }, barber: true },
@@ -72,7 +73,7 @@ export async function GET() {
 
       // Apenas processa para o gráfico se a transação estiver na janela de 7 dias do gráfico
       if (t.date >= chartStart) {
-        const dayKey = t.date.toISOString().slice(0, 10)
+        const dayKey = zonedDayKey(t.date, timeZone)
         if (!chartDataMap.has(dayKey)) {
           chartDataMap.set(dayKey, { income: 0, expense: 0 })
         }
@@ -83,12 +84,12 @@ export async function GET() {
     }
 
     const chartData = Array.from({ length: 7 }, (_, i) => {
-        const day = new Date()
-        day.setDate(day.getDate() - i)
-        const dayKey = day.toISOString().slice(0, 10)
+        // Meio-dia do dia (no fuso) evita cair no dia vizinho ao formatar
+        const day = new Date(startOfZonedDay(now, timeZone, -i).getTime() + 12 * 60 * 60 * 1000)
+        const dayKey = zonedDayKey(day, timeZone)
         const data = chartDataMap.get(dayKey) || { income: 0, expense: 0 }
         return {
-          day: day.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
+          day: day.toLocaleDateString('pt-BR', { weekday: 'short', timeZone }).replace('.', ''),
           ...data
         }
     }).reverse()

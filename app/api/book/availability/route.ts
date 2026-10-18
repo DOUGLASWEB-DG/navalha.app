@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Date is required' }, { status: 400 })
     }
 
-    const { start, end } = getAppointmentDayRange(dateParam)
+    const { start, end } = getAppointmentDayRange(dateParam, barbearia.timezone)
     let requestedDurationMins: number | undefined
     if (serviceIdsParam) {
       const serviceIds = normalizeServiceIds(serviceIdsParam.split(','))

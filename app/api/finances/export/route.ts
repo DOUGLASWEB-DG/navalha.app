@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { getAppointmentServiceSummary } from '@/lib/appointment-services'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { startOfZonedMonth } from '@/lib/time-zone'
 
 export async function GET(req: NextRequest) {
   try {
     const { barbearia } = await requireTenantAdmin()
+    const timeZone = barbearia.timezone
     const { searchParams } = new URL(req.url)
     const period = parseInt(searchParams.get('period') || '6')
     const now = new Date()
 
-    const periodStart = startOfMonth(subMonths(now, period - 1))
-    const periodEnd = endOfMonth(now)
+    // Meses do calendário no fuso da barbearia; periodEnd é o início do mês seguinte (exclusivo)
+    const periodStart = startOfZonedMonth(now, timeZone, -(period - 1))
+    const periodEnd = startOfZonedMonth(now, timeZone, 1)
 
     const transactions = await prisma.transaction.findMany({
       where: {
         barbeariaId: barbearia.id,
-        date: { gte: periodStart, lte: periodEnd },
+        date: { gte: periodStart, lt: periodEnd },
       },
       orderBy: { date: 'desc' },
       include: {
@@ -35,7 +37,7 @@ export async function GET(req: NextRequest) {
     // Gerar CSV
     const header = ['Data', 'Tipo', 'Descrição', 'Categoria', 'Valor', 'Cliente', 'Serviço']
     const rows = (transactions as any[]).map((t: any) => [
-      new Date(t.date).toLocaleDateString('pt-BR'),
+      new Date(t.date).toLocaleDateString('pt-BR', { timeZone }),
       t.type === 'INCOME' ? 'Receita' : 'Despesa',
       t.description,
       t.categoryRef?.name || t.category || '',

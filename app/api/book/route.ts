@@ -37,10 +37,9 @@ const bookingSchema = z.object({
   notes: z.string().optional(),
 })
 
-function parseBookingDate(date: string, time: string) {
+function parseBookingDate(date: string, time: string, timeZone: string) {
   const [year, month, day] = date.split('-').map(Number)
-  const [hour, minute] = time.split(':').map(Number)
-  const datetime = parseAppointmentDate(`${date}T${time}`)
+  const datetime = parseAppointmentDate(`${date}T${time}`, timeZone)
   return { datetime, year, month, day }
 }
 
@@ -62,14 +61,14 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const parsed = bookingSchema.parse(body)
 
-    const { datetime, year, month, day } = parseBookingDate(parsed.date, parsed.time)
-    const endDatetime = new Date(datetime)
+    // Data e hora informadas são as do relógio da barbearia
+    const { datetime, year, month, day } = parseBookingDate(parsed.date, parsed.time, barbearia.timezone)
 
     const serviceIds = normalizeServiceIds(parsed.serviceIds, parsed.serviceId)
     const services = await getActiveServices(barbeariaId, serviceIds)
     const totals = getServiceTotals(services)
-    endDatetime.setMinutes(endDatetime.getMinutes() + totals.durationMins)
-    validateAppointmentSchedule(datetime, totals.durationMins)
+    const endDatetime = new Date(datetime.getTime() + totals.durationMins * 60_000)
+    validateAppointmentSchedule(datetime, totals.durationMins, barbearia.timezone)
 
     let finalBarberId = parsed.barberId && parsed.barberId !== 'any' ? parsed.barberId : null
 
@@ -115,8 +114,8 @@ export async function POST(req: NextRequest) {
         where: {
           barbeariaId,
           date: {
-            gte: getAppointmentDayRange(parsed.date).start,
-            lt: getAppointmentDayRange(parsed.date).end,
+            gte: getAppointmentDayRange(parsed.date, barbearia.timezone).start,
+            lt: getAppointmentDayRange(parsed.date, barbearia.timezone).end,
           },
           status: { not: 'CANCELED' },
         },
@@ -170,7 +169,8 @@ export async function POST(req: NextRequest) {
       barber: finalBarber,
       services,
       totalPrice: totals.price,
-      totalDurationMins: totals.durationMins
+      totalDurationMins: totals.durationMins,
+      timeZone: barbearia.timezone,
     }).catch(console.error);
 
     return NextResponse.json({
@@ -217,7 +217,7 @@ export async function GET() {
       orderBy: { name: 'asc' },
     })
 
-    return NextResponse.json({ services, barbers })
+    return NextResponse.json({ services, barbers, timezone: barbearia.timezone })
   } catch (error) {
     const handled = tenantErrorResponse(error)
     if (handled) return handled

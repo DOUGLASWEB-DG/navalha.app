@@ -81,12 +81,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (!barber.active && nextBarberId !== current.barberId) throw new AppointmentRuleError('Barbeiro desativado.')
 
     const nextDate = parsed.date
-      ? parseIncomingAppointmentDate(parsed.date)
+      ? parseIncomingAppointmentDate(parsed.date, barbearia.timezone)
       : current.date
     if (Number.isNaN(nextDate.getTime())) throw new AppointmentRuleError('Data do agendamento inválida.')
 
     if (hasScheduleChange && nextStatus !== 'CANCELED') {
-      validateAppointmentSchedule(nextDate, nextTotals.durationMins, !isAdmin)
+      validateAppointmentSchedule(nextDate, nextTotals.durationMins, barbearia.timezone, !isAdmin)
       const conflicts = await prisma.appointment.findMany({
         where: { id: { not: id }, barbeariaId, barberId: nextBarberId, status: { not: 'CANCELED' } },
         include: { service: { select: { price: true, durationMins: true } }, appointmentServices: { select: { price: true, durationMins: true } } },
@@ -135,7 +135,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           } else {
             // Formatar data e hora usando fuso horário correto
             const formatter = new Intl.DateTimeFormat('pt-BR', {
-              timeZone: 'America/Porto_Velho',
+              timeZone: barbearia.timezone,
               weekday: 'long',
               day: 'numeric',
               month: 'long',

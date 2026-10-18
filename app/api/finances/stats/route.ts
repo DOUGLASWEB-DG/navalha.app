@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { startOfZonedMonth, zonedMonthKey } from '@/lib/time-zone'
+
+const DAY_MS = 24 * 60 * 60 * 1000
 
 export async function GET(req: NextRequest) {
   try {
     const { barbearia } = await requireTenantAdmin()
+    const timeZone = barbearia.timezone
     const { searchParams } = new URL(req.url)
     const monthsParam = parseInt(searchParams.get('months') || '6', 10)
     const now = new Date()
 
     // ─── Otimização Principal: Uma única viagem ao banco de dados ─────
     // Buscamos todas as transações dos últimos N meses de uma só vez.
-    const firstMonth = startOfMonth(subMonths(now, monthsParam - 1))
+    // Meses do calendário no fuso da barbearia
+    const firstMonth = startOfZonedMonth(now, timeZone, -(monthsParam - 1))
     const allTransactions = await prisma.transaction.findMany({
       where: {
         barbeariaId: barbearia.id,
@@ -32,16 +36,16 @@ export async function GET(req: NextRequest) {
       { receitas: number; despesas: number }
     >()
     const categoryMap = new Map<string, number>()
-    const currentMonthStart = startOfMonth(now)
+    const currentMonthStart = startOfZonedMonth(now, timeZone)
     let incomeTotal = 0
     let expenseTotal = 0
     let prevIncomeVal = 0
     let prevExpenseVal = 0
 
-    const prevMonthStart = startOfMonth(subMonths(now, 1))
+    const prevMonthStart = startOfZonedMonth(now, timeZone, -1)
 
     for (const t of allTransactions) {
-      const monthKey = t.date.toISOString().slice(0, 7) // ex: "2023-04"
+      const monthKey = zonedMonthKey(t.date, timeZone) // ex: "2023-04"
 
       // Inicializa o mapa do mês se não existir
       if (!monthlyMap.has(monthKey)) {
@@ -81,12 +85,13 @@ export async function GET(req: NextRequest) {
 
     // Monta o array de dados mensais
     const monthlyData = Array.from({ length: monthsParam }, (_, i) => {
-      const date = subMonths(now, monthsParam - 1 - i)
-      const monthKey = date.toISOString().slice(0, 7)
+      // Dia 15 do mês: longe das bordas, o rótulo nunca cai no mês vizinho
+      const date = new Date(startOfZonedMonth(now, timeZone, -(monthsParam - 1 - i)).getTime() + 14 * DAY_MS)
+      const monthKey = zonedMonthKey(date, timeZone)
       const data = monthlyMap.get(monthKey) || { receitas: 0, despesas: 0 }
       return {
-        month: date.toLocaleString('pt-BR', { month: 'short' }),
-        monthFull: date.toLocaleString('pt-BR', { month: 'short', year: '2-digit' }),
+        month: date.toLocaleString('pt-BR', { month: 'short', timeZone }),
+        monthFull: date.toLocaleString('pt-BR', { month: 'short', year: '2-digit', timeZone }),
         receitas: data.receitas,
         despesas: data.despesas,
         saldo: data.receitas - data.despesas,

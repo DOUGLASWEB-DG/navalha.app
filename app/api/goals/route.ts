@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { parseZonedDate } from '@/lib/time-zone'
 
 const createSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -41,8 +42,8 @@ export async function POST(req: NextRequest) {
         type: parsed.type,
         targetAmount: parsed.targetAmount,
         period: parsed.period,
-        startDate: new Date(parsed.startDate),
-        endDate: new Date(parsed.endDate),
+        startDate: parseZonedDate(parsed.startDate, barbearia.timezone),
+        endDate: parseZonedDate(parsed.endDate, barbearia.timezone),
       },
     })
 

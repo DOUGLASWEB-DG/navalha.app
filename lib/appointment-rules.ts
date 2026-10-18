@@ -1,6 +1,8 @@
 import { AppointmentStatus } from '@prisma/client'
+import { getZonedParts, zonedWallClockToUtc } from '@/lib/time-zone'
 
-export const APPOINTMENT_TIME_ZONE = 'America/Porto_Velho'
+// Regras de agenda no fuso da barbearia (Barbearia.timezone). Todas as funções exigem o fuso: não há padrão,
+// para que nenhuma chamada caia no fuso da máquina ou de outra barbearia.
 export const OPENING_MINUTES = 8 * 60
 export const CLOSING_MINUTES = 20 * 60
 export const CANCELLATION_NOTICE_MINUTES = 120
@@ -12,45 +14,7 @@ export class AppointmentRuleError extends Error {
   }
 }
 
-interface AppointmentDateParts {
-  year: number
-  month: number
-  day: number
-  hour: number
-  minute: number
-}
-
-function getPartsInTimeZone(date: Date): AppointmentDateParts {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: APPOINTMENT_TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(date)
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
-  return {
-    year: Number(values.year),
-    month: Number(values.month),
-    day: Number(values.day),
-    hour: Number(values.hour),
-    minute: Number(values.minute),
-  }
-}
-
-function wallClockToUtc(parts: AppointmentDateParts): Date {
-  let timestamp = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute)
-  for (let iteration = 0; iteration < 2; iteration += 1) {
-    const zoned = getPartsInTimeZone(new Date(timestamp))
-    const zonedAsUtc = Date.UTC(zoned.year, zoned.month - 1, zoned.day, zoned.hour, zoned.minute)
-    timestamp += Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute) - zonedAsUtc
-  }
-  return new Date(timestamp)
-}
-
-export function parseAppointmentDate(value: string): Date {
+export function parseAppointmentDate(value: string, timeZone: string): Date {
   const match = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/.exec(value)
   if (!match) throw new AppointmentRuleError('Data do agendamento inválida.')
 
@@ -60,8 +24,8 @@ export function parseAppointmentDate(value: string): Date {
   const day = Number(dayText)
   const hour = Number(hourText)
   const minute = Number(minuteText)
-  const date = wallClockToUtc({ year, month, day, hour, minute })
-  const parsed = getPartsInTimeZone(date)
+  const date = zonedWallClockToUtc({ year, month, day, hour, minute }, timeZone)
+  const parsed = getZonedParts(date, timeZone)
 
   if (
     parsed.year !== year ||
@@ -76,36 +40,32 @@ export function parseAppointmentDate(value: string): Date {
   return date
 }
 
-export function parseIncomingAppointmentDate(value: string): Date {
+export function parseIncomingAppointmentDate(value: string, timeZone: string): Date {
   if (value.includes('Z') || value.includes('+')) {
     const date = new Date(value)
     if (Number.isNaN(date.getTime())) throw new AppointmentRuleError('Data do agendamento inválida.')
     return date
   }
-  return parseAppointmentDate(value)
+  return parseAppointmentDate(value, timeZone)
 }
 
-export function getAppointmentDayRange(dateValue: string) {
+// Intervalo [start, end) do dia informado (yyyy-MM-dd) no fuso da barbearia.
+export function getAppointmentDayRange(dateValue: string, timeZone: string) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue)
   if (!match) throw new AppointmentRuleError('Data inválida.')
-  const year = Number(match[1])
-  const month = Number(match[2])
-  const day = Number(match[3])
-  const start = parseAppointmentDate(`${dateValue}T00:00`)
-  const nextDay = new Date(Date.UTC(year, month - 1, day + 1))
-  const nextDayValue = [
-    nextDay.getUTCFullYear(),
-    String(nextDay.getUTCMonth() + 1).padStart(2, '0'),
-    String(nextDay.getUTCDate()).padStart(2, '0'),
-  ].join('-')
-  return { start, end: parseAppointmentDate(`${nextDayValue}T00:00`) }
+  const start = parseAppointmentDate(`${dateValue}T00:00`, timeZone)
+  const end = zonedWallClockToUtc(
+    { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) + 1, hour: 0, minute: 0 },
+    timeZone,
+  )
+  return { start, end }
 }
 
-export function validateAppointmentSchedule(date: Date, durationMins: number, checkPast = true) {
+export function validateAppointmentSchedule(date: Date, durationMins: number, timeZone: string, checkPast = true) {
   const now = new Date()
-  const current = getPartsInTimeZone(now)
-  const scheduled = getPartsInTimeZone(date)
-  const todayStart = wallClockToUtc({ ...current, hour: 0, minute: 0 })
+  const current = getZonedParts(now, timeZone)
+  const scheduled = getZonedParts(date, timeZone)
+  const todayStart = zonedWallClockToUtc({ ...current, hour: 0, minute: 0 }, timeZone)
 
   if (checkPast && date < todayStart) {
     throw new AppointmentRuleError('Não é possível agendar em uma data passada.')
@@ -113,19 +73,17 @@ export function validateAppointmentSchedule(date: Date, durationMins: number, ch
   if (checkPast && date < now) {
     throw new AppointmentRuleError('Escolha um horário futuro.')
   }
-  const weekday = new Intl.DateTimeFormat('en-US', {
-    timeZone: APPOINTMENT_TIME_ZONE,
-    weekday: 'short',
-  }).format(date)
+  const weekday = new Intl.DateTimeFormat('en-US', { timeZone, weekday: 'short' }).format(date)
   if (weekday === 'Sun') {
     throw new AppointmentRuleError('A barbearia não funciona aos domingos.')
   }
 
   const startMinutes = scheduled.hour * 60 + scheduled.minute
   const end = new Date(date.getTime() + durationMins * 60_000)
-  const closing = wallClockToUtc({ ...scheduled, hour: 20, minute: 0 })
+  const closing = zonedWallClockToUtc({ ...scheduled, hour: 20, minute: 0 }, timeZone)
 
-  if (startMinutes < OPENING_MINUTES || startMinutes >= CLOSING_MINUTES || date.getMinutes() % 30 !== 0) {
+  // Minuto no fuso da barbearia (date.getMinutes() usaria o fuso da máquina)
+  if (startMinutes < OPENING_MINUTES || startMinutes >= CLOSING_MINUTES || scheduled.minute % 30 !== 0) {
     throw new AppointmentRuleError('Escolha um horário entre 08:00 e 19:30, em intervalos de 30 minutos.')
   }
   if (end > closing) {
@@ -154,7 +112,7 @@ export function assertStatusTransition(
   if (!isAdmin && !allowed[current].includes(next)) {
     throw new AppointmentRuleError(`Não é possível alterar um agendamento de ${current} para ${next}.`)
   }
-  
+
   if (!isAdmin && next === AppointmentStatus.CONFIRMED && appointmentDate <= new Date()) {
     throw new AppointmentRuleError('Agendamentos passados não podem ser confirmados.')
   }

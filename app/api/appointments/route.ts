@@ -51,8 +51,8 @@ export async function GET(req: NextRequest) {
       }
       const startValue = `${year}-${String(month).padStart(2, '0')}-01`
       const nextMonth = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`
-      const { start } = getAppointmentDayRange(startValue)
-      const { start: end } = getAppointmentDayRange(nextMonth)
+      const { start } = getAppointmentDayRange(startValue, barbearia.timezone)
+      const { start: end } = getAppointmentDayRange(nextMonth, barbearia.timezone)
       where.date = { gte: start, lt: end }
     } else if (dateParam) {
       const [year, month, day] = dateParam.split('-').map(Number)
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       }
 
       // Interpreta como data local (consistente com /api/book)
-      const { start, end } = getAppointmentDayRange(dateParam)
+      const { start, end } = getAppointmentDayRange(dateParam, barbearia.timezone)
       where.date = { gte: start, lt: end }
     }
 
@@ -115,11 +115,11 @@ export async function POST(req: NextRequest) {
 
     const date = parsed.date.includes('Z') || parsed.date.includes('+')
       ? new Date(parsed.date)
-      : parseIncomingAppointmentDate(parsed.date)
+      : parseIncomingAppointmentDate(parsed.date, barbearia.timezone)
     if (Number.isNaN(date.getTime())) throw new AppointmentRuleError('Data do agendamento inválida.')
     const isAdmin = user?.role === 'ADMIN'
     
-    validateAppointmentSchedule(date, totals.durationMins, !isAdmin)
+    validateAppointmentSchedule(date, totals.durationMins, barbearia.timezone, !isAdmin)
 
     const barbers = await prisma.user.findMany({
       where: user.role === 'BARBER' ? { id: user.id, barbeariaId, active: true } : { barbeariaId, active: true },
@@ -173,7 +173,8 @@ export async function POST(req: NextRequest) {
       barber: appointment.barber,
       services,
       totalPrice: totals.price,
-      totalDurationMins: totals.durationMins
+      totalDurationMins: totals.durationMins,
+      timeZone: barbearia.timezone,
     }).catch(console.error);
 
     return NextResponse.json(appointment, { status: 201 })

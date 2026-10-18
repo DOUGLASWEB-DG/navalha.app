@@ -119,6 +119,7 @@ interface AvailabilityResponse {
 interface BookingApiData {
   services: Service[]
   barbers: Barber[]
+  timezone: string // fuso IANA da barbearia: horários exibidos e comparados no relógio dela
 }
 
 interface DetailsStepProps {
@@ -330,8 +331,9 @@ function BookingContent() {
 
   // Verifica se um slot está livre
   function isSlotAvailable(slot: string) {
-    if (!availabilityData) return true
-    
+    if (!availabilityData || !apiData?.timezone) return true
+    const timeZone = apiData.timezone
+
     const [h, m] = slot.split(':').map(Number)
     const reqStart = h * 60 + m
     const reqEnd = reqStart + Number(booking.totalDuration || booking.serviceDuration || 30)
@@ -357,7 +359,7 @@ function BookingContent() {
       // Checa se há conflito
       const hasConflict = barberAppts.some((appointment) => {
         const apptDate = new Date(appointment.date)
-        const tzString = apptDate.toLocaleString('en-US', { timeZone: 'America/Porto_Velho' })
+        const tzString = apptDate.toLocaleString('en-US', { timeZone })
         const zonedDate = new Date(tzString)
         const apptStart = zonedDate.getHours() * 60 + zonedDate.getMinutes()
         const apptEnd = apptStart + Number(appointment.service.durationMins)
@@ -371,7 +373,7 @@ function BookingContent() {
 
     // Se é hoje, não permitir agendar no passado
     if (booking.date === format(new Date(), 'yyyy-MM-dd')) {
-      const nowTzString = new Date().toLocaleString('en-US', { timeZone: 'America/Porto_Velho' })
+      const nowTzString = new Date().toLocaleString('en-US', { timeZone })
       const nowZoned = new Date(nowTzString)
       const currentMins = nowZoned.getHours() * 60 + nowZoned.getMinutes()
       if (reqStart <= currentMins) return false
