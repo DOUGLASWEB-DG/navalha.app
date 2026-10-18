@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -184,14 +185,14 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
           </div>
 
           {/* Rodapé */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-2">
+          <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
               Cancelar
             </Button>
             <Button type="submit" isLoading={isSubmitting} className="px-6">
               {user ? 'Salvar' : 'Criar'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

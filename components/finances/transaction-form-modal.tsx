@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -248,14 +249,14 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
             {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting} className="border-border text-foreground">
               Cancelar
             </Button>
             <Button type="submit" isLoading={isSubmitting}>
               Salvar Transação
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -135,7 +136,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} className="border-border text-foreground">
               Cancelar
             </Button>
@@ -143,7 +144,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
               {isSubmitting && <Spinner className="w-3.5 h-3.5" />}
               {client ? 'Atualizar' : 'Adicionar'} Cliente
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

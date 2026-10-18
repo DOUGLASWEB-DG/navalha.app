@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -160,14 +161,14 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-2">
+          <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting} className="text-muted-foreground hover:text-foreground">
               Cancelar
             </Button>
             <Button type="submit" isLoading={isSubmitting} className="px-6">
               {service ? 'Salvar Alterações' : 'Adicionar Serviço'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

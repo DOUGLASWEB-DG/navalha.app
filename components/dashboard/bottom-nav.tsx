@@ -63,7 +63,7 @@ export function BottomNav() {
   return (
     <nav
       className={cn(
-        'lg:hidden fixed bottom-0 left-0 right-0 z-50',
+        'lg:hidden fixed bottom-0 left-0 right-0 z-nav',
         'border-t border-border bg-card/90 backdrop-blur-xl',
         'supports-[backdrop-filter]:bg-card/75',
         'pb-[max(0.375rem,env(safe-area-inset-bottom))] pt-2 px-1',

@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import {
   Select,
@@ -295,14 +296,14 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
           </div>
 
           {/* Rodapé */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-2">
+          <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting} className="text-muted-foreground hover:text-foreground">
               Cancelar
             </Button>
             <Button type="submit" isLoading={isSubmitting} className="px-6">
               {appointment ? 'Salvar Alterações' : 'Criar Agendamento'}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

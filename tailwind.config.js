@@ -8,6 +8,14 @@ module.exports = {
   ],
   theme: {
     extend: {
+      // Camadas da interface, da mais baixa para a mais alta. Usar estes nomes em vez de números soltos.
+      zIndex: {
+        header: '30', // cabeçalhos fixos/sticky
+        nav: '40', // navegação inferior mobile
+        overlay: '50', // fundo escurecido de modais
+        modal: '50', // conteúdo de modais (vem depois do overlay no DOM)
+        popover: '60', // menus, selects e dropdowns (precisam abrir por cima de modais)
+      },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
         serif: ['var(--font-playfair)', 'Georgia', 'serif'],

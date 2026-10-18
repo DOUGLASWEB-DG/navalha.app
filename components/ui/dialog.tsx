@@ -21,7 +21,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm",
+      "fixed inset-0 z-overlay bg-black/80 backdrop-blur-sm",
       "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
@@ -39,7 +39,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 grid w-full gap-4 border border-border bg-card p-6 text-foreground shadow-2xl duration-200",
+        "fixed z-modal grid w-full gap-4 border border-border bg-card p-6 text-foreground shadow-2xl duration-200",
         "max-h-[min(92vh,100%)] overflow-y-auto",
         /* Mobile: sheet inferior, opaco */
         "inset-x-0 bottom-0 top-auto max-w-full translate-x-0 translate-y-0 rounded-t-3xl rounded-b-none",
@@ -83,7 +83,11 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      // Fixo no rodapé do modal: o botão principal fica visível sem rolar o formulário.
+      // Margens e bottom negativos compensam o p-6 do DialogContent (sticky ancora na borda do padding).
+      "sticky -bottom-6 z-20 -mx-6 -mb-6 mt-2 flex justify-end gap-3 border-t border-border bg-card px-6 pt-4",
+      "pb-[max(1rem,env(safe-area-inset-bottom))]",
+      "max-sm:[&>button]:min-h-11 max-sm:[&>button]:flex-1",
       className
     )}
     {...props}
