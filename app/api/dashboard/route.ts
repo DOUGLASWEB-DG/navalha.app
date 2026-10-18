@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
+import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 export async function GET() {
   try {
+    const { barbearia } = await requireTenantAdmin()
+    const barbeariaId = barbearia.id
     const now = new Date()
     const monthStart = startOfMonth(now)
     const weekStart = startOfWeek(now, { weekStartsOn: 1 })
@@ -25,12 +28,13 @@ export async function GET() {
       recentTransactions,
       recentTxForCalculations
     ] = await Promise.all([
-      prisma.client.count({ where: { isActive: true } }),
+      prisma.client.count({ where: { barbeariaId, isActive: true } }),
       prisma.goal.findMany({
-        where: { startDate: { lte: now }, endDate: { gte: now } },
+        where: { barbeariaId, startDate: { lte: now }, endDate: { gte: now } },
       }),
       prisma.appointment.findMany({
         where: {
+          barbeariaId,
           date: { gte: todayStart, lte: endOfDay(now) },
           status: { not: 'CANCELED' },
         },
@@ -38,16 +42,17 @@ export async function GET() {
         orderBy: { date: 'asc' },
       }),
       prisma.transaction.aggregate({
-        where: { date: { gte: monthStart }, type: 'INCOME' },
+        where: { barbeariaId, date: { gte: monthStart }, type: 'INCOME' },
         _sum: { amount: true }
       }),
       prisma.transaction.findMany({
+        where: { barbeariaId },
         orderBy: { date: 'desc' },
         take: 5,
         select: { id: true, type: true, description: true, date: true, amount: true }
       }),
       prisma.transaction.findMany({
-        where: { date: { gte: earliestTxDate } },
+        where: { barbeariaId, date: { gte: earliestTxDate } },
         select: { date: true, type: true, amount: true }
       })
     ])
@@ -109,6 +114,8 @@ export async function GET() {
       chartData,
     })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Dashboard API]', error)
     return NextResponse.json({ error: 'Failed to load dashboard data' }, { status: 500 })
   }

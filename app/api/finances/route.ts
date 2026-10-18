@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import { sendTextMessage } from '@/lib/whatsapp'
-import { getCurrentBarbeariaId } from '@/lib/tenant'
+import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE']),
@@ -16,11 +16,12 @@ const createSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantAdmin()
     const { searchParams } = new URL(req.url)
     const monthParam = searchParams.get('month') // "2024-01"
     const type = searchParams.get('type') // INCOME | EXPENSE | null
 
-    const where: any = {}
+    const where: any = { barbeariaId: barbearia.id }
 
     if (monthParam) {
       const [year, month] = monthParam.split('-').map(Number)
@@ -100,6 +101,8 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Finances GET]', error)
     return NextResponse.json({ error: 'Failed to fetch transactions' }, { status: 500 })
   }
@@ -107,12 +110,22 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantAdmin()
     const body = await req.json()
     const parsed = createSchema.parse(body)
 
+    // Referência cruzada: a categoria precisa ser da mesma barbearia (o banco não impede o contrário)
+    if (parsed.categoryId) {
+      const category = await prisma.category.findFirst({
+        where: { id: parsed.categoryId, barbeariaId: barbearia.id },
+        select: { id: true },
+      })
+      if (!category) throw notFound('Categoria não encontrada.')
+    }
+
     const transaction = await prisma.transaction.create({
       data: {
-        barbeariaId: await getCurrentBarbeariaId(),
+        barbeariaId: barbearia.id,
         type: parsed.type,
         amount: parsed.amount,
         description: parsed.description,
@@ -161,6 +174,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(transaction, { status: 201 })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Finances POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })

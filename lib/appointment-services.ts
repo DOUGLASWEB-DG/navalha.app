@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { AppointmentRuleError } from '@/lib/appointment-rules'
+import { notFound } from '@/lib/api-error'
 
 export interface AppointmentServiceSnapshot {
   id: string
@@ -15,13 +16,14 @@ export function normalizeServiceIds(serviceIds?: string[], serviceId?: string) {
   return unique
 }
 
-export async function getActiveServices(serviceIds: string[]) {
+// Serviço de outra barbearia é tratado como inexistente (mesma mensagem), sem revelar que o id existe.
+export async function getActiveServices(barbeariaId: string, serviceIds: string[]) {
   const services = await prisma.service.findMany({
-    where: { id: { in: serviceIds }, active: true },
+    where: { id: { in: serviceIds }, barbeariaId, active: true },
     select: { id: true, name: true, price: true, durationMins: true },
   })
   if (services.length !== serviceIds.length) {
-    throw new AppointmentRuleError('Um ou mais serviços não foram encontrados ou estão indisponíveis.')
+    throw notFound('Um ou mais serviços não foram encontrados ou estão indisponíveis.')
   }
   const byId = new Map(services.map((service) => [service.id, service]))
   return serviceIds.map((id) => byId.get(id)!)

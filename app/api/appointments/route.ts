@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { getSession } from '@/lib/auth'
 import { AppointmentStatus, Prisma } from '@prisma/client'
 import {
   AppointmentRuleError,
@@ -17,7 +16,7 @@ import {
   normalizeServiceIds,
 } from '@/lib/appointment-services'
 import { notifyAppointmentCreated } from '@/lib/notifications'
-import { getCurrentBarbeariaId } from '@/lib/tenant'
+import { notFound, requireTenantUser, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
   clientId: z.string().min(1),
@@ -31,15 +30,14 @@ const createSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getSession()
-    if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    const { user, barbearia } = await requireTenantUser()
     const { searchParams } = new URL(req.url)
     const dateParam = searchParams.get('date')
     const status = searchParams.get('status')
 
     const monthParam = searchParams.get('month')
 
-    const where: any = {}
+    const where: any = { barbeariaId: barbearia.id }
 
     // Filtra pelo barbeiro logado se for role BARBER
     if (user?.role === 'BARBER') {
@@ -84,6 +82,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(appointments)
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Appointments GET]', error)
     return NextResponse.json({ error: 'Failed to fetch appointments' }, { status: 500 })
   }
@@ -91,8 +91,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await getSession()
-    if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    const { user, barbearia } = await requireTenantUser()
+    const barbeariaId = barbearia.id
     const body = await req.json()
     const parsed = createSchema.parse(body)
     if (parsed.status && parsed.status !== AppointmentStatus.PENDING) {
@@ -105,11 +105,12 @@ export async function POST(req: NextRequest) {
     }
 
     const serviceIds = normalizeServiceIds(parsed.serviceIds, parsed.serviceId)
+    // Referências cruzadas: cliente, serviços e barbeiro precisam ser desta barbearia
     const [client, services] = await Promise.all([
-      prisma.client.findUnique({ where: { id: parsed.clientId } }),
-      getActiveServices(serviceIds),
+      prisma.client.findFirst({ where: { id: parsed.clientId, barbeariaId } }),
+      getActiveServices(barbeariaId, serviceIds),
     ])
-    if (!client || !client.isActive) throw new AppointmentRuleError('Cliente não encontrado ou inativo.')
+    if (!client || !client.isActive) throw notFound('Cliente não encontrado ou inativo.')
     const totals = getServiceTotals(services)
 
     const date = parsed.date.includes('Z') || parsed.date.includes('+')
@@ -121,17 +122,16 @@ export async function POST(req: NextRequest) {
     validateAppointmentSchedule(date, totals.durationMins, !isAdmin)
 
     const barbers = await prisma.user.findMany({
-      where: user.role === 'BARBER' ? { id: user.id, active: true } : { active: true },
+      where: user.role === 'BARBER' ? { id: user.id, barbeariaId, active: true } : { barbeariaId, active: true },
       select: { id: true },
     })
     if (barberId && !barbers.some((barber) => barber.id === barberId)) {
-      throw new AppointmentRuleError('Barbeiro não encontrado.')
+      throw notFound('Barbeiro não encontrado.')
     }
     const candidates = barberId ? barbers.filter((barber) => barber.id === barberId) : barbers
-    const barbeariaId = await getCurrentBarbeariaId()
     const appointment = await prisma.$transaction(async (tx) => {
       const appointments = await tx.appointment.findMany({
-        where: { status: { not: AppointmentStatus.CANCELED }, barberId: { in: candidates.map((barber) => barber.id) } },
+        where: { barbeariaId, status: { not: AppointmentStatus.CANCELED }, barberId: { in: candidates.map((barber) => barber.id) } },
         include: { service: { select: { price: true, durationMins: true } }, appointmentServices: { select: { price: true, durationMins: true } } },
       })
       const availableBarber = candidates.find((barber) => !appointments.some((appointment) => {
@@ -178,6 +178,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(appointment, { status: 201 })
     } catch (error: any) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Appointments POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })

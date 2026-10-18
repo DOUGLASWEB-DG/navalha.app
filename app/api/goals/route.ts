@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { getCurrentBarbeariaId } from '@/lib/tenant'
+import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -14,11 +14,15 @@ const createSchema = z.object({
 
 export async function GET() {
   try {
+    const { barbearia } = await requireTenantAdmin()
     const goals = await prisma.goal.findMany({
+      where: { barbeariaId: barbearia.id },
       orderBy: { createdAt: 'desc' },
     })
     return NextResponse.json(goals)
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Goals GET]', error)
     return NextResponse.json({ error: 'Failed to fetch goals' }, { status: 500 })
   }
@@ -26,12 +30,13 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantAdmin()
     const body = await req.json()
     const parsed = createSchema.parse(body)
 
     const goal = await prisma.goal.create({
       data: {
-        barbeariaId: await getCurrentBarbeariaId(),
+        barbeariaId: barbearia.id,
         title: parsed.title,
         type: parsed.type,
         targetAmount: parsed.targetAmount,
@@ -43,6 +48,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(goal, { status: 201 })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Goals POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })

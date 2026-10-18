@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { normalizeBrazilPhone } from '@/lib/format'
-import { getCurrentBarbeariaId } from '@/lib/tenant'
+import { requireTenantUser, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
@@ -13,13 +13,14 @@ const createSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantUser()
     const { searchParams } = new URL(req.url)
     const minimal = searchParams.get('minimal') === 'true'
     const search = searchParams.get('search') ?? ''
 
     if (minimal) {
       const clients = await prisma.client.findMany({
-        where: { isActive: true },
+        where: { barbeariaId: barbearia.id, isActive: true },
         select: { id: true, name: true, phone: true },
         orderBy: { name: 'asc' },
       })
@@ -28,6 +29,7 @@ export async function GET(req: NextRequest) {
 
     const clients = await prisma.client.findMany({
       where: {
+        barbeariaId: barbearia.id,
         isActive: true,
         ...(search && {
           OR: [
@@ -47,13 +49,13 @@ export async function GET(req: NextRequest) {
     const [completed, upcoming] = await Promise.all([
       prisma.appointment.groupBy({
         by: ['clientId'],
-        where: { clientId: { in: clientIds }, status: 'COMPLETED' },
+        where: { barbeariaId: barbearia.id, clientId: { in: clientIds }, status: 'COMPLETED' },
         _count: { _all: true },
         _max: { date: true },
       }),
       prisma.appointment.groupBy({
         by: ['clientId'],
-        where: { clientId: { in: clientIds }, status: { in: ['PENDING', 'CONFIRMED'] }, date: { gte: new Date() } },
+        where: { barbeariaId: barbearia.id, clientId: { in: clientIds }, status: { in: ['PENDING', 'CONFIRMED'] }, date: { gte: new Date() } },
         _min: { date: true },
       }),
     ])
@@ -67,6 +69,8 @@ export async function GET(req: NextRequest) {
       nextAppointmentAt: upcomingByClient.get(client.id)?._min.date ?? null,
     })))
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Clients GET]', error)
     return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 })
   }
@@ -74,12 +78,13 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantUser()
     const body = await req.json()
     const parsed = createSchema.parse(body)
 
     const client = await prisma.client.create({
       data: {
-        barbeariaId: await getCurrentBarbeariaId(),
+        barbeariaId: barbearia.id,
         name: parsed.name,
         phone: normalizeBrazilPhone(parsed.phone)!,
         email: parsed.email || undefined,
@@ -89,6 +94,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(client, { status: 201 })
   } catch (error: any) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Clients POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })

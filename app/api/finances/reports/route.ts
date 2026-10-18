@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 export async function GET(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantAdmin()
+    const barbeariaId = barbearia.id
     const { searchParams } = new URL(req.url)
     const period = parseInt(searchParams.get('period') || '6')
     const now = new Date()
@@ -20,17 +23,17 @@ export async function GET(req: NextRequest) {
     ] = await Promise.all([
       // 1. Histórico do período
       prisma.transaction.findMany({
-        where: { date: { gte: periodStart, lte: periodEnd } },
+        where: { barbeariaId, date: { gte: periodStart, lte: periodEnd } },
         select: { amount: true, type: true, date: true }
       }),
       // 2. Totais de toda a vida
-      prisma.transaction.aggregate({ where: { type: 'INCOME' }, _sum: { amount: true } }),
+      prisma.transaction.aggregate({ where: { barbeariaId, type: 'INCOME' }, _sum: { amount: true } }),
       // 3. Totais de toda a vida
-      prisma.transaction.aggregate({ where: { type: 'EXPENSE' }, _sum: { amount: true } }),
+      prisma.transaction.aggregate({ where: { barbeariaId, type: 'EXPENSE' }, _sum: { amount: true } }),
       // 4. Breakdown de categorias do período
       prisma.transaction.groupBy({
         by: ['categoryId'] as any,
-        where: { type: 'EXPENSE', date: { gte: periodStart, lte: periodEnd }, categoryId: { not: null } } as any,
+        where: { barbeariaId, type: 'EXPENSE', date: { gte: periodStart, lte: periodEnd }, categoryId: { not: null } } as any,
         _sum: { amount: true },
         orderBy: { _sum: { amount: 'desc' } } as any
       })
@@ -82,7 +85,7 @@ export async function GET(req: NextRequest) {
       .filter((id: string | null): id is string => id !== null)
 
     const categories = categoryIds.length > 0
-      ? await (prisma as any).category.findMany({ where: { id: { in: categoryIds } } })
+      ? await prisma.category.findMany({ where: { id: { in: categoryIds }, barbeariaId } })
       : []
 
     const catMap = Object.fromEntries((categories as any[]).map((c: any) => [c.id, c]))
@@ -105,6 +108,8 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Reports GET]', error)
     return NextResponse.json({ error: 'Failed to fetch report data' }, { status: 500 })
   }

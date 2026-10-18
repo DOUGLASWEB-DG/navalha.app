@@ -7,6 +7,11 @@ import { getCurrentBarbearia, TenantNotFoundError } from '@/lib/tenant'
 
 const WINDOW_MS = 15 * 60 * 1000
 
+// Hash de uma senha aleatória, gerado uma vez por processo. E-mail inexistente também passa por um
+// bcrypt.compare (contra este hash, que nunca confere), para o tempo de resposta não revelar se a conta existe.
+// Mesmo custo (10) dos hashes reais.
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync(crypto.randomUUID(), 10)
+
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json()
@@ -39,7 +44,7 @@ export async function POST(req: NextRequest) {
       where: { email: normalizedEmail },
     })
 
-    const passwordMatch = user ? await bcrypt.compare(password, user.password) : false
+    const passwordMatch = await bcrypt.compare(password, user?.password ?? DUMMY_PASSWORD_HASH) && Boolean(user)
 
     // Login só vale na barbearia do usuário. Conta de outra barbearia recebe a mesma resposta de senha
     // errada (e a senha é comparada do mesmo jeito), para não revelar que o e-mail existe em outro lugar.

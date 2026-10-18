@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth'
-import { getCurrentBarbeariaId } from '@/lib/tenant'
+import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 const createUserSchema = z.object({
   name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres'),
@@ -14,12 +13,10 @@ const createUserSchema = z.object({
 
 export async function GET() {
   try {
-    const auth = await requireAdmin()
-    if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status })
-    }
+    const { barbearia } = await requireTenantAdmin()
 
     const users = await prisma.user.findMany({
+      where: { barbeariaId: barbearia.id },
       select: {
         id: true,
         name: true,
@@ -32,6 +29,8 @@ export async function GET() {
     })
     return NextResponse.json(users)
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Users GET]', error)
     return NextResponse.json({ error: 'Erro ao buscar usuários' }, { status: 500 })
   }
@@ -39,14 +38,12 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = await requireAdmin()
-    if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status })
-    }
+    const { barbearia } = await requireTenantAdmin()
 
     const body = await req.json()
     const parsed = createUserSchema.parse(body)
 
+    // E-mail é único no sistema todo (o login é global), por isso a checagem não filtra por barbearia
     const existingUser = await prisma.user.findUnique({ where: { email: parsed.email } })
     if (existingUser) {
       return NextResponse.json({ error: 'Email já cadastrado' }, { status: 400 })
@@ -56,7 +53,7 @@ export async function POST(req: NextRequest) {
     
     const user = await prisma.user.create({
       data: {
-        barbeariaId: await getCurrentBarbeariaId(),
+        barbeariaId: barbearia.id,
         name: parsed.name,
         email: parsed.email,
         password: hashedPassword,
@@ -72,6 +69,8 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json(user, { status: 201 })
   } catch (error: any) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Users POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0]?.message || 'Dados inválidos' }, { status: 400 })

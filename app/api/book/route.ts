@@ -18,7 +18,7 @@ import {
   normalizeServiceIds,
 } from '@/lib/appointment-services'
 import { checkLimited, getClientIp, hit, tooManyRequestsHeaders } from '@/lib/rate-limit'
-import { getCurrentBarbeariaId } from '@/lib/tenant'
+import { notFound, requireTenant, tenantErrorResponse } from '@/lib/api'
 
 const HOUR_MS = 60 * 60 * 1000
 const MAX_ACTIVE_APPOINTMENTS_PER_PHONE = 3
@@ -57,6 +57,8 @@ export async function POST(req: NextRequest) {
     }
     hit(ipRules)
 
+    const barbearia = await requireTenant()
+    const barbeariaId = barbearia.id
     const body = await req.json()
     const parsed = bookingSchema.parse(body)
 
@@ -64,20 +66,21 @@ export async function POST(req: NextRequest) {
     const endDatetime = new Date(datetime)
 
     const serviceIds = normalizeServiceIds(parsed.serviceIds, parsed.serviceId)
-    const services = await getActiveServices(serviceIds)
+    const services = await getActiveServices(barbeariaId, serviceIds)
     const totals = getServiceTotals(services)
     endDatetime.setMinutes(endDatetime.getMinutes() + totals.durationMins)
     validateAppointmentSchedule(datetime, totals.durationMins)
 
     let finalBarberId = parsed.barberId && parsed.barberId !== 'any' ? parsed.barberId : null
 
-    const allBarbers = await prisma.user.findMany({ where: { active: true }, select: { id: true, name: true, phone: true } })
+    const allBarbers = await prisma.user.findMany({ where: { barbeariaId, active: true }, select: { id: true, name: true, phone: true } })
     if (finalBarberId && !allBarbers.some((barber) => barber.id === finalBarberId)) {
-      throw new AppointmentRuleError('Barbeiro não encontrado.')
+      throw notFound('Barbeiro não encontrado.')
     }
 
     const phone = normalizeBrazilPhone(parsed.phone)!
-    const phoneRules = [{ key: `book:phone:${phone}`, limit: 3, windowMs: 24 * HOUR_MS }]
+    // Limite por telefone dentro da barbearia: reservas em uma barbearia não consomem o limite de outra
+    const phoneRules = [{ key: `book:phone:${barbeariaId}:${phone}`, limit: 3, windowMs: 24 * HOUR_MS }]
     const phoneRetryAfter = checkLimited(phoneRules)
     if (phoneRetryAfter !== null) {
       return NextResponse.json(
@@ -86,7 +89,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const barbeariaId = await getCurrentBarbeariaId()
     const appointment = await prisma.$transaction(async (tx) => {
       const client = await tx.client.upsert({
         // Telefone é único por barbearia: o mesmo número pode ser cliente de outra barbearia.
@@ -98,6 +100,7 @@ export async function POST(req: NextRequest) {
 
       const activeAppointments = await tx.appointment.count({
         where: {
+          barbeariaId,
           clientId: client.id,
           date: { gte: new Date() },
           status: { in: ['PENDING', 'CONFIRMED'] },
@@ -107,8 +110,10 @@ export async function POST(req: NextRequest) {
         throw new AppointmentRuleError('Este telefone já possui o máximo de agendamentos ativos. Entre em contato com a barbearia.')
       }
 
+      // Conflito de horário só entre agendamentos desta barbearia
       const overlappingAppointments = await tx.appointment.findMany({
         where: {
+          barbeariaId,
           date: {
             gte: getAppointmentDayRange(parsed.date).start,
             lt: getAppointmentDayRange(parsed.date).end,
@@ -181,6 +186,8 @@ export async function POST(req: NextRequest) {
       },
     }, { status: 201 })
     } catch (error: any) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Book POST]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })
@@ -197,20 +204,23 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
+    const barbearia = await requireTenant()
     const services = await prisma.service.findMany({
-      where: { active: true },
+      where: { barbeariaId: barbearia.id, active: true },
       select: { id: true, name: true, price: true, durationMins: true, description: true },
       orderBy: { name: 'asc' },
     })
 
     const barbers = await prisma.user.findMany({
-      where: { active: true },
+      where: { barbeariaId: barbearia.id, active: true },
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     })
 
     return NextResponse.json({ services, barbers })
-  } catch {
+  } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     return NextResponse.json({ error: 'Failed' }, { status: 500 })
   }
 }

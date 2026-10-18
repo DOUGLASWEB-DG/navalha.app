@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
-import { getCurrentBarbeariaId } from '@/lib/tenant'
+import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 export async function GET() {
   try {
+    const { barbearia } = await requireTenantAdmin()
     const alerts = await prisma.financeAlert.findMany({
+      where: { barbeariaId: barbearia.id },
       orderBy: { createdAt: 'desc' },
       take: 50,
     })
@@ -14,6 +16,8 @@ export async function GET() {
 
     return NextResponse.json({ alerts, unreadCount })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Alerts GET]', error)
     return NextResponse.json({ error: 'Failed to fetch alerts' }, { status: 500 })
   }
@@ -21,12 +25,14 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantAdmin()
+    const barbeariaId = barbearia.id
     const body = await req.json()
     const { action, id } = body
 
     if (action === 'markRead' && id) {
       await prisma.financeAlert.update({
-        where: { id },
+        where: { id, barbeariaId },
         data: { read: true },
       })
       return NextResponse.json({ success: true })
@@ -34,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     if (action === 'markAllRead') {
       await prisma.financeAlert.updateMany({
-        where: { read: false },
+        where: { barbeariaId, read: false },
         data: { read: true },
       })
       return NextResponse.json({ success: true })
@@ -48,15 +54,15 @@ export async function POST(req: NextRequest) {
       const prevEnd = endOfMonth(subMonths(now, 1))
 
       const currentExpense = await prisma.transaction.aggregate({
-        where: { type: 'EXPENSE', date: { gte: currentStart, lte: currentEnd } },
+        where: { barbeariaId, type: 'EXPENSE', date: { gte: currentStart, lte: currentEnd } },
         _sum: { amount: true },
       })
       const prevExpense = await prisma.transaction.aggregate({
-        where: { type: 'EXPENSE', date: { gte: prevStart, lte: prevEnd } },
+        where: { barbeariaId, type: 'EXPENSE', date: { gte: prevStart, lte: prevEnd } },
         _sum: { amount: true },
       })
       const currentIncome = await prisma.transaction.aggregate({
-        where: { type: 'INCOME', date: { gte: currentStart, lte: currentEnd } },
+        where: { barbeariaId, type: 'INCOME', date: { gte: currentStart, lte: currentEnd } },
         _sum: { amount: true },
       })
 
@@ -113,7 +119,6 @@ export async function POST(req: NextRequest) {
       }
 
       // Salvar alertas no banco
-      const barbeariaId = await getCurrentBarbeariaId()
       for (const alert of newAlerts) {
         await prisma.financeAlert.create({
           data: {
@@ -131,6 +136,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Alerts POST]', error)
     return NextResponse.json({ error: 'Failed to process alert action' }, { status: 500 })
   }

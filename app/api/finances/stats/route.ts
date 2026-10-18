@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 export async function GET(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantAdmin()
     const { searchParams } = new URL(req.url)
     const monthsParam = parseInt(searchParams.get('months') || '6', 10)
     const now = new Date()
@@ -13,6 +15,7 @@ export async function GET(req: NextRequest) {
     const firstMonth = startOfMonth(subMonths(now, monthsParam - 1))
     const allTransactions = await prisma.transaction.findMany({
       where: {
+        barbeariaId: barbearia.id,
         date: { gte: firstMonth },
       },
       select: {
@@ -93,7 +96,7 @@ export async function GET(req: NextRequest) {
     // Monta o breakdown de categorias
     const categoryIds = Array.from(categoryMap.keys())
     const categories = await prisma.category.findMany({
-      where: { id: { in: categoryIds } },
+      where: { id: { in: categoryIds }, barbeariaId: barbearia.id },
     })
     const catMap = Object.fromEntries(categories.map((c) => [c.id, c]))
     const categoryData = Array.from(categoryMap.entries()).map(([id, sum]) => ({
@@ -119,6 +122,8 @@ export async function GET(req: NextRequest) {
       // allTime pode ser otimizado similarmente se necessário, ou calculado de outra forma
     })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Finance Stats GET]', error)
     return NextResponse.json({ error: 'Failed to fetch finance stats' }, { status: 500 })
   }

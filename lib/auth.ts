@@ -13,13 +13,14 @@ const sessionUserSelect = { id: true, name: true, email: true, role: true, barbe
 
 // Sessão válida NA barbearia do Host: o JWT precisa ter sido emitido para ela (claim barbeariaId) e o
 // usuário precisa pertencer a ela e estar ativo. Qualquer divergência é tratada como "sem sessão".
+// Host sem barbearia lança TenantNotFoundError (404), que não se confunde com "sem sessão" (401).
 export async function getTenantSession() {
+  const barbearia = await getCurrentBarbearia()
   const cookieStore = await cookies()
   const token = cookieStore.get(SESSION_COOKIE)?.value
   if (!token) return null
 
   try {
-    const barbearia = await getCurrentBarbearia()
     const { payload } = await jwtVerify(token, getJwtSecretKey())
     const userId = payload.userId as string
     if (!userId || payload.barbeariaId !== barbearia.id) return null
@@ -32,13 +33,17 @@ export async function getTenantSession() {
     if (!user) return null
     return { user, barbearia }
   } catch {
-    // Host sem barbearia, token inválido ou expirado
+    // Token inválido ou expirado
     return null
   }
 }
 
 export async function getSession() {
-  return (await getTenantSession())?.user ?? null
+  try {
+    return (await getTenantSession())?.user ?? null
+  } catch {
+    return null
+  }
 }
 
 export async function requireAdmin() {

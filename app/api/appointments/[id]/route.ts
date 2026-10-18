@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { sendTextMessage } from '@/lib/whatsapp'
 import { normalizeBrazilPhone } from '@/lib/format'
 import { Prisma } from '@prisma/client'
-import { getSession } from '@/lib/auth'
+import { notFound, requireTenantUser, tenantErrorResponse } from '@/lib/api'
 import {
   AppointmentRuleError,
   assertStatusTransition,
@@ -32,17 +32,18 @@ const updateSchema = z.object({
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getSession()
-    if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    const { user, barbearia } = await requireTenantUser()
+    const barbeariaId = barbearia.id
     const { id } = await params
     const body = await req.json()
     const parsed = updateSchema.parse(body)
 
-    const current = await prisma.appointment.findUnique({
-      where: { id },
+    // Agendamento de outra barbearia: 404, igual a inexistente
+    const current = await prisma.appointment.findFirst({
+      where: { id, barbeariaId },
       include: { service: true, appointmentServices: { include: { service: true } }, client: true },
     })
-    if (!current) return NextResponse.json({ error: 'Agendamento não encontrado.' }, { status: 404 })
+    if (!current) throw notFound('Agendamento não encontrado.')
     if (user.role === 'BARBER' && current.barberId !== user.id) {
       return NextResponse.json({ error: 'Você não pode alterar este agendamento.' }, { status: 403 })
     }
@@ -61,21 +62,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       ? current.appointmentServices.map((item) => item.service)
       : [current.service]
     const nextServices = hasServiceChange
-      ? await getActiveServices(normalizeServiceIds(parsed.serviceIds, parsed.serviceId))
+      ? await getActiveServices(barbeariaId, normalizeServiceIds(parsed.serviceIds, parsed.serviceId))
       : currentServices
     const nextService = nextServices[0]
     const nextTotals = getServiceTotals(nextServices)
 
     const nextClientId = parsed.clientId ?? current.clientId
     if (parsed.clientId) {
-      const client = await prisma.client.findUnique({ where: { id: nextClientId } })
-      if (!client || !client.isActive) throw new AppointmentRuleError('Cliente não encontrado ou inativo.')
+      const client = await prisma.client.findFirst({ where: { id: nextClientId, barbeariaId } })
+      if (!client || !client.isActive) throw notFound('Cliente não encontrado ou inativo.')
     }
 
     const nextBarberId = user.role === 'BARBER' ? user.id : (parsed.barberId === undefined ? current.barberId : parsed.barberId)
     if (!nextBarberId) throw new AppointmentRuleError('Selecione um barbeiro para o agendamento.')
-    const barber = await prisma.user.findUnique({ where: { id: nextBarberId } })
-    if (!barber) throw new AppointmentRuleError('Barbeiro não encontrado.')
+    const barber = await prisma.user.findFirst({ where: { id: nextBarberId, barbeariaId } })
+    if (!barber) throw notFound('Barbeiro não encontrado.')
     // Agendamento antigo de barbeiro desativado continua editável (ex.: concluir); só não pode ser transferido a ele.
     if (!barber.active && nextBarberId !== current.barberId) throw new AppointmentRuleError('Barbeiro desativado.')
 
@@ -87,7 +88,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (hasScheduleChange && nextStatus !== 'CANCELED') {
       validateAppointmentSchedule(nextDate, nextTotals.durationMins, !isAdmin)
       const conflicts = await prisma.appointment.findMany({
-        where: { id: { not: id }, barberId: nextBarberId, status: { not: 'CANCELED' } },
+        where: { id: { not: id }, barbeariaId, barberId: nextBarberId, status: { not: 'CANCELED' } },
         include: { service: { select: { price: true, durationMins: true } }, appointmentServices: { select: { price: true, durationMins: true } } },
       })
       const nextEnd = nextDate.getTime() + nextTotals.durationMins * 60_000
@@ -116,7 +117,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const appointment = await prisma.appointment.update({
-      where: { id },
+      where: { id, barbeariaId },
       data,
       include: { client: true, service: true, appointmentServices: { include: { service: true } } },
     })
@@ -191,8 +192,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     // Auto-create income transaction when completed
     if (current.status !== 'COMPLETED' && nextStatus === 'COMPLETED') {
-      const appt = await prisma.appointment.findUnique({
-        where: { id },
+      const appt = await prisma.appointment.findFirst({
+        where: { id, barbeariaId },
         include: { service: true, appointmentServices: { include: { service: true } }, client: true },
       })
       if (appt) {
@@ -255,6 +256,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     return NextResponse.json(appointment)
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Appointments PATCH]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 })
@@ -266,9 +269,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 }
 
+// Não consulta o id: a resposta é a mesma para qualquer agendamento, de qualquer barbearia.
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const user = await getSession()
-  if (!user) return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+  try {
+    await requireTenantUser()
+  } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
+    throw error
+  }
   return NextResponse.json(
     { error: 'Agendamentos não podem ser excluídos. Altere o status para CANCELED para preservar o histórico.' },
     { status: 409 },

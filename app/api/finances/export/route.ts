@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
 import { getAppointmentServiceSummary } from '@/lib/appointment-services'
+import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 export async function GET(req: NextRequest) {
   try {
+    const { barbearia } = await requireTenantAdmin()
     const { searchParams } = new URL(req.url)
     const period = parseInt(searchParams.get('period') || '6')
     const now = new Date()
@@ -14,6 +16,7 @@ export async function GET(req: NextRequest) {
 
     const transactions = await prisma.transaction.findMany({
       where: {
+        barbeariaId: barbearia.id,
         date: { gte: periodStart, lte: periodEnd },
       },
       orderBy: { date: 'desc' },
@@ -53,6 +56,8 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Export GET]', error)
     return NextResponse.json({ error: 'Failed to export data' }, { status: 500 })
   }

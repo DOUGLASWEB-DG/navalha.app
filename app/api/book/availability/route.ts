@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { AppointmentRuleError, getAppointmentDayRange } from '@/lib/appointment-rules'
 import { getActiveServices, getAppointmentServiceTotals, getServiceTotals, normalizeServiceIds } from '@/lib/appointment-services'
+import { requireTenant, tenantErrorResponse } from '@/lib/api'
 
 export async function GET(req: NextRequest) {
   try {
+    const barbearia = await requireTenant()
     const { searchParams } = new URL(req.url)
     const dateParam = searchParams.get('date')
     const serviceIdsParam = searchParams.get('serviceIds')
@@ -17,12 +19,13 @@ export async function GET(req: NextRequest) {
     let requestedDurationMins: number | undefined
     if (serviceIdsParam) {
       const serviceIds = normalizeServiceIds(serviceIdsParam.split(','))
-      const services = await getActiveServices(serviceIds)
+      const services = await getActiveServices(barbearia.id, serviceIds)
       requestedDurationMins = getServiceTotals(services).durationMins
     }
 
     const appointments = await prisma.appointment.findMany({
       where: {
+        barbeariaId: barbearia.id,
         date: { gte: start, lt: end },
         status: { not: 'CANCELED' },
       },
@@ -45,6 +48,8 @@ export async function GET(req: NextRequest) {
       })),
     })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[Availability GET]', error)
     if (error instanceof AppointmentRuleError) {
       return NextResponse.json({ error: error.message }, { status: 400 })

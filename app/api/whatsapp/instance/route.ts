@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createInstance, EvolutionConfigError, fetchConnectionStatus } from '@/lib/whatsapp';
-import { requireAdmin } from '@/lib/auth';
+import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api';
 
-function configErrorResponse(error: unknown) {
+// A instância do WhatsApp ainda é única para o sistema todo (não é por barbearia): ver relatório do Bloco 3.
+function errorResponse(error: unknown) {
+  const handled = tenantErrorResponse(error);
+  if (handled) return handled;
   if (error instanceof EvolutionConfigError) {
     return NextResponse.json({ error: 'Integração WhatsApp não configurada.' }, { status: 503 });
   }
@@ -10,25 +13,21 @@ function configErrorResponse(error: unknown) {
 }
 
 export async function GET() {
-  const auth = await requireAdmin();
-  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
-
   try {
+    await requireTenantAdmin();
     const status = await fetchConnectionStatus();
     return NextResponse.json(status);
   } catch (error) {
-    return configErrorResponse(error);
+    return errorResponse(error);
   }
 }
 
 export async function POST() {
-  const auth = await requireAdmin();
-  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
-
   try {
+    await requireTenantAdmin();
     const instance = await createInstance();
     return NextResponse.json(instance);
   } catch (error) {
-    return configErrorResponse(error);
+    return errorResponse(error);
   }
 }

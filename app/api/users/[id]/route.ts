@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { requireAdmin } from '@/lib/auth'
+import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 
 const updateUserSchema = z.object({
   name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres').optional(),
@@ -14,27 +14,23 @@ const updateUserSchema = z.object({
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const auth = await requireAdmin()
-    if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status })
-    }
+    const auth = await requireTenantAdmin()
+    const barbeariaId = auth.barbearia.id
 
     const resolvedParams = await params
     const targetUserId = resolvedParams.id
     const body = await req.json()
     const parsed = updateUserSchema.parse(body)
 
-    const targetUser = await prisma.user.findUnique({
-      where: { id: targetUserId },
+    const targetUser = await prisma.user.findFirst({
+      where: { id: targetUserId, barbeariaId },
       select: { id: true, role: true, email: true, active: true }
     })
 
-    if (!targetUser) {
-      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
-    }
+    if (!targetUser) throw notFound('Usuário não encontrado')
 
     const deactivating = parsed.active === false && targetUser.active
-    if (deactivating && auth.user?.id === targetUserId) {
+    if (deactivating && auth.user.id === targetUserId) {
       return NextResponse.json({ error: 'Você não pode desativar sua própria conta.' }, { status: 400 })
     }
 
@@ -43,7 +39,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const losingActiveAdmin = targetUser.role === 'ADMIN' && targetUser.active
       && ((parsed.role && parsed.role !== 'ADMIN') || deactivating)
     if (losingActiveAdmin) {
-      const activeAdminCount = await prisma.user.count({ where: { role: 'ADMIN', active: true } })
+      const activeAdminCount = await prisma.user.count({ where: { barbeariaId, role: 'ADMIN', active: true } })
       if (activeAdminCount <= 1) {
         return NextResponse.json(
           { error: deactivating
@@ -72,7 +68,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: targetUserId },
+      where: { id: targetUserId, barbeariaId },
       data,
       select: {
         id: true,
@@ -85,6 +81,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     return NextResponse.json(updatedUser)
   } catch (error: any) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[User PATCH]', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0]?.message || 'Dados inválidos' }, { status: 400 })
@@ -95,34 +93,30 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const auth = await requireAdmin()
-    if (auth.error) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status })
-    }
+    const auth = await requireTenantAdmin()
+    const barbeariaId = auth.barbearia.id
 
     const resolvedParams = await params
     const targetUserId = resolvedParams.id
 
     // Regra de segurança: impedir que o usuário autenticado delete a si mesmo
-    if (auth.user?.id === targetUserId) {
+    if (auth.user.id === targetUserId) {
       return NextResponse.json(
         { error: 'Você não pode excluir sua própria conta enquanto logado.' },
         { status: 400 }
       )
     }
 
-    const targetUser = await prisma.user.findUnique({
-      where: { id: targetUserId },
+    const targetUser = await prisma.user.findFirst({
+      where: { id: targetUserId, barbeariaId },
       select: { id: true, role: true }
     })
 
-    if (!targetUser) {
-      return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
-    }
+    if (!targetUser) throw notFound('Usuário não encontrado')
 
     // Regra de integridade: impedir que o último ADMIN seja excluído
     if (targetUser.role === 'ADMIN') {
-      const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } })
+      const adminCount = await prisma.user.count({ where: { barbeariaId, role: 'ADMIN' } })
       if (adminCount <= 1) {
         return NextResponse.json(
           { error: 'Não é possível excluir o único administrador do sistema.' },
@@ -132,11 +126,13 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     }
 
     await prisma.user.delete({
-      where: { id: targetUserId }
+      where: { id: targetUserId, barbeariaId }
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    const handled = tenantErrorResponse(error)
+    if (handled) return handled
     console.error('[User DELETE]', error)
     return NextResponse.json({ error: 'Erro ao excluir usuário' }, { status: 500 })
   }
