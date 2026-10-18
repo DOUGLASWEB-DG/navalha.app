@@ -101,7 +101,6 @@ interface Service {
 interface Barber {
   id: string
   name: string
-  role: string
 }
 
 interface AppointmentAvailability {

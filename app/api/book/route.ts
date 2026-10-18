@@ -17,9 +17,16 @@ import {
   getServiceTotals,
   normalizeServiceIds,
 } from '@/lib/appointment-services'
+import { checkLimited, getClientIp, hit, tooManyRequestsHeaders } from '@/lib/rate-limit'
+
+const HOUR_MS = 60 * 60 * 1000
+const MAX_ACTIVE_APPOINTMENTS_PER_PHONE = 3
 
 const bookingSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  // O nome entra no texto do WhatsApp: tamanho limitado, sem quebras de linha nem links.
+  name: z.string().trim().min(1, 'Name is required').max(60, 'Nome muito longo.')
+    .refine((value) => !/[\r\n]/.test(value), 'Nome inválido.')
+    .refine((value) => !/(https?:|www\.|:\/\/)/i.test(value), 'Nome inválido.'),
   phone: z.string().refine((value) => normalizeBrazilPhone(value) !== null, 'Telefone inválido. Use DDD + número.'),
   serviceIds: z.array(z.string().min(1)).min(1).optional(),
   serviceId: z.string().min(1).optional(),
@@ -38,6 +45,17 @@ function parseBookingDate(date: string, time: string) {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req.headers)
+    const ipRules = ip ? [{ key: `book:ip:${ip}`, limit: 10, windowMs: HOUR_MS }] : []
+    const ipRetryAfter = checkLimited(ipRules)
+    if (ipRetryAfter !== null) {
+      return NextResponse.json(
+        { error: 'Muitas tentativas de agendamento. Tente novamente mais tarde.' },
+        { status: 429, headers: tooManyRequestsHeaders(ipRetryAfter) }
+      )
+    }
+    hit(ipRules)
+
     const body = await req.json()
     const parsed = bookingSchema.parse(body)
 
@@ -58,13 +76,33 @@ export async function POST(req: NextRequest) {
     }
 
     const phone = normalizeBrazilPhone(parsed.phone)!
+    const phoneRules = [{ key: `book:phone:${phone}`, limit: 3, windowMs: 24 * HOUR_MS }]
+    const phoneRetryAfter = checkLimited(phoneRules)
+    if (phoneRetryAfter !== null) {
+      return NextResponse.json(
+        { error: 'Limite diário de agendamentos para este telefone atingido.' },
+        { status: 429, headers: tooManyRequestsHeaders(phoneRetryAfter) }
+      )
+    }
 
     const appointment = await prisma.$transaction(async (tx) => {
       const client = await tx.client.upsert({
         where: { phone },
-        update: { name: parsed.name },
+        // Reserva pública não altera cadastro existente: quem conhece o telefone não pode renomear o cliente.
+        update: {},
         create: { name: parsed.name, phone },
       })
+
+      const activeAppointments = await tx.appointment.count({
+        where: {
+          clientId: client.id,
+          date: { gte: new Date() },
+          status: { in: ['PENDING', 'CONFIRMED'] },
+        },
+      })
+      if (activeAppointments >= MAX_ACTIVE_APPOINTMENTS_PER_PHONE) {
+        throw new AppointmentRuleError('Este telefone já possui o máximo de agendamentos ativos. Entre em contato com a barbearia.')
+      }
 
       const overlappingAppointments = await tx.appointment.findMany({
         where: {
@@ -113,6 +151,8 @@ export async function POST(req: NextRequest) {
       isolationLevel: Prisma.TransactionIsolationLevel.Serializable
     })
 
+    hit(phoneRules)
+
     const finalBarber = allBarbers.find(b => b.id === appointment.barberId);
     
     notifyAppointmentCreated({
@@ -160,7 +200,7 @@ export async function GET() {
     })
 
     const barbers = await prisma.user.findMany({
-      select: { id: true, name: true, role: true },
+      select: { id: true, name: true },
       orderBy: { name: 'asc' },
     })
 
