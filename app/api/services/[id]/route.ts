@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { requireAdmin } from '@/lib/auth'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -12,6 +13,8 @@ const updateSchema = z.object({
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const auth = await requireAdmin()
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
     const { id } = await params
     const body = await req.json()
     const parsed = updateSchema.parse(body)
@@ -25,6 +28,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
 export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const auth = await requireAdmin()
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
     const { id } = await params
     await prisma.service.delete({ where: { id } })
     return NextResponse.json({ success: true })

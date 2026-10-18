@@ -121,13 +121,17 @@ export async function POST(req: NextRequest) {
     })
 
     try {
-      const adminPhone = process.env.ADMIN_PHONE || '5569999630329';
+      const adminPhone = process.env.ADMIN_PHONE;
       const symbol = transaction.type === 'INCOME' ? '🟢' : '🔴';
       const tipoStr = transaction.type === 'INCOME' ? 'Receita' : 'Despesa';
       const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount);
       const msg = `${symbol} *Nova Transação Registrada*\n\nTipo: ${tipoStr}\nValor: ${formattedAmount}\nDescrição: ${transaction.description}\nCategoria: ${transaction.category || 'Outros'}`;
       
-      await sendTextMessage(adminPhone, msg).catch(e => console.error('WhatsApp message error:', e));
+      if (adminPhone) {
+        await sendTextMessage(adminPhone, msg).catch(e => console.error('WhatsApp message error:', e));
+      } else {
+        console.warn('[Finances POST] ADMIN_PHONE não configurado. Mensagem ao administrador ignorada.');
+      }
 
       // Disparar Evento para Webhook (Fire-and-forget)
       import('crypto').then(({ randomUUID }) => {

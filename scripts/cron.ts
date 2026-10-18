@@ -6,8 +6,14 @@ import { normalizeBrazilPhone } from '../lib/format';
 import { getAppointmentServiceSummary } from '../lib/appointment-services';
 
 const prisma = new PrismaClient();
-const EVO_URL = process.env.NEXT_PUBLIC_EVO_URL || 'http://localhost:8080';
-const EVO_API_KEY = process.env.EVO_API_KEY || 'barberos_whatsapp_key';
+const EVO_URL = process.env.NEXT_PUBLIC_EVO_URL ?? '';
+const EVO_API_KEY = process.env.EVO_API_KEY ?? '';
+
+// Sem valores padrão: o robô não inicia com credenciais embutidas no código.
+if (!EVO_URL || !EVO_API_KEY) {
+  console.error('❌ [Cron] NEXT_PUBLIC_EVO_URL e EVO_API_KEY precisam estar configurados. Encerrando.');
+  process.exit(1);
+}
 const INSTANCE_NAME = 'barberos_main';
 
 async function sendTextMessage(number: string, text: string) {

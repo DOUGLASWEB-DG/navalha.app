@@ -32,7 +32,7 @@ services:
       - SERVER_URL=http://localhost:8080
       - DOCKER_ENV=true
       - AUTHENTICATION_TYPE=apikey
-      - AUTHENTICATION_API_KEY=barberos_whatsapp_key
+      - AUTHENTICATION_API_KEY=${EVO_API_KEY:?Defina EVO_API_KEY no ambiente ou no .env antes de subir a Evolution}
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
       - DATABASE_CONNECTION_URI=postgresql://postgres:postgres@db:5432/barberos?schema=evolution

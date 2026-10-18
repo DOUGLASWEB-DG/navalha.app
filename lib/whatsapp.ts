@@ -1,8 +1,19 @@
-const EVO_URL = process.env.NEXT_PUBLIC_EVO_URL || 'http://localhost:8080';
-const EVO_API_KEY = process.env.EVO_API_KEY || 'barberos_whatsapp_key';
 const INSTANCE_NAME = 'barberos_main';
 
+export class EvolutionConfigError extends Error {}
+
+// Sem valores padrão: chave ou URL ausente deve falhar, nunca cair numa credencial embutida no código.
+export function getEvolutionConfig() {
+  const url = process.env.NEXT_PUBLIC_EVO_URL;
+  const apiKey = process.env.EVO_API_KEY;
+  if (!url || !apiKey) {
+    throw new EvolutionConfigError('[WhatsApp] NEXT_PUBLIC_EVO_URL e EVO_API_KEY precisam estar configurados.');
+  }
+  return { url, apiKey };
+}
+
 export async function createInstance() {
+  const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
   const response = await fetch(`${EVO_URL}/instance/create`, {
     method: 'POST',
     headers: {
@@ -11,7 +22,8 @@ export async function createInstance() {
     },
     body: JSON.stringify({
       instanceName: INSTANCE_NAME,
-      token: 'barberos_token',
+      // Token da instância opcional; se ausente, não é enviado.
+      ...(process.env.EVO_INSTANCE_TOKEN && { token: process.env.EVO_INSTANCE_TOKEN }),
       qrcode: true,
       integration: 'WHATSAPP-BAILEYS'
     }),
@@ -20,6 +32,7 @@ export async function createInstance() {
 }
 
 export async function fetchConnectionStatus() {
+  const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
   try {
     const response = await fetch(`${EVO_URL}/instance/connectionState/${INSTANCE_NAME}`, {
       method: 'GET',
@@ -34,6 +47,7 @@ export async function fetchConnectionStatus() {
 }
 
 export async function connectInstance() {
+  const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
   const response = await fetch(`${EVO_URL}/instance/connect/${INSTANCE_NAME}`, {
     method: 'GET',
     headers: {
@@ -44,6 +58,7 @@ export async function connectInstance() {
 }
 
 export async function sendTextMessage(number: string, text: string) {
+  const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
   const response = await fetch(`${EVO_URL}/message/sendText/${INSTANCE_NAME}`, {
     method: 'POST',
     headers: {

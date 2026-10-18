@@ -4,6 +4,11 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD
+  if (!adminPassword || adminPassword.length < 12) {
+    throw new Error('SEED_ADMIN_PASSWORD precisa estar definido (mínimo 12 caracteres).')
+  }
+
   // ─── Seed Categorias Financeiras ────────────────────────────────────
   const categoriesData = [
     // Receitas
@@ -34,11 +39,11 @@ async function main() {
   }
 
   // Seed Usuário Admin
-  const hashedPassword = await bcrypt.hash('admin@administrador', 10)
+  const hashedPassword = await bcrypt.hash(adminPassword, 10)
   await prisma.user.upsert({
     where: { email: 'admin@administrador.com' },
+    // Admin existente: nunca sobrescrever a senha (evita reset acidental em produção)
     update: {
-      password: hashedPassword,
       role: Role.ADMIN, // Garantir que está como ADMIN no formato Enum
     },
     create: {
@@ -51,8 +56,7 @@ async function main() {
   })
 
   console.log('✅ Dados base inseridos com sucesso (Categorias e Admin)! Dados fictícios removidos.')
-  console.log('📧 Login: admin@administrador.com')
-  console.log('🔑 Senha: admin@administrador')
+  console.log('📧 Login: admin@administrador.com (senha definida por SEED_ADMIN_PASSWORD; admin existente mantém a senha atual)')
 }
 
 main()

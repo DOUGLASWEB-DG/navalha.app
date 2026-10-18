@@ -207,10 +207,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           },
         })
 
-        const adminPhone = process.env.ADMIN_PHONE || '5569999630329';
+        const adminPhone = process.env.ADMIN_PHONE
         const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount)
         const msgToAdmin = `💰 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
-        await sendTextMessage(adminPhone, msgToAdmin).catch((error) => console.error('WhatsApp admin message error:', error))
+        if (adminPhone) {
+          await sendTextMessage(adminPhone, msgToAdmin).catch((error) => console.error('WhatsApp admin message error:', error))
+        } else {
+          console.warn('[Appointments PATCH] ADMIN_PHONE não configurado. Mensagem ao administrador ignorada.')
+        }
 
         // Notify client about completion
         const { resolvePhone } = await import('@/lib/notifications')
