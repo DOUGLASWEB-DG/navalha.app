@@ -2,33 +2,43 @@ import { cookies } from 'next/headers'
 import prisma from '@/lib/prisma'
 import { SignJWT, jwtVerify } from 'jose'
 import { getJwtSecretKey } from '@/lib/jwt'
+import { getCurrentBarbearia } from '@/lib/tenant'
 
+// Escopo do cookie: SEM atributo Domain, de propósito. O navegador só envia o cookie ao host exato que o
+// criou (america.navalha.app), nunca a outra barbearia (teste-b.navalha.app) nem ao domínio raiz. Não
+// adicionar Domain: isso compartilharia a sessão entre todas as barbearias do domínio.
 const SESSION_COOKIE = 'barberos_session'
 
-export async function getSession() {
+const sessionUserSelect = { id: true, name: true, email: true, role: true, barbeariaId: true } as const
+
+// Sessão válida NA barbearia do Host: o JWT precisa ter sido emitido para ela (claim barbeariaId) e o
+// usuário precisa pertencer a ela e estar ativo. Qualquer divergência é tratada como "sem sessão".
+export async function getTenantSession() {
   const cookieStore = await cookies()
   const token = cookieStore.get(SESSION_COOKIE)?.value
-  
   if (!token) return null
 
   try {
-    const secretKey = getJwtSecretKey()
-    const { payload } = await jwtVerify(token, secretKey)
+    const barbearia = await getCurrentBarbearia()
+    const { payload } = await jwtVerify(token, getJwtSecretKey())
     const userId = payload.userId as string
+    if (!userId || payload.barbeariaId !== barbearia.id) return null
 
-    if (!userId) return null
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true, name: true, email: true, role: true, active: true },
-    })
     // Usuário desativado perde a sessão já aberta na próxima requisição, mesmo com o JWT ainda válido.
-    if (!user || !user.active) return null
-    const { active: _active, ...sessionUser } = user
-    return sessionUser
+    const user = await prisma.user.findFirst({
+      where: { id: userId, barbeariaId: barbearia.id, active: true },
+      select: sessionUserSelect,
+    })
+    if (!user) return null
+    return { user, barbearia }
   } catch {
+    // Host sem barbearia, token inválido ou expirado
     return null
   }
+}
+
+export async function getSession() {
+  return (await getTenantSession())?.user ?? null
 }
 
 export async function requireAdmin() {
@@ -52,12 +62,12 @@ export async function verifySessionToken(token: string) {
   }
 }
 
-export async function createSession(userId: string, role: string) {
+export async function createSession(user: { id: string; role: string; barbeariaId: string }) {
   const cookieStore = await cookies()
   const sessionStart = Date.now()
   const secretKey = getJwtSecretKey()
-  
-  const token = await new SignJWT({ userId, role, sessionStart })
+
+  const token = await new SignJWT({ userId: user.id, role: user.role, barbeariaId: user.barbeariaId, sessionStart })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('2h')

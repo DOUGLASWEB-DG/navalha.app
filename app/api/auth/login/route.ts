@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import prisma from '@/lib/prisma'
 import { createSession } from '@/lib/auth'
 import { checkLimited, clear, getClientIp, hit, tooManyRequestsHeaders } from '@/lib/rate-limit'
+import { getCurrentBarbearia, TenantNotFoundError } from '@/lib/tenant'
 
 const WINDOW_MS = 15 * 60 * 1000
 
@@ -33,13 +34,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const barbearia = await getCurrentBarbearia()
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     })
 
     const passwordMatch = user ? await bcrypt.compare(password, user.password) : false
 
-    if (!user || !passwordMatch) {
+    // Login só vale na barbearia do usuário. Conta de outra barbearia recebe a mesma resposta de senha
+    // errada (e a senha é comparada do mesmo jeito), para não revelar que o e-mail existe em outro lugar.
+    if (!user || !passwordMatch || user.barbeariaId !== barbearia.id) {
       hit(failureRules)
       return NextResponse.json(
         { error: 'Email ou senha incorretos' },
@@ -57,7 +61,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    await createSession(user.id, user.role)
+    await createSession(user)
 
     return NextResponse.json({
       user: {
@@ -68,6 +72,9 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (error) {
+    if (error instanceof TenantNotFoundError) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
+    }
     console.error('Login error:', error)
     return NextResponse.json(
       { error: 'Erro interno do servidor' },

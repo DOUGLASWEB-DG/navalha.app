@@ -34,11 +34,18 @@ export async function middleware(request: NextRequest) {
   let shouldRenew = false
   let renewedToken = null
   let sessionStart = Date.now()
+  let discardCookie = false
+
+  // Verificar se é uma rota protegida
+  const isProtectedRoute = protectedPaths.some((path) => pathname.startsWith(path))
+  const isApiDashboard = pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/') && !pathname.startsWith('/api/book')
 
   if (token) {
     try {
       const secretKey = getJwtSecretKey()
       const { payload } = await jwtVerify(token, secretKey)
+      // Sessão vale só na barbearia em que foi criada. Token sem a claim (anterior ao Bloco 3) também é recusado.
+      if (payload.barbeariaId !== barbearia.id) throw new Error('sessão de outra barbearia')
       userRole = payload.role as string
       sessionId = payload.userId as string
       sessionStart = (payload.sessionStart as number) || Date.now()
@@ -48,6 +55,11 @@ export async function middleware(request: NextRequest) {
 
       // Verifica Timeout Absoluto
       if (now - sessionStart > ABSOLUTE_TIMEOUT_MS) {
+        if (isApiDashboard) {
+          const response = NextResponse.json({ error: 'Sessão expirada.' }, { status: 401 })
+          response.cookies.delete(SESSION_COOKIE)
+          return response
+        }
         const loginUrl = new URL('/login', request.url)
         loginUrl.searchParams.set('redirect', pathname)
         const response = NextResponse.redirect(loginUrl)
@@ -63,38 +75,41 @@ export async function middleware(request: NextRequest) {
       // Renova se faltar menos de 1 hora para expirar (2h originais)
       if (timeLeftSec > 0 && timeLeftSec < RENEW_THRESHOLD_SEC) {
         shouldRenew = true
-        renewedToken = await new SignJWT({ userId: sessionId, role: userRole, sessionStart })
+        renewedToken = await new SignJWT({ userId: sessionId, role: userRole, barbeariaId: barbearia.id, sessionStart })
           .setProtectedHeader({ alg: 'HS256' })
           .setIssuedAt()
           .setExpirationTime('2h')
           .sign(secretKey)
       }
     } catch {
-      // Invalid or expired token
+      // Token inválido, expirado ou de outra barbearia: descartado
       sessionId = null
+      discardCookie = true
     }
   }
 
-  // Verificar se é uma rota protegida
-  const isProtectedRoute = protectedPaths.some((path) => pathname.startsWith(path))
-  const isApiDashboard = pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/') && !pathname.startsWith('/api/book')
-
   let response = NextResponse.next()
 
-  // Se é rota protegida e não tem sessão, redirecionar para login
+  // Sem sessão: API responde 401 em JSON (redirect quebraria o fetch); página vai para o login
   if ((isProtectedRoute || isApiDashboard) && !sessionId) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    response = NextResponse.redirect(loginUrl)
+    if (isApiDashboard) {
+      response = NextResponse.json({ error: 'Não autenticado.' }, { status: 401 })
+    } else {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('redirect', pathname)
+      response = NextResponse.redirect(loginUrl)
+    }
   } else if (sessionId && userRole === 'BARBER') {
     // Controle de Acesso por Papel (RBAC)
-    const isAllowedBarberPath = 
-      pathname === '/dashboard/appointments' || 
+    const isAllowedBarberPath =
+      pathname === '/dashboard/appointments' ||
       pathname.startsWith('/api/appointments') ||
       pathname.startsWith('/api/clients') ||
       pathname.startsWith('/api/services')
 
-    if ((isProtectedRoute || isApiDashboard) && !isAllowedBarberPath) {
+    if (isApiDashboard && !isAllowedBarberPath) {
+      response = NextResponse.json({ error: 'Acesso negado.' }, { status: 403 })
+    } else if (isProtectedRoute && !isAllowedBarberPath) {
       response = NextResponse.redirect(new URL('/dashboard/appointments', request.url))
     }
   } else if (pathname === '/login' && sessionId) {
@@ -115,6 +130,8 @@ export async function middleware(request: NextRequest) {
       path: '/',
       maxAge: 2 * 60 * 60, // estende por +2 horas de inatividade
     })
+  } else if (discardCookie) {
+    response.cookies.delete(SESSION_COOKIE)
   }
 
   return response
