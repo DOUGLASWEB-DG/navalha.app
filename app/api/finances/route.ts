@@ -21,22 +21,23 @@ export async function GET(req: NextRequest) {
     const monthParam = searchParams.get('month') // "2024-01"
     const type = searchParams.get('type') // INCOME | EXPENSE | null
 
-    const where: any = { barbeariaId: barbearia.id }
+    // Filtros opcionais da tela; a barbearia entra explícita em cada consulta abaixo
+    const filters: any = {}
 
     if (monthParam) {
       const [year, month] = monthParam.split('-').map(Number)
       // Mês do calendário no fuso da barbearia, intervalo [início, próximo mês)
       const { start, end } = zonedMonthRange(year, month, barbearia.timezone)
-      where.date = { gte: start, lt: end }
+      filters.date = { gte: start, lt: end }
     }
 
     if (type && type !== 'ALL') {
-      where.type = type
+      filters.type = type
     }
 
     const [transactions, groupedSummary] = await Promise.all([
       prisma.transaction.findMany({
-        where,
+        where: { ...filters, barbeariaId: barbearia.id },
         orderBy: { date: 'desc' },
         select: {
           id: true,
@@ -75,7 +76,7 @@ export async function GET(req: NextRequest) {
       }),
       prisma.transaction.groupBy({
         by: ['type'],
-        where,
+        where: { ...filters, barbeariaId: barbearia.id },
         _sum: { amount: true },
       }),
     ])

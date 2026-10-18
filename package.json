@@ -16,7 +16,9 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "setup": "npm run db:push && npm run db:seed",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts",
+    "test:isolation": "tsx tests/integration/isolation.ts",
+    "test:fixture": "tsx tests/fixtures/tenant-b.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

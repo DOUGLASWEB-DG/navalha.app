@@ -7,9 +7,7 @@ import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { DEFAULT_BARBEARIA_ID } from '../../lib/tenant-host'
 import { seedDefaultCategories } from '../../prisma/seed-data'
-
-export const FIXTURE_PASSWORD = 'Smoke-Teste-2026'
-export const B_ID = 'barbearia-teste-b'
+import { B_ID, FIXTURE_PASSWORD } from './constants'
 
 const databaseUrl = process.env.DATABASE_URL ?? ''
 const host = (() => { try { return new URL(databaseUrl).hostname } catch { return '' } })()

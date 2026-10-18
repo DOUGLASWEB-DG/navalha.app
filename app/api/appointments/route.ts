@@ -37,11 +37,12 @@ export async function GET(req: NextRequest) {
 
     const monthParam = searchParams.get('month')
 
-    const where: any = { barbeariaId: barbearia.id }
+    // Filtros opcionais da tela; a barbearia entra explícita na consulta abaixo
+    const filters: any = {}
 
     // Filtra pelo barbeiro logado se for role BARBER
     if (user?.role === 'BARBER') {
-      where.barberId = user.id
+      filters.barberId = user.id
     }
 
     if (monthParam) {
@@ -53,7 +54,7 @@ export async function GET(req: NextRequest) {
       const nextMonth = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`
       const { start } = getAppointmentDayRange(startValue, barbearia.timezone)
       const { start: end } = getAppointmentDayRange(nextMonth, barbearia.timezone)
-      where.date = { gte: start, lt: end }
+      filters.date = { gte: start, lt: end }
     } else if (dateParam) {
       const [year, month, day] = dateParam.split('-').map(Number)
       if (!year || !month || !day) {
@@ -62,15 +63,15 @@ export async function GET(req: NextRequest) {
 
       // Interpreta como data local (consistente com /api/book)
       const { start, end } = getAppointmentDayRange(dateParam, barbearia.timezone)
-      where.date = { gte: start, lt: end }
+      filters.date = { gte: start, lt: end }
     }
 
     if (status && status !== 'ALL') {
-      where.status = status
+      filters.status = status
     }
 
     const appointments = await prisma.appointment.findMany({
-      where,
+      where: { ...filters, barbeariaId: barbearia.id },
       include: {
         client: true,
         service: true,
