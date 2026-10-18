@@ -71,7 +71,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
           <h1 className="truncate text-base font-bold tracking-tight text-foreground lg:text-lg ">
             {title}
           </h1>
-          <p className="hidden text-xs capitalize text-muted-foreground sm:block">{today}</p>
+          <p className="hidden text-xs text-muted-foreground first-letter:uppercase sm:block">{today}</p>
         </div>
       </div>
 

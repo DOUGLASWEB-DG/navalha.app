@@ -9,22 +9,22 @@ interface StatusBadgeProps {
 
 const statusConfig: Record<Status, { label: string; dot: string; text: string }> = {
   PENDING: {
-    label: 'PENDENTE',
+    label: 'Pendente',
     dot: 'bg-warning',
     text: 'text-warning',
   },
   CONFIRMED: {
-    label: 'CONFIRMADO',
+    label: 'Confirmado',
     dot: 'bg-info',
     text: 'text-info',
   },
   COMPLETED: {
-    label: 'CONCLUÍDO',
+    label: 'Concluído',
     dot: 'bg-success',
     text: 'text-success',
   },
   CANCELED: {
-    label: 'CANCELADO',
+    label: 'Cancelado',
     dot: 'bg-muted-foreground',
     text: 'text-muted-foreground',
   },
@@ -33,7 +33,7 @@ const statusConfig: Record<Status, { label: string; dot: string; text: string }>
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const config = statusConfig[status]
   return (
-    <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider bg-card border border-border shadow-sm', config.text, className)}>
+    <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-card border border-border shadow-sm', config.text, className)}>
       <span className={cn('w-2 h-2 rounded-full', config.dot)} />
       {config.label}
     </span>
