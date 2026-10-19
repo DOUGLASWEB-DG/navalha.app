@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { TopBar } from '@/components/dashboard/top-bar'
 import { BottomNav } from '@/components/dashboard/bottom-nav'
+import { DashboardSWRProvider } from '@/components/dashboard/swr-provider'
 
 export default function DashboardLayout({
   children,
@@ -13,6 +14,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
+    <DashboardSWRProvider>
     <div className="flex h-[100dvh] bg-background text-foreground overflow-hidden">
       <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -23,5 +25,6 @@ export default function DashboardLayout({
       </div>
       <BottomNav />
     </div>
+    </DashboardSWRProvider>
   )
 }

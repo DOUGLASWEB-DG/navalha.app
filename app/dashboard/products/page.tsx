@@ -17,8 +17,11 @@ import { ProductFormModal } from '@/components/products/product-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
 
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 export default function ProductsPage() {
   const [modalOpen, setModalOpen] = useState(false)
@@ -32,11 +35,11 @@ export default function ProductsPage() {
     })
     if (!ok) return
     try {
-      await fetch(`/api/products/${id}`, { method: 'DELETE' })
+      await apiRequest(`/api/products/${id}`, { method: 'DELETE' })
       mutate()
-      toast.success('Sucesso!', { description: 'Produto excluído.' })
-    } catch {
-      toast.error('Erro', { description: 'Falha ao excluir produto.' })
+      toast.success('Produto excluído', { description: `"${name}" saiu da lista de produtos.` })
+    } catch (error) {
+      showError('Não foi possível excluir o produto', error)
     }
   }
 

@@ -23,8 +23,11 @@ import { GoalFormModal } from '@/components/goals/goal-form-modal'
 import { cn } from '@/lib/utils'
 
 import { PageHeader } from '@/components/dashboard/page-header'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 const goalTypeConfig = {
   REVENUE: { label: 'Receita', icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
@@ -52,11 +55,11 @@ export default function GoalsPage() {
     })
     if (!ok) return
     try {
-      await fetch(`/api/goals/${id}`, { method: 'DELETE' })
+      await apiRequest(`/api/goals/${id}`, { method: 'DELETE' })
       mutate()
-      toast.success('Sucesso!', { description: 'Meta excluída.' })
-    } catch {
-      toast.error('Erro', { description: 'Falha ao excluir meta.' })
+      toast.success('Meta excluída')
+    } catch (error) {
+      showError('Não foi possível excluir a meta', error)
     }
   }
 

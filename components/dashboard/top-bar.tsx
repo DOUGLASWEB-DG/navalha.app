@@ -19,8 +19,9 @@ import { ptBR } from 'date-fns/locale'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 import { cn } from '@/lib/utils'
+import { apiFetcher } from '@/lib/http-errors'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 interface TopBarProps {
   onMenuToggle: () => void

@@ -22,8 +22,11 @@ import { FinanceDashboard } from '@/components/finances/finance-dashboard'
 import { FinanceReports } from '@/components/finances/finance-reports'
 import { FinanceAlerts } from '@/components/finances/finance-alerts'
 import { cn } from '@/lib/utils'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 const typeFilters = [
   { value: 'ALL', label: 'Todos' },
@@ -57,11 +60,11 @@ export default function FinancesPage() {
     })
     if (!ok) return
     try {
-      await fetch(`/api/finances/${id}`, { method: 'DELETE' })
+      await apiRequest(`/api/finances/${id}`, { method: 'DELETE' })
       mutate()
-      toast.success('Transação excluída')
-    } catch {
-      toast.error('Falha ao excluir transação')
+      toast.success('Transação excluída', { description: 'Os totais foram atualizados.' })
+    } catch (error) {
+      showError('Não foi possível excluir a transação', error)
     }
   }
 

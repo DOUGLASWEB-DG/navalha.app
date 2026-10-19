@@ -18,6 +18,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Clock, DollarSign, Type, AlignLeft } from 'lucide-react'
 import { PhotoField, syncPhoto, usePhotoField } from '@/components/shared/photo-field'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -67,35 +69,38 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
       const url = service ? `/api/services/${service.id}` : '/api/services'
       const method = service ? 'PATCH' : 'POST'
 
-      const res = await fetch(url, {
+      const saved = await apiRequest<{ id: string }>(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        json: {
           name: data.name,
           description: data.description,
           price: parseFloat(data.price),
           durationMins: parseInt(data.durationMins),
-        }),
+        },
       })
 
-      if (!res.ok) throw new Error('Falha ao salvar')
-      const saved = await res.json()
-
       // A foto vai depois do cadastro (precisa do id). Se ela falhar, o serviço já está salvo.
+      const sentPhoto = !!photo.file
+      const removedPhoto = photo.remove && !!photo.savedUrl
       const photoError = await syncPhoto(`/api/services/${saved.id}/image`, photo)
 
       if (photoError) {
-        toast.warning('Serviço salvo, mas a foto não foi atualizada', { description: photoError })
+        toast.warning(service ? 'Serviço atualizado, mas a foto não foi salva' : 'Serviço adicionado, mas a foto não foi salva', {
+          description: `${photoError} Abra o serviço novamente para tentar enviar a foto.`,
+          duration: 9000,
+        })
       } else {
-        toast.success('Sucesso!', {
-          description: service ? 'Serviço atualizado.' : 'Serviço adicionado.',
+        toast.success(service ? 'Serviço atualizado' : 'Serviço adicionado', {
+          description: sentPhoto
+            ? 'A foto nova já aparece na página de agendamento.'
+            : removedPhoto
+              ? 'A foto foi removida.'
+              : 'As alterações foram salvas.',
         })
       }
       onSaved()
-    } catch {
-      toast.error('Erro', {
-        description: 'Falha ao salvar serviço.',
-      })
+    } catch (error) {
+      showError(service ? 'Não foi possível atualizar o serviço' : 'Não foi possível adicionar o serviço', error)
     }
   }
 

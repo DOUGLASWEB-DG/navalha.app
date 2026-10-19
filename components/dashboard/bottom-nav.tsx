@@ -12,8 +12,9 @@ import {
 } from 'lucide-react'
 import { AppIcon } from '@/components/shared/app-icon'
 import { cn } from '@/lib/utils'
+import { apiFetcher } from '@/lib/http-errors'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 const items = [
   {

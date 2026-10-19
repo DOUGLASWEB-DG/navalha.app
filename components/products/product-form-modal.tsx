@@ -18,6 +18,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Package, DollarSign, FileText, Hash } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
 const schema = z.object({
   name: z.string().min(2, 'Nome muito curto'),
@@ -68,22 +70,14 @@ export function ProductFormModal({ open, onClose, product, onSaved }: Props) {
       const url = product ? `/api/products/${product.id}` : '/api/products'
       const method = product ? 'PATCH' : 'POST'
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
+      await apiRequest(url, { method, json: data })
 
-      if (!res.ok) throw new Error('Falha na requisição')
-
-      toast.success('Sucesso!', {
-        description: product ? 'Produto atualizado.' : 'Produto criado.',
+      toast.success(product ? 'Produto atualizado' : 'Produto adicionado', {
+        description: product ? 'As alterações foram salvas.' : 'Ele já aparece na lista de produtos.',
       })
       onSaved()
-    } catch {
-      toast.error('Erro', {
-        description: 'Falha ao salvar produto.',
-      })
+    } catch (error) {
+      showError(product ? 'Não foi possível atualizar o produto' : 'Não foi possível adicionar o produto', error)
     }
   }
 
