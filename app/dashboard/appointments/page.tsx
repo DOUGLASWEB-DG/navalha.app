@@ -354,8 +354,8 @@ export default function AppointmentsPage() {
                       <col />
                       {isAdmin && <col />}
                       <col className="w-[110px]" />
-                      <col className="w-[170px]" />
-                      <col className="w-[170px]" />
+                      <col className="w-[150px]" />
+                      <col className="w-[200px]" />
                     </colgroup>
                     <thead className="border-b border-border text-left text-xs text-muted-foreground">
                       <tr>
@@ -365,7 +365,7 @@ export default function AppointmentsPage() {
                         {isAdmin && <th scope="col" className="px-4 py-2.5 font-medium">Barbeiro</th>}
                         <th scope="col" className="px-4 py-2.5 text-right font-medium">Valor</th>
                         <th scope="col" className="px-4 py-2.5 font-medium">Status</th>
-                        <th scope="col" className="px-4 py-2.5 text-right font-medium"><span className="sr-only">Ações</span></th>
+                        <th scope="col" className="px-4 py-2.5 font-medium"><span className="sr-only">Ações</span></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -401,8 +401,8 @@ export default function AppointmentsPage() {
                               </div>
                             </td>
                             <td className="px-4 py-3">
-                              <div className="flex items-center justify-end gap-2">
-                                {renderPrimary(appt, actions, 'min-h-0 h-9 w-[7.5rem] justify-center px-3')}
+                              <div className="flex items-center gap-2">
+                                {renderPrimary(appt, actions, 'min-h-0 h-9 w-[7.5rem] justify-center px-3') ?? <span className="w-[7.5rem] shrink-0" aria-hidden />}
                                 {renderMenu(appt, actions)}
                               </div>
                             </td>

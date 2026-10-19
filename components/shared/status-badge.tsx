@@ -1,3 +1,4 @@
+import { CalendarCheck, CheckCircle2, Clock, XCircle, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type Status = 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELED'
@@ -7,34 +8,35 @@ interface StatusBadgeProps {
   className?: string
 }
 
-const statusConfig: Record<Status, { label: string; dot: string; text: string }> = {
+const statusConfig: Record<Status, { label: string; icon: LucideIcon; tone: string }> = {
   PENDING: {
     label: 'Pendente',
-    dot: 'bg-warning',
-    text: 'text-warning',
+    icon: Clock,
+    tone: 'border-warning/25 bg-warning/10 text-warning',
   },
   CONFIRMED: {
     label: 'Confirmado',
-    dot: 'bg-info',
-    text: 'text-info',
+    icon: CalendarCheck,
+    tone: 'border-info/25 bg-info/10 text-info',
   },
   COMPLETED: {
     label: 'Concluído',
-    dot: 'bg-success',
-    text: 'text-success',
+    icon: CheckCircle2,
+    tone: 'border-success/25 bg-success/10 text-success',
   },
   CANCELED: {
     label: 'Cancelado',
-    dot: 'bg-muted-foreground',
-    text: 'text-muted-foreground',
+    icon: XCircle,
+    tone: 'border-border bg-muted text-muted-foreground',
   },
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const config = statusConfig[status]
+  const Icon = config.icon
   return (
-    <span className={cn('inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-card border border-border shadow-sm', config.text, className)}>
-      <span className={cn('w-2 h-2 rounded-full', config.dot)} />
+    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium', config.tone, className)}>
+      <Icon className="h-3.5 w-3.5" aria-hidden />
       {config.label}
     </span>
   )
