@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
 import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Shield } from 'lucide-react'
+import { AppIcon } from '@/components/shared/app-icon'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -161,7 +162,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/goals" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/metas-icon.png" alt="Metas" className="w-full h-full object-contain" />
+                      <AppIcon src="/assets/icons/metas-icon.png" />
                     </div>
                     Metas
                   </Link>
@@ -169,7 +170,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/products" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/produtos-icon.png" alt="Produtos" className="w-full h-full object-contain" />
+                      <AppIcon src="/assets/icons/produtos-icon.png" />
                     </div>
                     Produtos
                   </Link>
@@ -177,7 +178,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/users" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/equipe-icon.png" alt="Equipe" className="w-full h-full object-contain" />
+                      <AppIcon src="/assets/icons/equipe-icon.png" />
                     </div>
                     Equipe
                   </Link>

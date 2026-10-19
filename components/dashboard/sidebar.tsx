@@ -18,6 +18,7 @@ import {
   Package,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { AppIcon } from '@/components/shared/app-icon'
 import { tenantConfig } from '@/config/tenant'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -28,14 +29,14 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { label: 'Painel', href: '/dashboard', iconUrl: '/assets/painel-icon.png', adminOnly: true },
-  { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/agendamentos-icon.png' },
-  { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/clientes-icon.png', adminOnly: true },
-  { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/finaces-icon.png', adminOnly: true },
-  { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/metas-icon.png', adminOnly: true },
-  { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/servicos-icon.png', adminOnly: true },
-  { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/produtos-icon.png', adminOnly: true },
-  { label: 'Equipe', href: '/dashboard/users', iconUrl: '/assets/equipe-icon.png', adminOnly: true },
+  { label: 'Painel', href: '/dashboard', iconUrl: '/assets/icons/painel-icon.png', adminOnly: true },
+  { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/icons/agendamentos-icon.png' },
+  { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/icons/clientes-icon.png', adminOnly: true },
+  { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/icons/finaces-icon.png', adminOnly: true },
+  { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/icons/metas-icon.png', adminOnly: true },
+  { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/icons/servicos-icon.png', adminOnly: true },
+  { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/icons/produtos-icon.png', adminOnly: true },
+  { label: 'Equipe', href: '/dashboard/users', iconUrl: '/assets/icons/equipe-icon.png', adminOnly: true },
 ]
 
 const bottomItems = [
@@ -96,6 +97,8 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
               key={item.href}
               href={item.href}
               title={!open ? item.label : undefined}
+              aria-label={!open ? item.label : undefined}
+              aria-current={isActive ? 'page' : undefined}
               className={cn(
                 'flex min-h-12 items-center rounded-xl transition-all duration-150 active:scale-[0.98] group relative',
                 open ? 'gap-3 px-3 py-2.5' : 'justify-center p-2.5',
@@ -105,10 +108,10 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
               )}
             >
               <div className={cn(
-                "flex items-center justify-center shrink-0 w-8 h-8 rounded-lg transition-all duration-200 overflow-hidden",
-                isActive ? "opacity-100" : "opacity-75 grayscale-[30%] group-hover:opacity-100 group-hover:grayscale-0"
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl p-1 transition-all duration-200",
+                isActive ? "bg-primary/10" : "opacity-80 group-hover:opacity-100 group-hover:scale-105"
               )}>
-                <img src={item.iconUrl} alt={item.label} className="w-full h-full object-contain" />
+                <AppIcon src={item.iconUrl} />
               </div>
               {open && (
                 <span className="text-sm font-medium">{item.label}</span>

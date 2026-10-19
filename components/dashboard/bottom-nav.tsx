@@ -10,6 +10,7 @@ import {
   DollarSign,
   Scissors,
 } from 'lucide-react'
+import { AppIcon } from '@/components/shared/app-icon'
 import { cn } from '@/lib/utils'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -18,34 +19,34 @@ const items = [
   {
     href: '/dashboard',
     label: 'Painel',
-    iconUrl: '/assets/painel-icon.png',
+    iconUrl: '/assets/icons/painel-icon.png',
     match: (p: string) => p === '/dashboard',
     adminOnly: true,
   },
   {
     href: '/dashboard/appointments',
     label: 'Agenda',
-    iconUrl: '/assets/agendamentos-icon.png',
+    iconUrl: '/assets/icons/agendamentos-icon.png',
     match: (p: string) => p.startsWith('/dashboard/appointments'),
   },
   {
     href: '/dashboard/clients',
     label: 'Clientes',
-    iconUrl: '/assets/clientes-icon.png',
+    iconUrl: '/assets/icons/clientes-icon.png',
     match: (p: string) => p.startsWith('/dashboard/clients'),
     adminOnly: true,
   },
   {
     href: '/dashboard/finances',
     label: 'Finanças',
-    iconUrl: '/assets/finaces-icon.png',
+    iconUrl: '/assets/icons/finaces-icon.png',
     match: (p: string) => p.startsWith('/dashboard/finances'),
     adminOnly: true,
   },
   {
     href: '/dashboard/services',
     label: 'Serviços',
-    iconUrl: '/assets/servicos-icon.png',
+    iconUrl: '/assets/icons/servicos-icon.png',
     match: (p: string) => p.startsWith('/dashboard/services'),
     adminOnly: true,
   },
@@ -83,6 +84,7 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               prefetch
+              aria-current={active ? 'page' : undefined}
               className={cn(
                 'flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl min-h-12 py-2 px-1',
                 'transition-all duration-150 active:scale-[0.97] active:bg-muted',
@@ -90,10 +92,10 @@ export function BottomNav() {
               )}
             >
               <span className={cn(
-                "relative inline-flex w-7 h-7 items-center justify-center transition-all duration-200 overflow-hidden rounded-md",
-                active ? "opacity-100" : "opacity-75 grayscale-[30%]"
+                "relative inline-flex h-8 w-8 items-center justify-center rounded-xl p-1 transition-all duration-200",
+                active ? "bg-primary/10" : "opacity-80"
               )}>
-                <img src={item.iconUrl} alt={item.label} className="w-full h-full object-contain" />
+                <AppIcon src={item.iconUrl} />
                 {showBadge && (
                   <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold leading-none text-white tabular-nums z-10">
                     {alertCount > 9 ? '9+' : alertCount}
