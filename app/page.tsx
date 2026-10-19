@@ -5,7 +5,7 @@ import { Scissors, Clock, Star, MapPin, Phone, Instagram, ArrowRight, User, Spar
 import { Button } from '@/components/ui/button'
 import { useRef, useState } from "react"
 import { cn } from "@/lib/utils"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion"
 import { tenantConfig } from '@/config/tenant'
 import { WhatsAppIcon } from '@/components/shared/whatsapp-icon'
 
@@ -28,7 +28,13 @@ function AppBrand({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
   )
 }
 
-function HairParticles({ isPrimary = false }: { isPrimary?: boolean }) {
+// Valores fixos por partícula: Math.random() no render gera HTML diferente no servidor e no
+// navegador (erro de hidratação). Mesma aparência de "fios caindo", só que previsível.
+const PARTICLE_TILT = [-12, 8, -5, 14, -16, 6]
+const PARTICLE_DRIFT = [3, -4, 2, -3, 4, -2]
+const PARTICLE_END_TILT = [40, -35, 25, -45, 50, -20]
+
+function HairParticles({ isPrimary = false, delay }: { isPrimary?: boolean; delay: number }) {
   const particles = Array.from({ length: 6 })
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
@@ -39,17 +45,17 @@ function HairParticles({ isPrimary = false }: { isPrimary?: boolean }) {
             opacity: 0,
             x: `${(i + 1) * 15}%`,
             y: "40%",
-            rotate: Math.random() * 40 - 20,
+            rotate: PARTICLE_TILT[i],
           }}
           animate={{
             opacity: [0, 1, 0],
             y: ["40%", "130%"],
-            x: [`${(i + 1) * 15}%`, `${(i + 1) * 15 + (Math.random() * 10 - 5)}%`],
-            rotate: Math.random() * 120 - 60,
+            x: [`${(i + 1) * 15}%`, `${(i + 1) * 15 + PARTICLE_DRIFT[i]}%`],
+            rotate: PARTICLE_END_TILT[i],
           }}
           transition={{
             duration: 0.6,
-            delay: (isPrimary ? 1.6 : 0.2) + i * 0.05,
+            delay: delay + i * 0.05,
             ease: "easeOut"
           }}
           className={cn(
@@ -62,15 +68,26 @@ function HairParticles({ isPrimary = false }: { isPrimary?: boolean }) {
   )
 }
 
+// Linha 1 corta em ~0,6s e a linha 2 em ~0,4s: o título completo aparece em cerca de 1s
+// (antes levava ~2s com a tela vazia). Sem animação para quem pede movimento reduzido.
 function HeroTitle() {
+  const reduceMotion = useReducedMotion()
+  if (reduceMotion) {
+    return (
+      <h1 className="text-4xl sm:text-6xl font-bold text-balance leading-tight mb-6 flex flex-col items-center tracking-tight">
+        <span className="py-1">A Arte do</span>
+        <span className="py-1 text-primary">Corte Perfeito</span>
+      </h1>
+    )
+  }
   return (
     <h1 className="text-4xl sm:text-6xl font-bold text-balance leading-tight mb-6 flex flex-col items-center tracking-tight">
       <div className="relative inline-block py-1">
-        <HairParticles />
+        <HairParticles delay={0.1} />
         <motion.div
           initial={{ clipPath: 'inset(0 100% 0 0)' }}
           animate={{ clipPath: 'inset(0 0% 0 0)' }}
-          transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
+          transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
         >
           A Arte do
         </motion.div>
@@ -81,12 +98,12 @@ function HeroTitle() {
             left: "105%", 
             opacity: [0, 1, 1, 0],
           }}
-          transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
+          transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
           className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-muted-foreground z-10"
         >
           <motion.div
             animate={{ rotate: [0, -20, 0, -20, 0] }}
-            transition={{ duration: 1, ease: "easeInOut", delay: 0.2 }}
+            transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
           >
             <Scissors className="w-8 h-8 md:w-10 md:h-10 transform -scale-x-100" />
           </motion.div>
@@ -94,11 +111,11 @@ function HeroTitle() {
       </div>
 
       <div className="relative inline-block py-1">
-        <HairParticles isPrimary />
+        <HairParticles isPrimary delay={0.7} />
         <motion.div
           initial={{ clipPath: 'inset(0 100% 0 0)' }}
           animate={{ clipPath: 'inset(0 0% 0 0)' }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 1.4 }}
+          transition={{ duration: 0.4, ease: "easeOut", delay: 0.7 }}
           className="text-primary"
         >
           Corte Perfeito
@@ -110,12 +127,12 @@ function HeroTitle() {
             left: "105%", 
             opacity: [0, 1, 1, 0],
           }}
-          transition={{ duration: 0.5, ease: "easeOut", delay: 1.4 }}
+          transition={{ duration: 0.4, ease: "easeOut", delay: 0.7 }}
           className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-primary z-10"
         >
           <motion.div
             animate={{ rotate: [0, -30, 0] }}
-            transition={{ duration: 0.5, ease: "linear", delay: 1.4 }}
+            transition={{ duration: 0.4, ease: "linear", delay: 0.7 }}
           >
             <Scissors className="w-10 h-10 md:w-12 md:h-12 transform -scale-x-100" />
           </motion.div>

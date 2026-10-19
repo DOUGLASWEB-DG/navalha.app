@@ -413,10 +413,11 @@ function BookingContent() {
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0"
+          aria-label="Tirar dúvidas pelo WhatsApp"
         >
-          <Button variant="outline" size="sm" className="border-success/20 bg-success/10 text-success hover:bg-success/20 gap-2 h-9 rounded-xl px-4">
+          <Button variant="outline" size="sm" className="border-success/20 bg-success/10 text-success hover:bg-success/20 gap-2 min-h-11 rounded-xl px-4">
             <WhatsAppIcon className="w-4 h-4" />
-            <span className="text-xs font-bold sm:inline hidden">Dúvidas?</span>
+            <span className="text-sm font-medium sm:inline hidden">Dúvidas?</span>
           </Button>
         </a>
       </header>
@@ -424,7 +425,14 @@ function BookingContent() {
       <main className="flex-1 w-full max-w-xl mx-auto px-4 py-6 sm:py-12 flex flex-col">
         {step !== 'success' && (
           <div className="mb-8 px-1">
-            <div className="flex gap-1.5" aria-label="Progresso do agendamento">
+            <div
+              className="flex gap-1.5"
+              role="progressbar"
+              aria-label="Progresso do agendamento"
+              aria-valuemin={1}
+              aria-valuemax={4}
+              aria-valuenow={['service', 'barber', 'datetime', 'details'].indexOf(step) + 1}
+            >
               {(['service', 'barber', 'datetime', 'details'] as const).map((s, i) => {
                 const stepIndex = ['service', 'barber', 'datetime', 'details'].indexOf(step)
                 return (
@@ -432,13 +440,14 @@ function BookingContent() {
                     key={s}
                     className={cn(
                       'h-1.5 flex-1 rounded-full transition-colors duration-500',
-                      i <= stepIndex ? 'bg-primary' : 'bg-muted'
+                      i <= stepIndex ? 'bg-primary' : 'bg-border'
                     )}
                   />
                 )
               })}
             </div>
-            <p className="mt-2 text-center text-xs font-bold tracking-wide text-muted-foreground">
+            <p className="mt-2 text-center text-sm font-medium text-muted-foreground">
+              Passo {['service', 'barber', 'datetime', 'details'].indexOf(step) + 1} de 4 ·{' '}
               {step === 'service' && 'Escolha o serviço'}
               {step === 'barber' && 'Escolha o barbeiro'}
               {step === 'datetime' && 'Escolha data e horário'}
@@ -451,7 +460,7 @@ function BookingContent() {
         {step === 'service' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center sm:text-left">
-              <h1 className="text-3xl font-extrabold text-foreground tracking-tight">O que vamos fazer?</h1>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">O que vamos fazer?</h1>
               <p className="text-sm sm:text-base text-muted-foreground mt-2">Escolha o serviço perfeito para o seu visual.</p>
             </div>
 
@@ -500,6 +509,7 @@ function BookingContent() {
                         totalDuration: selectedServices.reduce((total, service) => total + Number(service.durationMins), 0),
                       })
                     }}
+                    aria-pressed={(booking.serviceIds || []).includes(svc.id)}
                     className={cn(
                       'w-full text-left bg-card backdrop-blur-md border rounded-2xl p-5 transition-all duration-200 group active:scale-[0.97] shadow-sm',
                       (booking.serviceIds || []).includes(svc.id)
@@ -512,7 +522,7 @@ function BookingContent() {
                         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-border bg-muted shadow-sm">
                           <img
                             src={getServiceImage(svc.name)}
-                            alt={`Imagem do serviço ${svc.name}`}
+                            alt=""
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
@@ -526,7 +536,7 @@ function BookingContent() {
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-lg font-bold text-primary">R${svc.price}</p>
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground tracking-wider justify-end mt-1">
+                        <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground justify-end mt-1">
                           <Clock className="w-3 h-3" />
                           {svc.durationMins} min
                         </div>
@@ -537,7 +547,7 @@ function BookingContent() {
                 <div className="sticky bottom-4 mt-3 rounded-2xl border border-primary/20 bg-card p-4 shadow-xl">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-bold text-muted-foreground">
+                      <p className="text-sm font-medium text-muted-foreground">
                         {(booking.serviceIds || []).length} serviço(s) selecionado(s)
                       </p>
                       <p className="text-lg font-bold text-primary">
@@ -563,10 +573,10 @@ function BookingContent() {
         {step === 'barber' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="flex flex-col gap-4">
-              <button onClick={() => setStep('service')} className="flex items-center gap-2 text-xs font-bold text-muted-foreground tracking-wide hover:text-foreground transition-colors w-fit">
+              <button onClick={() => setStep('service')} className="flex items-center gap-2 text-sm font-medium text-muted-foreground min-h-11 hover:text-foreground transition-colors w-fit">
                 <Undo2 className="w-4 h-4" /> Voltar
               </button>
-              <h1 className="text-3xl font-extrabold text-foreground">Quem vai te atender?</h1>
+              <h1 className="text-3xl font-bold text-foreground">Quem vai te atender?</h1>
               <p className="text-sm text-muted-foreground">Escolha o seu barbeiro de preferência.</p>
             </div>
 
@@ -588,7 +598,7 @@ function BookingContent() {
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-bold">Qualquer Um</p>
-                  <p className="text-xs text-muted-foreground font-medium tracking-wide mt-1">Primeiro livre</p>
+                  <p className="text-xs text-muted-foreground font-medium mt-1">Primeiro livre</p>
                 </div>
               </button>
 
@@ -611,7 +621,7 @@ function BookingContent() {
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-bold truncate w-full px-2">{b.name}</p>
-                    <p className="text-xs text-primary/70 font-medium tracking-wide mt-1">Barbeiro</p>
+                    <p className="text-xs text-primary/70 font-medium mt-1">Barbeiro</p>
                   </div>
                 </button>
               ))}
@@ -625,23 +635,23 @@ function BookingContent() {
             <div className="flex flex-col gap-4">
               <button
                 onClick={goBackFromDateTime}
-                className="flex items-center gap-2 text-xs font-bold text-muted-foreground tracking-wide hover:text-foreground transition-colors w-fit"
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground min-h-11 hover:text-foreground transition-colors w-fit"
               >
                 <Undo2 className="w-4 h-4" /> Voltar
               </button>
-              <h1 className="text-3xl font-extrabold text-foreground">Quando?</h1>
+              <h1 className="text-3xl font-bold text-foreground">Quando?</h1>
             </div>
 
             <div>
               <div className="mb-4 flex items-center justify-between gap-3">
-                <p className="text-xs font-bold text-muted-foreground tracking-wide flex items-center gap-2">
+                <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <CalendarDays className="w-4 h-4 text-primary" />
                   Escolha o Dia
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowCalendar((visible) => !visible)}
-                  className="relative flex h-9 items-center gap-2 overflow-hidden rounded-xl border border-primary/30 bg-primary/10 px-3 text-xs font-bold text-primary transition-all duration-200 hover:bg-primary/20 active:scale-95"
+                  className="relative flex h-9 items-center gap-2 overflow-hidden rounded-xl border border-primary/30 bg-primary/10 px-3 text-sm font-medium text-primary transition-all duration-200 hover:bg-primary/20 active:scale-95"
                   aria-expanded={showCalendar}
                   aria-controls="booking-calendar"
                 >
@@ -697,7 +707,7 @@ function BookingContent() {
 
             <div className={cn("transition-all duration-500", booking.date ? "opacity-100 translate-y-0" : "opacity-30 pointer-events-none translate-y-4")}>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-bold text-muted-foreground tracking-wide flex items-center gap-2">
+                <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Clock className="w-4 h-4 text-primary" />
                   Escolha o Horário
                 </p>
@@ -709,7 +719,7 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => reloadAvailability()}
-                    className="mt-2 text-xs font-bold text-primary underline underline-offset-4"
+                    className="mt-2 text-sm font-medium text-primary underline underline-offset-4"
                   >
                     Tentar novamente
                   </button>
@@ -748,7 +758,7 @@ function BookingContent() {
             <Button
               onClick={() => setStep('details')}
               disabled={!booking.date || !booking.time}
-              className="w-full h-14 rounded-2xl text-base font-bold tracking-wide mt-4 active:scale-[0.98] transition-all"
+              className="w-full h-14 rounded-2xl text-base font-bold mt-4 active:scale-[0.98] transition-all"
             >
               Próximo Passo
               <ChevronRight className="w-5 h-5 ml-1" />
@@ -777,7 +787,7 @@ function BookingContent() {
             </div>
 
             <div className="mb-10">
-              <h1 className="text-3xl font-extrabold text-foreground tracking-tight">Agendado!</h1>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">Agendado!</h1>
               <p className="text-sm text-muted-foreground mt-3 leading-relaxed max-w-xs mx-auto">
                 Tudo pronto, <span className="text-foreground font-bold">{booking.name?.split(' ')[0] || 'Campeão'}</span>! Sua vaga está garantida.
               </p>
@@ -790,7 +800,7 @@ function BookingContent() {
                   <CalendarDays className="w-5 h-5 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-bold text-muted-foreground tracking-wide uppercase">Serviço(s)</p>
+                  <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase">Serviço(s)</p>
                   <p className="text-sm font-bold text-foreground leading-tight mt-0.5 line-clamp-2">
                     {booking.serviceNames?.join(', ') || booking.serviceName}
                   </p>
@@ -799,13 +809,13 @@ function BookingContent() {
               
               <div className="grid grid-cols-2 gap-4 border-t border-border/50 pt-4">
                 <div>
-                  <p className="text-xs font-bold text-muted-foreground tracking-wide uppercase mb-1">Data</p>
+                  <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase mb-1">Data</p>
                   <p className="text-sm font-bold text-foreground">
                     {booking.date && format(new Date(booking.date + 'T12:00:00'), "d 'de' MMM", { locale: ptBR })}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-muted-foreground tracking-wide uppercase mb-1">Horário</p>
+                  <p className="text-sm font-medium text-muted-foreground tracking-wide uppercase mb-1">Horário</p>
                   <p className="text-sm font-bold text-foreground">{booking.time}</p>
                 </div>
               </div>
@@ -818,7 +828,7 @@ function BookingContent() {
                 rel="noopener noreferrer"
                 className="w-full block"
               >
-                <Button className="w-full bg-success text-success-foreground hover:bg-success/90 h-14 rounded-2xl text-base font-bold tracking-wide shadow border-none">
+                <Button className="w-full bg-success text-success-foreground hover:bg-success/90 h-14 rounded-2xl text-base font-bold shadow border-none">
                   <WhatsAppIcon className="w-5 h-5 mr-2" />
                   Abrir WhatsApp
                 </Button>
@@ -826,7 +836,7 @@ function BookingContent() {
               <Button 
                 variant="ghost" 
                 onClick={() => window.location.reload()} 
-                className="w-full text-muted-foreground hover:text-foreground h-12 font-bold tracking-wide text-xs"
+                className="w-full text-muted-foreground hover:text-foreground h-12 font-bold text-xs"
               >
                 Novo Agendamento
               </Button>
@@ -855,17 +865,17 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
       <div className="flex flex-col gap-4">
-        <button onClick={onBack} disabled={isSubmitting} className="flex items-center gap-2 text-xs font-bold text-muted-foreground tracking-wide hover:text-foreground transition-colors w-fit disabled:opacity-50">
+        <button onClick={onBack} disabled={isSubmitting} className="flex items-center gap-2 text-sm font-medium text-muted-foreground min-h-11 hover:text-foreground transition-colors w-fit disabled:opacity-50">
           <Undo2 className="w-4 h-4" /> Voltar
         </button>
-        <h1 className="text-3xl font-extrabold text-foreground">Quem é você?</h1>
+        <h1 className="text-3xl font-bold text-foreground">Quem é você?</h1>
         <p className="text-sm text-muted-foreground">Complete seus dados para finalizar a reserva.</p>
       </div>
 
       <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between gap-4 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
         <div className="min-w-0">
-          <p className="text-xs font-bold text-primary tracking-wide mb-1">{booking.serviceNames?.join(', ') || booking.serviceName}</p>
+          <p className="text-sm font-medium text-primary mb-1">{booking.serviceNames?.join(', ') || booking.serviceName}</p>
           <div className="flex items-center gap-2">
             <CalendarDays className="w-3.5 h-3.5 text-muted-foreground" />
             <p className="text-sm font-bold text-foreground">
@@ -875,13 +885,13 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
         </div>
         <div className="text-right">
           <p className="text-xl font-bold text-foreground leading-none">R${(booking.totalPrice || booking.servicePrice || 0).toFixed(2)}</p>
-          <p className="mt-1 text-xs font-bold text-muted-foreground">{booking.totalDuration || booking.serviceDuration || 0} min</p>
+          <p className="mt-1 text-sm font-medium text-muted-foreground">{booking.totalDuration || booking.serviceDuration || 0} min</p>
         </div>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); if (validate()) onSubmit({ name, phone, notes }) }} className="flex flex-col gap-6">
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-muted-foreground tracking-wide ml-1">Seu Nome Completo</Label>
+          <Label className="text-sm font-medium text-muted-foreground ml-1">Seu Nome Completo</Label>
           <div className="relative">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
@@ -892,11 +902,11 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
               className={cn("pl-12 h-14 rounded-2xl text-base border-border bg-card shadow-sm", errors.name && "border-destructive")}
             />
           </div>
-          {errors.name && <p className="text-xs font-bold text-destructive tracking-tight ml-1">{errors.name}</p>}
+          {errors.name && <p className="text-sm font-medium text-destructive tracking-tight ml-1">{errors.name}</p>}
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-muted-foreground tracking-wide ml-1">Seu WhatsApp</Label>
+          <Label className="text-sm font-medium text-muted-foreground ml-1">Seu WhatsApp</Label>
           <div className="relative">
             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
@@ -908,11 +918,11 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
               className={cn("pl-12 h-14 rounded-2xl text-base border-border bg-card shadow-sm", errors.phone && "border-destructive")}
             />
           </div>
-          {errors.phone && <p className="text-xs font-bold text-destructive tracking-tight ml-1">{errors.phone}</p>}
+          {errors.phone && <p className="text-sm font-medium text-destructive tracking-tight ml-1">{errors.phone}</p>}
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-bold text-muted-foreground tracking-wide ml-1">Observações</Label>
+          <Label className="text-sm font-medium text-muted-foreground ml-1">Observações</Label>
           <div className="relative">
             <FileText className="absolute left-4 top-4 h-5 w-5 text-muted-foreground" />
             <Textarea
@@ -929,7 +939,7 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
         <Button
           type="submit"
           isLoading={isSubmitting}
-          className="w-full h-14 rounded-2xl text-base font-bold tracking-wide mt-4 active:scale-[0.98] transition-all"
+          className="w-full h-14 rounded-2xl text-base font-bold mt-4 active:scale-[0.98] transition-all"
         >
           Finalizar Agendamento
         </Button>
@@ -943,7 +953,7 @@ export default function BookingPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4" />
-        <p className="text-sm font-bold text-primary tracking-wide animate-pulse">Carregando...</p>
+        <p className="text-sm font-bold text-primary animate-pulse">Carregando...</p>
       </div>
     }>
       <BookingContent />
