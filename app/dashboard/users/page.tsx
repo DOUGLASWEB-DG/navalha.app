@@ -82,11 +82,16 @@ export default function UsersPage() {
                 {/* Header (Ícone e Ações) */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${
-                      u.role === 'ADMIN' ? 'border-primary/20 bg-primary/10' : 'border-info/20 bg-info/10'
-                    }`}>
-                      {u.role === 'ADMIN' ? <ShieldCheck className="h-6 w-6 text-primary" /> : <User className="h-6 w-6 text-info" />}
-                    </div>
+                    {u.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={u.avatarUrl} alt={`Foto de ${u.name}`} className="h-12 w-12 shrink-0 rounded-full border border-border object-cover" />
+                    ) : (
+                      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${
+                        u.role === 'ADMIN' ? 'border-primary/20 bg-primary/10' : 'border-info/20 bg-info/10'
+                      }`}>
+                        {u.role === 'ADMIN' ? <ShieldCheck className="h-6 w-6 text-primary" /> : <User className="h-6 w-6 text-info" />}
+                      </div>
+                    )}
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { removeStoredImage } from '@/lib/uploads/route-helpers'
 
 const updateUserSchema = z.object({
   name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres').optional(),
@@ -109,7 +110,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
     const targetUser = await prisma.user.findFirst({
       where: { id: targetUserId, barbeariaId },
-      select: { id: true, role: true }
+      select: { id: true, role: true, avatarUrl: true }
     })
 
     if (!targetUser) throw notFound('Usuário não encontrado')
@@ -128,6 +129,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     await prisma.user.delete({
       where: { id: targetUserId, barbeariaId }
     })
+    // Usuário excluído: a foto fica órfã no disco, então é removida (falha aqui não desfaz a exclusão)
+    await removeStoredImage(targetUser.avatarUrl, 'User DELETE')
 
     return NextResponse.json({ success: true })
   } catch (error) {

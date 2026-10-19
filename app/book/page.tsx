@@ -104,6 +104,28 @@ interface Service {
 interface Barber {
   id: string
   name: string
+  avatarUrl?: string | null
+}
+
+// Foto do barbeiro; sem foto (ou se o arquivo falhar ao carregar) volta o ícone
+function BarberAvatar({ barber }: { barber: Barber }) {
+  const [failed, setFailed] = useState(false)
+  if (!barber.avatarUrl || failed) {
+    return (
+      <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center shrink-0">
+        <User className="w-6 h-6 text-primary" />
+      </div>
+    )
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={barber.avatarUrl}
+      alt={`Foto de ${barber.name}`}
+      onError={() => setFailed(true)}
+      className="w-14 h-14 shrink-0 rounded-full border border-border object-cover"
+    />
+  )
 }
 
 interface AppointmentAvailability {
@@ -620,9 +642,7 @@ function BookingContent() {
                       : 'border-border bg-card text-foreground hover:bg-accent/50'
                   )}
                 >
-                  <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center shrink-0">
-                    <User className="w-6 h-6 text-primary" />
-                  </div>
+                  <BarberAvatar barber={b} />
                   <div className="text-center">
                     <p className="text-sm font-bold truncate w-full px-2">{b.name}</p>
                     <p className="text-xs text-primary/70 font-medium mt-1">Barbeiro</p>

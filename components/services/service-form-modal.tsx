@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,11 +16,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Clock, DollarSign, Type, AlignLeft, ImagePlus, Trash2 } from 'lucide-react'
-
-// Mesmos limites do servidor (lib/uploads/image.ts); o servidor continua sendo quem decide.
-const MAX_PHOTO_BYTES = 2 * 1024 * 1024
-const ACCEPTED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+import { Clock, DollarSign, Type, AlignLeft } from 'lucide-react'
+import { PhotoField, syncPhoto, usePhotoField } from '@/components/shared/photo-field'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
@@ -48,44 +45,7 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
     resolver: zodResolver(schema),
   })
 
-  const fileInput = useRef<HTMLInputElement>(null)
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
-  const [removePhoto, setRemovePhoto] = useState(false)
-
-  // Foto exibida: a escolhida agora, senão a já salva (a menos que o admin tenha marcado para remover)
-  const shownPhoto = photoPreview ?? (removePhoto ? null : service?.imageUrl ?? null)
-
-  useEffect(() => {
-    return () => {
-      if (photoPreview) URL.revokeObjectURL(photoPreview)
-    }
-  }, [photoPreview])
-
-  function resetPhoto() {
-    setPhotoFile(null)
-    setPhotoPreview(null)
-    setRemovePhoto(false)
-    if (fileInput.current) fileInput.current.value = ''
-  }
-
-  function handlePhotoChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-    if (!file) return
-    if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) {
-      toast.error('Formato não suportado', { description: 'Envie uma foto JPEG, PNG ou WebP.' })
-      event.target.value = ''
-      return
-    }
-    if (file.size > MAX_PHOTO_BYTES) {
-      toast.error('Foto muito grande', { description: 'A foto pode ter no máximo 2 MB.' })
-      event.target.value = ''
-      return
-    }
-    setPhotoFile(file)
-    setPhotoPreview(URL.createObjectURL(file))
-    setRemovePhoto(false)
-  }
+  const photo = usePhotoField(service?.imageUrl)
 
   useEffect(() => {
     if (service) {
@@ -98,7 +58,7 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
     } else {
       reset({ name: '', description: '', price: '', durationMins: '30' })
     }
-    resetPhoto()
+    photo.reset()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [service, open, reset])
 
@@ -122,18 +82,7 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
       const saved = await res.json()
 
       // A foto vai depois do cadastro (precisa do id). Se ela falhar, o serviço já está salvo.
-      let photoError: string | null = null
-      if (photoFile) {
-        const body = new FormData()
-        body.append('file', photoFile)
-        const photoRes = await fetch(`/api/services/${saved.id}/image`, { method: 'POST', body })
-        if (!photoRes.ok) {
-          photoError = (await photoRes.json().catch(() => null))?.error ?? 'Falha ao enviar a foto.'
-        }
-      } else if (removePhoto && service?.imageUrl) {
-        const photoRes = await fetch(`/api/services/${saved.id}/image`, { method: 'DELETE' })
-        if (!photoRes.ok) photoError = 'Falha ao remover a foto.'
-      }
+      const photoError = await syncPhoto(`/api/services/${saved.id}/image`, photo)
 
       if (photoError) {
         toast.warning('Serviço salvo, mas a foto não foi atualizada', { description: photoError })
@@ -160,59 +109,7 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 mt-4">
-          <div className="flex flex-col gap-2">
-            <Label className="text-sm font-semibold text-foreground">Foto do serviço</Label>
-            <div className="flex items-center gap-4">
-              <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted">
-                {shownPhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={shownPhoto} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <ImagePlus className="h-8 w-8 text-muted-foreground" aria-hidden />
-                )}
-              </div>
-              <div className="flex min-w-0 flex-col gap-2">
-                <input
-                  ref={fileInput}
-                  type="file"
-                  accept={ACCEPTED_PHOTO_TYPES.join(',')}
-                  onChange={handlePhotoChange}
-                  disabled={isSubmitting}
-                  className="sr-only"
-                  id="service-photo"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={isSubmitting}
-                  onClick={() => fileInput.current?.click()}
-                  className="gap-2"
-                >
-                  <ImagePlus className="h-4 w-4" aria-hidden />
-                  {shownPhoto ? 'Trocar foto' : 'Escolher foto'}
-                </Button>
-                {shownPhoto && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    disabled={isSubmitting}
-                    onClick={() => {
-                      const hadSavedPhoto = !!service?.imageUrl
-                      resetPhoto()
-                      if (hadSavedPhoto) setRemovePhoto(true)
-                    }}
-                    className="gap-2 text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden />
-                    Remover foto
-                  </Button>
-                )}
-                <p className="text-xs text-muted-foreground">JPEG, PNG ou WebP, até 2 MB.</p>
-              </div>
-            </div>
-          </div>
+          <PhotoField field={photo} label="Foto do serviço" inputId="service-photo" disabled={isSubmitting} />
 
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Nome do Serviço *</Label>

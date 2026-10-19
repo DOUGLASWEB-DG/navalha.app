@@ -148,6 +148,8 @@ async function main() {
     ['DELETE', '/api/services/[id]/image', 'b-service'],
     ['PATCH', '/api/users/[id]', 'b-admin', { active: false }],
     ['DELETE', '/api/users/[id]', 'b-barber'],
+    ['POST', '/api/users/[id]/avatar', 'b-barber'],
+    ['DELETE', '/api/users/[id]/avatar', 'b-barber'],
   ]
   for (const [method, template, bId, body] of byId) {
     route(method, template)
@@ -213,6 +215,7 @@ async function main() {
     ['GET', '/api/services'], ['POST', '/api/services'], ['PATCH', '/api/services/[id]'], ['DELETE', '/api/services/[id]'],
     ['POST', '/api/services/[id]/image'], ['DELETE', '/api/services/[id]/image'],
     ['GET', '/api/users'], ['POST', '/api/users'], ['PATCH', '/api/users/[id]'], ['DELETE', '/api/users/[id]'],
+    ['POST', '/api/users/[id]/avatar'], ['DELETE', '/api/users/[id]/avatar'],
     ['GET', '/api/whatsapp/connect'], ['GET', '/api/whatsapp/instance'], ['POST', '/api/whatsapp/instance'],
   ]
   for (const [method, template] of crossHost) {

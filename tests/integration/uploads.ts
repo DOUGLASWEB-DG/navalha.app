@@ -1,4 +1,5 @@
-// Fotos de serviço contra um servidor real: envio, leitura pública, troca, remoção e isolamento entre barbearias.
+// Fotos (de serviço e de barbeiro) contra um servidor real: envio, leitura pública, troca, remoção e isolamento
+// entre barbearias. A mesma bateria roda para os dois alvos.
 //
 // Preparo (banco LOCAL; esta suíte e a fixture recusam banco remoto):
 //   1. npm run test:fixture
@@ -6,8 +7,8 @@
 //   3. npm run build && UPLOADS_DIR=<mesma pasta> TENANT_ROOT_DOMAIN=navalha.app npx next start -p 3131
 //   4. UPLOADS_DIR=<mesma pasta> TEST_PORT=3131 npm run test:uploads
 //
-// Diferente da suíte de isolamento, esta ALTERA dados (a foto de um serviço da barbearia A) e restaura o
-// estado ao final: imageUrl volta a ser null e os arquivos de teste são apagados.
+// Diferente da suíte de isolamento, esta ALTERA dados (a foto de um serviço e de um barbeiro da barbearia A, e um
+// usuário temporário) e restaura o estado ao final: as URLs voltam a null e os arquivos de teste são apagados.
 import http from 'node:http'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -61,22 +62,113 @@ function multipart(fileName: string, mime: string, data: Buffer, field = 'file')
   const tail = Buffer.from(`\r\n--${boundary}--\r\n`)
   return { body: Buffer.concat([head, data, tail]), headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` } }
 }
-const upload = (host: string, serviceId: string, token: string | undefined, fileName: string, mime: string, data: Buffer, field?: string) => {
-  const m = multipart(fileName, mime, data, field)
-  return raw(host, 'POST', `/api/services/${serviceId}/image`, { token, body: m.body, headers: m.headers })
-}
-const login = async (host: string, email: string) =>
-  (await raw(host, 'POST', '/api/auth/login', {
-    body: Buffer.from(JSON.stringify({ email, password: FIXTURE_PASSWORD })),
-    headers: { 'Content-Type': 'application/json' },
-  })).token
+const json = (data: unknown) => ({ body: Buffer.from(JSON.stringify(data)), headers: { 'Content-Type': 'application/json' } })
+const login = async (host: string, email: string) => (await raw(host, 'POST', '/api/auth/login', json({ email, password: FIXTURE_PASSWORD }))).token
 
 function check(label: string, ok: boolean, detail = '') {
   checks += 1
   if (!ok) failures += 1
   if (!ok || process.env.VERBOSE) console.log(`${ok ? 'ok  ' : 'FAIL'} ${label}${detail ? ' | ' + detail : ''}`)
 }
-const fileOf = (imageUrl: string) => path.join(uploadsDir, ...imageUrl.replace('/media/', '').split('/'))
+const fileOf = (url: string) => path.join(uploadsDir!, ...url.replace('/media/', '').split('/'))
+
+// Um alvo de foto: qual rota, qual registro de A e de B, onde a URL fica no banco e onde aparece em público
+interface Target {
+  label: string
+  kind: 'services' | 'avatars'
+  route: (id: string) => string
+  aId: string
+  bId: string
+  responseField: 'imageUrl' | 'avatarUrl'
+  readUrl: (id: string) => Promise<string | null | undefined>
+  clearUrl: (id: string) => Promise<unknown>
+  publicUrl: (book: any, id: string) => string | null | undefined
+}
+
+async function runTarget(t: Target, tokens: { tA?: string; tABarber?: string; tB?: string }, jpeg: Buffer, huge: Buffer) {
+  const { tA, tABarber, tB } = tokens
+  const upload = (host: string, id: string, token: string | undefined, fileName: string, mime: string, data: Buffer, field?: string) => {
+    const m = multipart(fileName, mime, data, field)
+    return raw(host, 'POST', t.route(id), { token, body: m.body, headers: m.headers })
+  }
+  const createdFiles: string[] = []
+  if (await t.readUrl(t.aId)) throw new Error(`${t.label}: o registro de teste já tem foto; limpe antes de rodar.`)
+  const L = (s: string) => `[${t.label}] ${s}`
+
+  // 1. Autorização
+  check(L('sem sessão: 401'), (await upload(A, t.aId, undefined, 'a.jpg', 'image/jpeg', jpeg)).status === 401)
+  check(L('barbeiro (não admin): 403'), (await upload(A, t.aId, tABarber, 'a.jpg', 'image/jpeg', jpeg)).status === 403)
+  check(L('DELETE sem sessão: 401'), (await raw(A, 'DELETE', t.route(t.aId))).status === 401)
+
+  // 2. Isolamento: registro de outra barbearia é 404, igual a um id que não existe
+  const guess = await upload(A, 'cmzzzzzzzzzzzzzzzzzzzzzzz', tA, 'a.jpg', 'image/jpeg', jpeg)
+  const crossAtoB = await upload(A, t.bId, tA, 'a.jpg', 'image/jpeg', jpeg)
+  const crossBtoA = await upload(B, t.aId, tB, 'a.jpg', 'image/jpeg', jpeg)
+  check(L('admin A no registro de B: 404 igual ao id inexistente'), crossAtoB.status === 404 && crossAtoB.text === guess.text, `status=${crossAtoB.status}`)
+  check(L('admin B no registro de A: 404'), crossBtoA.status === 404, `status=${crossBtoA.status}`)
+  check(L('token de A no host B: 401'), (await upload(B, t.aId, tA, 'a.jpg', 'image/jpeg', jpeg)).status === 401)
+  check(L('nada foi gravado nas tentativas negadas'), !(await t.readUrl(t.aId)) && !(await t.readUrl(t.bId)))
+
+  // 3. Entradas inválidas (nada deve ser gravado)
+  const bad: [string, Res][] = [
+    ['texto com extensão .jpg', await upload(A, t.aId, tA, 'a.jpg', 'image/jpeg', Buffer.from('isto nao e uma imagem'))],
+    ['SVG', await upload(A, t.aId, tA, 'a.svg', 'image/svg+xml', Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'))],
+    ['campo com outro nome', await upload(A, t.aId, tA, 'a.jpg', 'image/jpeg', jpeg, 'outro')],
+    ['corpo que não é multipart', await raw(A, 'POST', t.route(t.aId), { token: tA, ...json({}) })],
+  ]
+  for (const [label, r] of bad) check(L(`${label}: 400`), r.status === 400, `status=${r.status}`)
+  // Acima de 2 MB a rota responde 413. O Next, por bufferizar o corpo para o middleware, às vezes falha com 500 ANTES
+  // de a rota rodar (ver docs/uploads.md). A suíte garante que o arquivo é recusado e que nada é gravado.
+  const bigRes = await upload(A, t.aId, tA, 'g.png', 'image/png', huge)
+  check(L('arquivo acima de 2 MB é recusado (413, ou 500 do framework) sem gravar'), [413, 500].includes(bigRes.status), `status=${bigRes.status}`)
+  if (bigRes.status !== 413) console.log(`aviso: [${t.label}] arquivo grande respondeu ${bigRes.status} em vez de 413 (comportamento do Next, ver docs/uploads.md)`)
+  check(L('nenhuma foto gravada após entradas inválidas'), !(await t.readUrl(t.aId)))
+
+  // 4. Envio válido
+  const ok1 = await upload(A, t.aId, tA, 'foto.jpg', 'image/jpeg', jpeg)
+  const url1: string = ok1.json?.[t.responseField] ?? ''
+  const urlPattern = new RegExp(`^/media/barbearia-america/${t.kind}/[0-9a-f-]{36}\\.webp$`)
+  check(L(`envio válido: 200 com URL /media/<barbearia>/${t.kind}/<uuid>.webp`), ok1.status === 200 && urlPattern.test(url1), `status=${ok1.status} ${ok1.text.slice(0, 120)}`)
+  if (url1) createdFiles.push(fileOf(url1))
+  check(L('o banco guarda a mesma URL'), (await t.readUrl(t.aId)) === url1)
+  check(L('arquivo existe no disco'), Boolean(url1) && fs.existsSync(fileOf(url1)))
+
+  // 5. Leitura pública e conteúdo gravado
+  const served = await raw(A, 'GET', url1)
+  check(L('GET da foto sem sessão: 200 image/webp'), served.status === 200 && served.headers['content-type'] === 'image/webp', `status=${served.status}`)
+  check(L('cabeçalhos: cache imutável e nosniff'), /immutable/.test(String(served.headers['cache-control'])) && served.headers['x-content-type-options'] === 'nosniff')
+  const meta = served.status === 200 ? await sharp(served.body).metadata() : null
+  check(L('servida é WebP com no máximo 800 px'), meta?.format === 'webp' && Math.max(meta.width ?? 9999, meta.height ?? 9999) <= 800, `${meta?.format} ${meta?.width}x${meta?.height}`)
+  check(L('servida sem EXIF/GPS'), meta !== null && !meta.exif && !served.body.includes(Buffer.from('MARCADOR-SECRETO-EXIF')))
+  check(L('rotação do EXIF aplicada (1600x1200 com orientação 6 vira retrato)'), meta !== null && (meta.height ?? 0) > (meta.width ?? 0))
+  check(L('GET /api/book na A devolve a URL da foto'), t.publicUrl((await raw(A, 'GET', '/api/book')).json, t.aId) === url1)
+  check(L('GET /api/book na B não mostra a foto da A'), !(await raw(B, 'GET', '/api/book')).text.includes(url1))
+
+  // 6. Leitura cruzada
+  check(L('mesma foto no host B: 404'), (await raw(B, 'GET', url1)).status === 404)
+  check(L('mesma foto em host desconhecido: 404'), (await raw('naoexiste.navalha.app', 'GET', url1)).status === 404)
+
+  // 7. Troca: a foto antiga some do disco, a nova responde
+  const ok2 = await upload(A, t.aId, tA, 'outra.png', 'image/png', await sharp({ create: { width: 300, height: 300, channels: 3, background: { r: 10, g: 90, b: 200 } } }).png().toBuffer())
+  const url2: string = ok2.json?.[t.responseField] ?? ''
+  if (url2) createdFiles.push(fileOf(url2))
+  check(L('troca: 200 com URL nova'), ok2.status === 200 && url2 !== '' && url2 !== url1)
+  check(L('troca: arquivo antigo apagado do disco'), !fs.existsSync(fileOf(url1)))
+  check(L('troca: URL antiga passa a 404'), (await raw(A, 'GET', url1)).status === 404)
+  check(L('troca: URL nova 200'), (await raw(A, 'GET', url2)).status === 200)
+
+  // 8. Remoção
+  check(L('DELETE com admin de B no registro de A: 404 e a foto continua'), (await raw(B, 'DELETE', t.route(t.aId), { token: tB })).status === 404 && fs.existsSync(fileOf(url2)))
+  const del = await raw(A, 'DELETE', t.route(t.aId), { token: tA })
+  check(L('DELETE com admin de A: 200 e URL null'), del.status === 200 && del.json?.[t.responseField] === null)
+  check(L('DELETE: arquivo apagado e banco limpo'), !fs.existsSync(fileOf(url2)) && !(await t.readUrl(t.aId)))
+  check(L('DELETE: URL passa a 404'), (await raw(A, 'GET', url2)).status === 404)
+  check(L('DELETE repetido: 200 (idempotente)'), (await raw(A, 'DELETE', t.route(t.aId), { token: tA })).status === 200)
+
+  // Limpeza do que este alvo criou
+  await t.clearUrl(t.aId)
+  for (const file of createdFiles) fs.rmSync(file, { force: true })
+}
 
 async function main() {
   const tA = await login(A, 'smoke.admin@local.dev')
@@ -84,11 +176,8 @@ async function main() {
   const tB = await login(B, 'b.admin@local.dev')
   check('logins de teste (rode a fixture antes)', Boolean(tA && tABarber && tB))
 
-  const svc = await prisma.service.findFirst({ where: { barbeariaId: 'barbearia-america', active: true }, select: { id: true, imageUrl: true } })
+  const svc = await prisma.service.findFirst({ where: { barbeariaId: 'barbearia-america', active: true }, select: { id: true } })
   if (!svc) throw new Error('A barbearia A precisa de um serviço ativo.')
-  if (svc.imageUrl) throw new Error('O serviço de teste já tem foto; limpe antes de rodar.')
-  const bSvc = 'b-service'
-  const createdFiles: string[] = []
 
   // Foto grande, girada pelo EXIF e com GPS: a saída deve vir sem metadados e com no máximo 800 px
   const jpeg = await sharp({ create: { width: 1600, height: 1200, channels: 3, background: { r: 200, g: 60, b: 60 } } })
@@ -97,65 +186,31 @@ async function main() {
     .withMetadata({ orientation: 6 })
     .toBuffer()
   check('foto de teste tem EXIF antes do envio', Boolean((await sharp(jpeg).metadata()).exif))
-
-  // 1. Autorização
-  check('sem sessão: 401', (await upload(A, svc.id, undefined, 'a.jpg', 'image/jpeg', jpeg)).status === 401)
-  check('barbeiro (não admin): 403', (await upload(A, svc.id, tABarber, 'a.jpg', 'image/jpeg', jpeg)).status === 403)
-  check('DELETE sem sessão: 401', (await raw(A, 'DELETE', `/api/services/${svc.id}/image`)).status === 401)
-
-  // 2. Isolamento: serviço de outra barbearia é 404, igual a um id que não existe
-  const guess = await upload(A, 'cmzzzzzzzzzzzzzzzzzzzzzzz', tA, 'a.jpg', 'image/jpeg', jpeg)
-  const crossAtoB = await upload(A, bSvc, tA, 'a.jpg', 'image/jpeg', jpeg)
-  const crossBtoA = await upload(B, svc.id, tB, 'a.jpg', 'image/jpeg', jpeg)
-  check('admin A no serviço de B: 404 igual ao id inexistente', crossAtoB.status === 404 && crossAtoB.text === guess.text)
-  check('admin B no serviço de A: 404', crossBtoA.status === 404)
-  check('token de A no host B: 401', (await upload(B, svc.id, tA, 'a.jpg', 'image/jpeg', jpeg)).status === 401)
-  check('nada foi gravado nas tentativas negadas', await prisma.service.count({ where: { id: { in: [svc.id, bSvc] }, imageUrl: { not: null } } }) === 0)
-
-  // 3. Entradas inválidas (nada deve ser gravado)
-  const bad: [string, Res][] = [
-    ['texto com extensão .jpg', await upload(A, svc.id, tA, 'a.jpg', 'image/jpeg', Buffer.from('isto nao e uma imagem'))],
-    ['SVG', await upload(A, svc.id, tA, 'a.svg', 'image/svg+xml', Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'))],
-    ['campo com outro nome', await upload(A, svc.id, tA, 'a.jpg', 'image/jpeg', jpeg, 'outro')],
-    ['corpo que não é multipart', await raw(A, 'POST', `/api/services/${svc.id}/image`, { token: tA, body: Buffer.from('{}'), headers: { 'Content-Type': 'application/json' } })],
-  ]
-  for (const [label, r] of bad) check(`${label}: 400`, r.status === 400, `status=${r.status}`)
   const huge = await sharp({ create: { width: 1200, height: 1200, channels: 3, background: { r: 128, g: 128, b: 128 }, noise: { type: 'gaussian', mean: 128, sigma: 60 } } }).png().toBuffer()
-  // Acima de 2 MB a rota responde 413. Porém o Next, por bufferizar o corpo para o middleware, às vezes falha com 500
-  // ANTES de a rota rodar (condição de corrida do framework, comprovada; ver docs/uploads.md). O que a suíte garante é
-  // que o arquivo é recusado (413 ou 500) e que nada é gravado; o 413 limpo em si fica registrado como informação.
-  const bigRes = await upload(A, svc.id, tA, 'g.png', 'image/png', huge)
-  check('arquivo acima de 2 MB é recusado (413, ou 500 do framework) sem gravar', huge.length > 2 * 1024 * 1024 && [413, 500].includes(bigRes.status), `tamanho=${huge.length} status=${bigRes.status}`)
-  if (bigRes.status !== 413) console.log(`aviso: arquivo grande respondeu ${bigRes.status} em vez de 413 (comportamento do Next, ver docs/uploads.md)`)
-  check('nenhuma foto gravada após entradas inválidas', await prisma.service.count({ where: { id: svc.id, imageUrl: { not: null } } }) === 0)
+  check('arquivo grande de teste passa de 2 MB', huge.length > 2 * 1024 * 1024, `tamanho=${huge.length}`)
 
-  // 4. Envio válido
-  const ok1 = await upload(A, svc.id, tA, 'foto.jpg', 'image/jpeg', jpeg)
-  const url1: string = ok1.json?.imageUrl ?? ''
-  check('envio válido: 200 com URL /media/<barbearia>/services/<uuid>.webp', ok1.status === 200 && /^\/media\/barbearia-america\/services\/[0-9a-f-]{36}\.webp$/.test(url1), `status=${ok1.status} ${ok1.text.slice(0, 120)}`)
-  if (url1) createdFiles.push(fileOf(url1))
-  check('o banco guarda a mesma URL', (await prisma.service.findUnique({ where: { id: svc.id }, select: { imageUrl: true } }))?.imageUrl === url1)
-  check('arquivo existe no disco', Boolean(url1) && fs.existsSync(fileOf(url1)))
+  const targets: Target[] = [
+    {
+      label: 'serviço', kind: 'services', route: (id) => `/api/services/${id}/image`, aId: svc.id, bId: 'b-service', responseField: 'imageUrl',
+      readUrl: async (id) => (await prisma.service.findUnique({ where: { id }, select: { imageUrl: true } }))?.imageUrl,
+      clearUrl: (id) => prisma.service.update({ where: { id }, data: { imageUrl: null } }),
+      publicUrl: (book, id) => book?.services?.find((s: any) => s.id === id)?.imageUrl,
+    },
+    {
+      label: 'avatar', kind: 'avatars', route: (id) => `/api/users/${id}/avatar`, aId: 'smoke-barber', bId: 'b-barber', responseField: 'avatarUrl',
+      readUrl: async (id) => (await prisma.user.findUnique({ where: { id }, select: { avatarUrl: true } }))?.avatarUrl,
+      clearUrl: (id) => prisma.user.update({ where: { id }, data: { avatarUrl: null } }),
+      publicUrl: (book, id) => book?.barbers?.find((b: any) => b.id === id)?.avatarUrl,
+    },
+  ]
+  for (const target of targets) await runTarget(target, { tA, tABarber, tB }, jpeg, huge)
 
-  // 5. Leitura pública e conteúdo gravado
-  const served = await raw(A, 'GET', url1)
-  check('GET da foto sem sessão: 200 image/webp', served.status === 200 && served.headers['content-type'] === 'image/webp', `status=${served.status} tipo=${served.headers['content-type']}`)
-  check('cabeçalhos: cache imutável e nosniff', /immutable/.test(String(served.headers['cache-control'])) && served.headers['x-content-type-options'] === 'nosniff')
-  const meta = served.status === 200 ? await sharp(served.body).metadata() : null
-  check('servida é WebP com no máximo 800 px', meta?.format === 'webp' && Math.max(meta.width ?? 9999, meta.height ?? 9999) <= 800, `${meta?.format} ${meta?.width}x${meta?.height}`)
-  check('servida sem EXIF/GPS', meta !== null && !meta.exif && !served.body.includes(Buffer.from('MARCADOR-SECRETO-EXIF')))
-  check('rotação do EXIF aplicada (1600x1200 com orientação 6 vira retrato)', meta !== null && (meta.height ?? 0) > (meta.width ?? 0), `${meta?.width}x${meta?.height}`)
-  const bookA = (await raw(A, 'GET', '/api/book')).json
-  check('GET /api/book na A devolve imageUrl do serviço', bookA?.services?.find((s: any) => s.id === svc.id)?.imageUrl === url1)
-
-  // 6. Leitura cruzada e caminhos maliciosos
-  check('mesma foto no host B: 404', (await raw(B, 'GET', url1)).status === 404)
-  check('mesma foto em host desconhecido: 404', (await raw('naoexiste.navalha.app', 'GET', url1)).status === 404)
+  // Caminhos maliciosos na leitura pública (valem para as duas pastas)
   for (const evil of [
     '/media/../.navalha-uploads',
     '/media/barbearia-america/services/..%2F..%2F.navalha-uploads',
     '/media/barbearia-america/services/%2e%2e/%2e%2e/x.webp',
-    `/media/barbearia-america/services/${path.basename(url1).toUpperCase()}`,
+    '/media/barbearia-america/avatars/..%2F..%2F.navalha-uploads',
     '/media/barbearia-america/services/00000000-0000-4000-8000-000000000000.webp',
     '/media/barbearia-america/avatars/00000000-0000-4000-8000-000000000000.webp',
     '/media/',
@@ -165,29 +220,21 @@ async function main() {
     check(`  e sem conteúdo de arquivo: ${evil}`, !r.text.includes('Pasta de fotos'))
   }
 
-  // 7. Troca: a foto antiga some do disco, a nova responde
-  const ok2 = await upload(A, svc.id, tA, 'outra.png', 'image/png', await sharp({ create: { width: 300, height: 300, channels: 3, background: { r: 10, g: 90, b: 200 } } }).png().toBuffer())
-  const url2: string = ok2.json?.imageUrl ?? ''
-  if (url2) createdFiles.push(fileOf(url2))
-  check('troca: 200 com URL nova', ok2.status === 200 && url2 !== '' && url2 !== url1)
-  check('troca: arquivo antigo apagado do disco', !fs.existsSync(fileOf(url1)))
-  check('troca: URL antiga passa a 404', (await raw(A, 'GET', url1)).status === 404)
-  check('troca: URL nova 200', (await raw(A, 'GET', url2)).status === 200)
-
-  // 8. Remoção
-  check('DELETE com admin de B no serviço de A: 404 e a foto continua', (await raw(B, 'DELETE', `/api/services/${svc.id}/image`, { token: tB })).status === 404 && fs.existsSync(fileOf(url2)))
-  const del = await raw(A, 'DELETE', `/api/services/${svc.id}/image`, { token: tA })
-  check('DELETE com admin de A: 200 e imageUrl null', del.status === 200 && del.json?.imageUrl === null)
-  check('DELETE: arquivo apagado e banco limpo', !fs.existsSync(fileOf(url2)) && (await prisma.service.findUnique({ where: { id: svc.id }, select: { imageUrl: true } }))?.imageUrl === null)
-  check('DELETE: URL passa a 404', (await raw(A, 'GET', url2)).status === 404)
-  check('DELETE repetido: 200 (idempotente)', (await raw(A, 'DELETE', `/api/services/${svc.id}/image`, { token: tA })).status === 200)
-
-  // 9. Limpeza do que o teste criou
-  await prisma.service.update({ where: { id: svc.id }, data: { imageUrl: null } })
-  for (const file of createdFiles) fs.rmSync(file, { force: true })
+  // Excluir o usuário apaga a foto dele do disco (usuário temporário, criado e excluído aqui)
+  const email = `upl.temp.${Date.now()}@local.dev`
+  const created = await raw(A, 'POST', '/api/users', { token: tA, ...json({ name: 'UPL Temporario', email, password: 'senha-temporaria-123', role: 'BARBER' }) })
+  const tempId: string = created.json?.id ?? ''
+  const m = multipart('t.jpg', 'image/jpeg', jpeg)
+  const tempUrl: string = (await raw(A, 'POST', `/api/users/${tempId}/avatar`, { token: tA, body: m.body, headers: m.headers })).json?.avatarUrl ?? ''
+  check('usuário temporário criado com foto', created.status === 201 && Boolean(tempUrl) && fs.existsSync(fileOf(tempUrl)), `status=${created.status}`)
+  const removed = await raw(A, 'DELETE', `/api/users/${tempId}`, { token: tA })
+  check('excluir o usuário apaga a foto do disco', removed.status === 200 && !fs.existsSync(fileOf(tempUrl)), `status=${removed.status}`)
+  check('excluir o usuário: URL da foto passa a 404', (await raw(A, 'GET', tempUrl)).status === 404)
+  if (tempId) await prisma.user.deleteMany({ where: { id: tempId } })
+  if (tempUrl) fs.rmSync(fileOf(tempUrl), { force: true })
 
   console.log(`${checks} verificações`)
-  console.log(failures ? `RESULTADO: ${failures} falha(s)` : 'RESULTADO: fotos de serviço comprovadas (envio, leitura, troca, remoção e isolamento)')
+  console.log(failures ? `RESULTADO: ${failures} falha(s)` : 'RESULTADO: fotos de serviço e de barbeiro comprovadas (envio, leitura, troca, remoção e isolamento)')
   if (failures) process.exitCode = 1
 }
 

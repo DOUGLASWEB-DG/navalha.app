@@ -213,7 +213,7 @@ export async function GET() {
 
     const barbers = await prisma.user.findMany({
       where: { barbeariaId: barbearia.id, active: true },
-      select: { id: true, name: true },
+      select: { id: true, name: true, avatarUrl: true },
       orderBy: { name: 'asc' },
     })
 

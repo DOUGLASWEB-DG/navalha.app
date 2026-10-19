@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { User, Mail, Lock, ShieldCheck } from 'lucide-react'
+import { PhotoField, syncPhoto, usePhotoField } from '@/components/shared/photo-field'
 
 const schema = z.object({
   name: z.string().min(2, 'Nome muito curto'),
@@ -53,6 +54,9 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
     defaultValues: { role: 'BARBER' },
   })
 
+  // Foto do barbeiro/admin (só o admin chega neste formulário)
+  const photo = usePhotoField(user?.avatarUrl)
+
   useEffect(() => {
     if (user) {
       reset({
@@ -64,6 +68,8 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
     } else {
       reset({ name: '', email: '', role: 'BARBER', password: '' })
     }
+    photo.reset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, open, reset])
 
   async function onSubmit(data: FormData) {
@@ -96,10 +102,17 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         const d = await res.json()
         throw new Error(d.error || 'Falha na requisição')
       }
+      const saved = await res.json()
 
-      toast.success('Sucesso!', {
-        description: user ? 'Usuário atualizado.' : 'Usuário criado.',
-      })
+      // A foto vai depois do cadastro (precisa do id). Se ela falhar, o usuário já está salvo.
+      const photoError = await syncPhoto(`/api/users/${saved.id}/avatar`, photo)
+      if (photoError) {
+        toast.warning('Usuário salvo, mas a foto não foi atualizada', { description: photoError })
+      } else {
+        toast.success('Sucesso!', {
+          description: user ? 'Usuário atualizado.' : 'Usuário criado.',
+        })
+      }
       onSaved()
     } catch (err: any) {
       toast.error('Erro', {
@@ -118,6 +131,8 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
+          <PhotoField field={photo} label="Foto" inputId="user-photo" disabled={isSubmitting} round />
+
           {/* Nome */}
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Nome *</Label>
