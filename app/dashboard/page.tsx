@@ -23,6 +23,8 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatCurrency } from '@/lib/format'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 
 import { ErrorState } from '@/components/shared/data-state'
 
@@ -32,6 +34,8 @@ export default function DashboardPage() {
   const { data, error, isLoading, mutate } = useSWR('/api/dashboard', fetcher, {
     refreshInterval: 30000,
   })
+  // Datas e horários no relógio da barbearia, não no do aparelho
+  const timeZone = useBarbeariaTimeZone()
 
   if (isLoading) {
     return <DashboardSkeleton />
@@ -57,7 +61,7 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h2 className="text-balance text-2xl font-bold tracking-tight text-foreground">
-            {getGreeting()}, Patrão
+            {getGreeting(timeZone)}, Patrão
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {appointmentStats?.total ?? 0} agendamentos para hoje
@@ -132,7 +136,7 @@ export default function DashboardPage() {
               <div className="min-w-0">
                 <h3 className="text-base font-semibold text-foreground">Agenda de Hoje</h3>
                 <p className="mt-0.5 text-xs text-muted-foreground first-letter:uppercase">
-                  {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
+                  {format(toZonedWallClock(new Date(), timeZone), "EEEE, d 'de' MMMM", { locale: ptBR })}
                 </p>
               </div>
               <Link href="/dashboard/appointments" className="shrink-0">
@@ -154,7 +158,7 @@ export default function DashboardPage() {
                   return (
                     <li key={appt.id} className="flex items-center gap-4 px-5 py-3">
                       <p className="w-14 shrink-0 text-base font-semibold text-foreground tabular-nums">
-                        {format(new Date(appt.date), 'HH:mm')}
+                        {format(toZonedWallClock(appt.date, timeZone), 'HH:mm')}
                       </p>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-foreground">{appt.client?.name}</p>
@@ -255,7 +259,7 @@ export default function DashboardPage() {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-foreground">{txn.description}</p>
                         <p className="text-xs text-muted-foreground">
-                          {format(new Date(txn.date), "d 'de' MMM", { locale: ptBR })}
+                          {format(toZonedWallClock(txn.date, timeZone), "d 'de' MMM", { locale: ptBR })}
                         </p>
                       </div>
                     </div>
@@ -279,8 +283,8 @@ export default function DashboardPage() {
   )
 }
 
-function getGreeting() {
-  const h = new Date().getHours()
+function getGreeting(timeZone?: string) {
+  const h = toZonedWallClock(new Date(), timeZone).getHours()
   if (h < 12) return 'Bom dia'
   if (h < 17) return 'Boa tarde'
   return 'Boa noite'

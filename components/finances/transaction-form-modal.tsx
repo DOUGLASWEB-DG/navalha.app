@@ -26,6 +26,8 @@ import {
 } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -54,6 +56,8 @@ interface Props {
 export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Props) {
   // Buscar categorias do banco
   const { data: dbCategories } = useSWR('/api/finances/categories', fetcher)
+  // Data padrão = hoje no relógio da barbearia (o servidor grava a data nesse fuso)
+  const timeZone = useBarbeariaTimeZone()
 
   const {
     register,
@@ -66,7 +70,7 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
     resolver: zodResolver(schema),
     defaultValues: {
       type: defaultType,
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: format(toZonedWallClock(new Date(), timeZone), 'yyyy-MM-dd'),
     },
   })
 
@@ -87,13 +91,13 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
   useEffect(() => {
     reset({
       type: defaultType,
-      date: format(new Date(), 'yyyy-MM-dd'),
+      date: format(toZonedWallClock(new Date(), timeZone), 'yyyy-MM-dd'),
       amount: '',
       description: '',
       category: '',
       categoryId: '',
     })
-  }, [open, defaultType, reset])
+  }, [open, defaultType, reset, timeZone])
 
   function handleCategoryChange(value: string) {
     // Se o valor começa com "id:", é uma categoria do banco

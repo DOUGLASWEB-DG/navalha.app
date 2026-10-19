@@ -4,6 +4,8 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import { format, isWithinInterval } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 import {
   Target,
   Plus,
@@ -38,6 +40,8 @@ const periodLabels: Record<string, string> = {
 
 export default function GoalsPage() {
   const [modalOpen, setModalOpen] = useState(false)
+  // Datas das metas no relógio da barbearia, não no do aparelho
+  const timeZone = useBarbeariaTimeZone()
   const { data: goals, mutate } = useSWR('/api/goals', fetcher)
   const { data: financeData } = useSWR('/api/dashboard', fetcher)
 
@@ -176,8 +180,8 @@ export default function GoalsPage() {
 
                   {/* Datas */}
                   <div className="flex justify-between text-xs font-medium text-muted-foreground pt-4 border-t border-border">
-                    <span>{format(new Date(goal.startDate), "d 'de' MMM", { locale: ptBR })}</span>
-                    <span>Vence em {format(new Date(goal.endDate), "d 'de' MMM", { locale: ptBR })}</span>
+                    <span>{format(toZonedWallClock(goal.startDate, timeZone), "d 'de' MMM", { locale: ptBR })}</span>
+                    <span>Vence em {format(toZonedWallClock(goal.endDate, timeZone), "d 'de' MMM", { locale: ptBR })}</span>
                   </div>
                 </div>
               )
@@ -203,7 +207,7 @@ export default function GoalsPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{goal.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {format(new Date(goal.startDate), "d 'de' MMM", { locale: ptBR })} – {format(new Date(goal.endDate), "d 'de' MMM 'de' yyyy", { locale: ptBR })}
+                        {format(toZonedWallClock(goal.startDate, timeZone), "d 'de' MMM", { locale: ptBR })} – {format(toZonedWallClock(goal.endDate, timeZone), "d 'de' MMM 'de' yyyy", { locale: ptBR })}
                       </p>
                     </div>
                     <div className="text-sm font-semibold text-muted-foreground whitespace-nowrap bg-background px-3 py-1.5 rounded-lg border border-border hidden sm:block">

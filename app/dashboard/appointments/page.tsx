@@ -28,6 +28,8 @@ import { cn } from '@/lib/utils'
 import { confirmAction } from '@/lib/confirm-toast'
 import { formatBrazilPhone, formatCurrency, normalizeBrazilPhone } from '@/lib/format'
 import { CANCELLATION_NOTICE_MINUTES } from '@/lib/appointment-rules'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 
 import { PageHeader } from '@/components/dashboard/page-header'
 
@@ -119,12 +121,15 @@ export default function AppointmentsPage() {
   const { data: appointments, error, isLoading, mutate } = useSWR<AppointmentItem[]>(`/api/appointments${queryParams}`, fetcher)
   const { data: authData } = useSWR('/api/auth/me', fetcher)
   const isAdmin = authData?.user?.role === 'ADMIN'
+  const timeZone = useBarbeariaTimeZone()
   const now = new Date()
+  // Dia e hora exibidos são os do relógio da barbearia, não os do aparelho
+  const today = toZonedWallClock(now, timeZone)
 
-  // Agrupa por dia (a API já devolve ordenado por data).
+  // Agrupa por dia da barbearia (a API já devolve ordenado por data).
   const groups: { key: string; date: Date; items: AppointmentItem[] }[] = []
   for (const appt of appointments ?? []) {
-    const date = new Date(appt.date)
+    const date = toZonedWallClock(appt.date, timeZone)
     const key = format(date, 'yyyy-MM-dd')
     const last = groups[groups.length - 1]
     if (last && last.key === key) last.items.push(appt)
@@ -182,7 +187,7 @@ export default function AppointmentsPage() {
       toast.error('Telefone inválido', { description: 'Atualize o telefone do cliente antes de abrir o WhatsApp.' })
       return
     }
-    const date = new Date(appt.date)
+    const date = toZonedWallClock(appt.date, timeZone)
     const msg = encodeURIComponent(
       `Olá ${appt.client?.name}! Este é um lembrete do seu agendamento de ${summarize(appt).names} no dia ${format(date, "d 'de' MMMM", { locale: ptBR })} às ${format(date, 'HH:mm')}. Até lá!`
     )
@@ -333,12 +338,12 @@ export default function AppointmentsPage() {
         ) : groups.length > 0 ? (
           <div className="space-y-6">
             {groups.map((group) => {
-              const isToday = isSameDay(group.date, now)
+              const isToday = isSameDay(group.date, today)
               return (
-                <section key={group.key} aria-label={dayLabel(group.date, now)} className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <section key={group.key} aria-label={dayLabel(group.date, today)} className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                   <header className={cn('flex items-center justify-between gap-3 border-b border-border px-4 py-3 lg:px-5', isToday ? 'bg-primary/5' : 'bg-muted/40')}>
                     <h4 className={cn('text-sm font-semibold first-letter:uppercase', isToday ? 'text-primary' : 'text-foreground')}>
-                      {dayLabel(group.date, now)}
+                      {dayLabel(group.date, today)}
                     </h4>
                     <span className="text-xs text-muted-foreground tabular-nums">
                       {group.items.length} {group.items.length === 1 ? 'horário' : 'horários'}
@@ -370,7 +375,7 @@ export default function AppointmentsPage() {
                     </thead>
                     <tbody className="divide-y divide-border">
                       {group.items.map((appt) => {
-                        const date = new Date(appt.date)
+                        const date = toZonedWallClock(appt.date, timeZone)
                         const summary = summarize(appt)
                         const end = new Date(date.getTime() + summary.durationMins * 60_000)
                         const actions = getActions(appt, isAdmin, now)
@@ -415,7 +420,7 @@ export default function AppointmentsPage() {
                   {/* Mobile e tablet: cards com rótulos */}
                   <ul className="divide-y divide-border xl:hidden">
                     {group.items.map((appt) => {
-                      const date = new Date(appt.date)
+                      const date = toZonedWallClock(appt.date, timeZone)
                       const summary = summarize(appt)
                       const end = new Date(date.getTime() + summary.durationMins * 60_000)
                       const actions = getActions(appt, isAdmin, now)

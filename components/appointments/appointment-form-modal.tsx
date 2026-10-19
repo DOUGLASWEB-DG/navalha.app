@@ -26,6 +26,8 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { User, Scissors, CalendarDays, Clock, FileText, Activity } from 'lucide-react'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -64,6 +66,9 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
 
   const users = usersData || []
   const user = authData?.user
+  // Data e hora do formulário são as do relógio da barbearia, não as do aparelho
+  const timeZone = useBarbeariaTimeZone()
+  const todayValue = () => format(toZonedWallClock(new Date(), timeZone), 'yyyy-MM-dd')
 
   const {
     register,
@@ -76,14 +81,14 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
     resolver: zodResolver(schema),
     defaultValues: {
       status: 'PENDING',
-      date: defaultDate ? format(defaultDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
+      date: defaultDate ? format(defaultDate, 'yyyy-MM-dd') : todayValue(),
       time: '09:00',
     },
   })
 
   useEffect(() => {
     if (appointment) {
-      const apptDate = new Date(appointment.date)
+      const apptDate = toZonedWallClock(appointment.date, timeZone)
       reset({
         clientId: appointment.clientId,
         serviceIds: appointment.appointmentServices?.map((item: any) => item.serviceId) || [appointment.serviceId],
@@ -96,7 +101,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
     } else {
       reset({
         status: 'PENDING',
-        date: defaultDate ? format(defaultDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
+        date: defaultDate ? format(defaultDate, 'yyyy-MM-dd') : todayValue(),
         time: '09:00',
         clientId: '',
         serviceIds: [],
@@ -104,10 +109,14 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
         notes: '',
       })
     }
-  }, [appointment, open, defaultDate, reset])
+    // timeZone entra nas dependências: se o fuso chegar depois da abertura, o formulário é refeito com ele
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appointment, open, defaultDate, reset, timeZone])
 
   async function onSubmit(data: FormData) {
-    const datetime = new Date(`${data.date}T${data.time}:00`)
+    // Envia data e hora como digitadas (sem "Z"): o servidor interpreta no fuso da barbearia.
+    // toISOString() converteria pelo fuso do aparelho e deslocaria o horário.
+    const datetime = `${data.date}T${data.time}`
 
     try {
       const url = appointment ? `/api/appointments/${appointment.id}` : '/api/appointments'
@@ -121,7 +130,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
           serviceIds: data.serviceIds,
           serviceId: data.serviceIds[0],
           barberId: data.barberId === 'any' ? undefined : data.barberId,
-          date: datetime.toISOString(),
+          date: datetime,
           status: data.status,
           notes: data.notes,
         }),

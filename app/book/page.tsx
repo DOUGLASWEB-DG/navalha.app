@@ -11,6 +11,7 @@ import {
   format,
   isBefore,
   isSameDay,
+  startOfDay,
   startOfMonth,
   startOfToday,
   subMonths,
@@ -37,6 +38,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { toZonedWallClock } from '@/lib/time-zone'
 import { tenantConfig } from '@/config/tenant'
 import { WhatsAppIcon } from '@/components/shared/whatsapp-icon'
 
@@ -270,7 +272,8 @@ function BookingContent() {
     fetcher
   )
 
-  const today = startOfToday()
+  // Hoje no relógio da barbearia (a reserva é validada nesse fuso); até o fuso chegar, o do aparelho
+  const today = apiData?.timezone ? startOfDay(toZonedWallClock(new Date(), apiData.timezone)) : startOfToday()
   const availableDates = Array.from({ length: 14 }, (_, i) => addDays(today, i + 0)).filter(
     (d) => d.getDay() !== 0
   )
@@ -372,7 +375,7 @@ function BookingContent() {
     })
 
     // Se é hoje, não permitir agendar no passado
-    if (booking.date === format(new Date(), 'yyyy-MM-dd')) {
+    if (booking.date === format(toZonedWallClock(new Date(), timeZone), 'yyyy-MM-dd')) {
       const nowTzString = new Date().toLocaleString('en-US', { timeZone })
       const nowZoned = new Date(nowTzString)
       const currentMins = nowZoned.getHours() * 60 + nowZoned.getMinutes()

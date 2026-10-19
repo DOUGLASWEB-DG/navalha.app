@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -42,6 +43,8 @@ const severityConfig = {
 }
 
 export function FinanceAlerts() {
+  // Horário dos alertas no relógio da barbearia, não no do aparelho
+  const timeZone = useBarbeariaTimeZone()
   const { data, isLoading, mutate } = useSWR('/api/finances/alerts', fetcher)
 
   // Gerar alertas automaticamente ao carregar
@@ -148,7 +151,7 @@ export function FinanceAlerts() {
                   </div>
                   <p className="text-sm text-foreground leading-relaxed">{alert.message}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(alert.createdAt).toLocaleString('pt-BR')}
+                    {new Date(alert.createdAt).toLocaleString('pt-BR', { timeZone })}
                   </p>
                 </div>
                 <button
@@ -198,7 +201,7 @@ export function FinanceAlerts() {
                     </div>
                     <p className="text-sm text-foreground">{alert.message}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(alert.createdAt).toLocaleString('pt-BR')}
+                      {new Date(alert.createdAt).toLocaleString('pt-BR', { timeZone })}
                     </p>
                   </div>
                 </div>

@@ -27,6 +27,8 @@ import {
 import { ClientFormModal } from '@/components/clients/client-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
 import { formatBrazilPhone, formatDate, getInitial, normalizeBrazilPhone } from '@/lib/format'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 
 import { ErrorState, ListSkeleton } from '@/components/shared/data-state'
 
@@ -43,9 +45,9 @@ interface ClientRow {
   nextAppointmentAt: string | null
 }
 
-function formatNextAppointment(value: string | null) {
+function formatNextAppointment(value: string | null, timeZone?: string) {
   if (!value) return '—'
-  return format(new Date(value), "dd/MM 'às' HH:mm", { locale: ptBR })
+  return format(toZonedWallClock(value, timeZone), "dd/MM 'às' HH:mm", { locale: ptBR })
 }
 
 export default function ClientsPage() {
@@ -56,6 +58,8 @@ export default function ClientsPage() {
   const url = `/api/clients${search ? `?search=${encodeURIComponent(search)}` : ''}`
   const { data: clients, error, isLoading, mutate } = useSWR<ClientRow[]>(url, fetcher)
   const { data: authData } = useSWR('/api/auth/me', fetcher)
+  // Datas no relógio da barbearia, não no do aparelho
+  const timeZone = useBarbeariaTimeZone()
   const isAdmin = authData?.user?.role === 'ADMIN'
 
   function openCreate() {
@@ -193,11 +197,11 @@ export default function ClientsPage() {
                     <td className="max-w-[200px] truncate px-4 py-3 text-muted-foreground">{client.email || '—'}</td>
                     <td className="px-4 py-3 text-right text-foreground tabular-nums">{client.completedCount}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-muted-foreground tabular-nums">
-                      {client.lastCompletedAt ? formatDate(client.lastCompletedAt) : '—'}
+                      {client.lastCompletedAt ? formatDate(client.lastCompletedAt, timeZone) : '—'}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 tabular-nums">
                       <span className={client.nextAppointmentAt ? 'font-medium text-primary' : 'text-muted-foreground'}>
-                        {formatNextAppointment(client.nextAppointmentAt)}
+                        {formatNextAppointment(client.nextAppointmentAt, timeZone)}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -246,12 +250,12 @@ export default function ClientsPage() {
                     </div>
                     <div>
                       <dt className="text-xs text-muted-foreground">Último atendimento</dt>
-                      <dd className="text-foreground tabular-nums">{client.lastCompletedAt ? formatDate(client.lastCompletedAt) : '—'}</dd>
+                      <dd className="text-foreground tabular-nums">{client.lastCompletedAt ? formatDate(client.lastCompletedAt, timeZone) : '—'}</dd>
                     </div>
                     <div>
                       <dt className="text-xs text-muted-foreground">Próximo horário</dt>
                       <dd className={client.nextAppointmentAt ? 'font-medium text-primary tabular-nums' : 'text-foreground'}>
-                        {formatNextAppointment(client.nextAppointmentAt)}
+                        {formatNextAppointment(client.nextAppointmentAt, timeZone)}
                       </dd>
                     </div>
                   </dl>

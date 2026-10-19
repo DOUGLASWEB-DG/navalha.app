@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Target, Type, Calendar, DollarSign } from 'lucide-react'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 
 const schema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -43,7 +45,9 @@ interface Props {
 }
 
 export function GoalFormModal({ open, onClose, onSaved }: Props) {
-  const now = new Date()
+  // Períodos padrão (mês, semana, dia) a partir de hoje no relógio da barbearia
+  const timeZone = useBarbeariaTimeZone()
+  const now = toZonedWallClock(new Date(), timeZone)
   const {
     register,
     handleSubmit,
@@ -65,7 +69,7 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
 
   useEffect(() => {
     if (open) {
-      const n = new Date()
+      const n = toZonedWallClock(new Date(), timeZone)
       reset({
         title: '',
         type: 'REVENUE',
@@ -75,11 +79,11 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
         endDate: format(endOfMonth(n), 'yyyy-MM-dd'),
       })
     }
-  }, [open, reset])
+  }, [open, reset, timeZone])
 
   // Auto-definir datas baseado no período
   useEffect(() => {
-    const n = new Date()
+    const n = toZonedWallClock(new Date(), timeZone)
     if (period === 'monthly') {
       setValue('startDate', format(startOfMonth(n), 'yyyy-MM-dd'))
       setValue('endDate', format(endOfMonth(n), 'yyyy-MM-dd'))
@@ -94,7 +98,7 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
       setValue('startDate', format(start, 'yyyy-MM-dd'))
       setValue('endDate', format(end, 'yyyy-MM-dd'))
     }
-  }, [period, setValue])
+  }, [period, setValue, timeZone])
 
   async function onSubmit(data: FormData) {
     try {

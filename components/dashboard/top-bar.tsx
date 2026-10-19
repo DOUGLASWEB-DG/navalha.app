@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 import { cn } from '@/lib/utils'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -42,7 +44,9 @@ const severityColors = {
 export function TopBar({ onMenuToggle }: TopBarProps) {
   const pathname = usePathname()
   const title = pageTitles[pathname] ?? 'NAVALHA.APP'
-  const today = format(new Date(), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })
+  // Data de hoje no relógio da barbearia, não no do aparelho
+  const timeZone = useBarbeariaTimeZone()
+  const today = format(toZonedWallClock(new Date(), timeZone), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })
 
   const { data: alertData } = useSWR('/api/finances/alerts', fetcher, { refreshInterval: 30000 })
   const alerts = alertData?.alerts ?? []
@@ -121,7 +125,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                       </div>
                       <p className="text-xs text-foreground leading-relaxed line-clamp-2">{alert.message}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {format(new Date(alert.createdAt), "d 'de' MMM 'às' HH:mm", { locale: ptBR })}
+                        {format(toZonedWallClock(alert.createdAt, timeZone), "d 'de' MMM 'às' HH:mm", { locale: ptBR })}
                       </p>
                     </Link>
                   </DropdownMenuItem>

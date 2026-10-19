@@ -4,6 +4,8 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { toZonedWallClock } from '@/lib/time-zone'
+import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 import {
   Plus,
   TrendingUp,
@@ -147,7 +149,9 @@ function TransactionsView({
   month, setMonth, typeFilter, setTypeFilter,
   transactions, summary, deleteTransaction, isLoading, error, mutate
 }: TransactionsViewProps) {
-  
+  // Data do lançamento no relógio da barbearia, não no do aparelho
+  const timeZone = useBarbeariaTimeZone()
+
   if (isLoading) {
     return <TransactionsSkeleton />
   }
@@ -253,7 +257,7 @@ function TransactionsView({
                     <p className="truncate text-sm font-medium text-foreground">{txn.description}</p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-2">
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(txn.date), "d 'de' MMM 'de' yyyy", { locale: ptBR })}
+                        {format(toZonedWallClock(txn.date, timeZone), "d 'de' MMM 'de' yyyy", { locale: ptBR })}
                       </p>
                       {(txn.categoryRef?.name || txn.category) && (
                         <>

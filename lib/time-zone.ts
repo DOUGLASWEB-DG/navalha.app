@@ -76,6 +76,16 @@ export function parseZonedDate(value: string, timeZone: string): Date {
   return zonedWallClockToUtc({ year: Number(match[1]), month: Number(match[2]), day: Number(match[3]), hour: 0, minute: 0 }, timeZone)
 }
 
+// Para exibir no navegador com date-fns: devolve um Date cujos campos locais (getHours, getDate, format...)
+// mostram o relógio da barbearia, qualquer que seja o fuso do aparelho. Serve só para exibir e comparar dias;
+// nunca enviar ao servidor nem usar como instante. Sem fuso (ainda carregando), devolve a data como veio.
+export function toZonedWallClock(date: Date | string | number, timeZone?: string | null): Date {
+  const instant = new Date(date)
+  if (!timeZone) return instant
+  const p = getZonedParts(instant, timeZone)
+  return new Date(p.year, p.month - 1, p.day, p.hour, p.minute, instant.getUTCSeconds())
+}
+
 // Chaves de agrupamento no fuso ("2026-10-31", "2026-10"); toISOString agruparia pelo dia em UTC.
 export function zonedDayKey(date: Date, timeZone: string): string {
   const { year, month, day } = getZonedParts(date, timeZone)

@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
+import { getTenantSession } from '@/lib/auth'
 
 export async function GET() {
-  const user = await getSession()
+  const session = await getTenantSession().catch(() => null)
 
-  if (!user) {
+  if (!session) {
     return NextResponse.json({ user: null }, { status: 401 })
   }
 
-  return NextResponse.json({ user })
+  // timezone: as telas do painel exibem datas e horários no relógio da barbearia, não no do aparelho
+  return NextResponse.json({ user: session.user, timezone: session.barbearia.timezone })
 }

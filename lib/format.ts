@@ -5,12 +5,14 @@ export function formatCurrency(value: number): string {
   }).format(value)
 }
 
-export function formatDate(date: Date | string): string {
+// timeZone: fuso da barbearia (useBarbeariaTimeZone). Sem ele, usa o fuso do aparelho.
+export function formatDate(date: Date | string, timeZone?: string): string {
   const d = typeof date === 'string' ? new Date(date) : date
   return d.toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
+    timeZone,
   })
 }
 
