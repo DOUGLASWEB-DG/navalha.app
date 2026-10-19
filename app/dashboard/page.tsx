@@ -22,6 +22,7 @@ import { StatusBadge } from '@/components/shared/status-badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatCurrency } from '@/lib/format'
 
 import { ErrorState } from '@/components/shared/data-state'
 
@@ -74,7 +75,7 @@ export default function DashboardPage() {
       <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-visible pb-1 touch-pan-x lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 lg:snap-none">
         <StatCard
           title="Receita de Hoje"
-          value={`R$${(revenue?.daily ?? 0).toFixed(2)}`}
+          value={formatCurrency(revenue?.daily ?? 0)}
           subtitle="Faturamento do dia"
           iconUrl="/assets/icons/receitahoje-icon.png"
           accent="gold"
@@ -82,14 +83,14 @@ export default function DashboardPage() {
         />
         <StatCard
           title="Receita Semanal"
-          value={`R$${(revenue?.weekly ?? 0).toFixed(2)}`}
+          value={formatCurrency(revenue?.weekly ?? 0)}
           subtitle="Faturamento da semana"
           iconUrl="/assets/icons/receitasamanal-icon.png"
           accent="green"
         />
         <StatCard
           title="Receita Mensal"
-          value={`R$${(revenue?.monthly ?? 0).toFixed(2)}`}
+          value={formatCurrency(revenue?.monthly ?? 0)}
           subtitle="Faturamento do mês"
           iconUrl="/assets/icons/receitamensal-icon.png"
           accent="blue"
@@ -103,224 +104,176 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Status dos Agendamentos — swipe no mobile */}
-      <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 touch-pan-x lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:pb-0 lg:snap-none">
-        <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/60 p-1.5">
-            <AppIcon src="/assets/icons/pendentes-icon.png" />
-          </div>
-          <div className="mt-3 lg:mt-0">
-            <p className="text-xl font-bold text-foreground">{appointmentStats?.pending ?? 0}</p>
-            <p className="text-xs text-muted-foreground">Pendentes</p>
-          </div>
-        </div>
-        <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/60 p-1.5">
-            <AppIcon src="/assets/icons/confirmados-icon.png" />
-          </div>
-          <div className="mt-3 lg:mt-0">
-            <p className="text-xl font-bold text-foreground">{appointmentStats?.confirmed ?? 0}</p>
-            <p className="text-xs text-muted-foreground">Confirmados</p>
-          </div>
-        </div>
-        <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/60 p-1.5">
-            <AppIcon src="/assets/icons/concluidos-icon.png" />
-          </div>
-          <div className="mt-3 lg:mt-0">
-            <p className="text-xl font-bold text-foreground">{appointmentStats?.completed ?? 0}</p>
-            <p className="text-xs text-muted-foreground">Concluídos</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Gráfico + Metas */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <RevenueChart data={chartData ?? []} />
-        </div>
-        <div className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-5 backdrop-blur-sm">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-foreground">Metas Ativas</h3>
-            <Link
-              href="/dashboard/goals"
-              className="inline-flex min-h-12 items-center rounded-xl px-2 text-xs font-medium text-primary transition-all active:scale-[0.98] active:bg-white/5"
-            >
-              Gerenciar
-            </Link>
-          </div>
-          {goals && goals.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {goals.map((goal: any) => {
-                const progress = Math.min(
-                  ((revenue?.monthly ?? 0) / goal.targetAmount) * 100,
-                  100
-                )
-                return (
-                  <div key={goal.id} className="flex flex-col gap-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground font-medium">{goal.title}</span>
-                      <span className="text-foreground font-semibold">
-                        {progress.toFixed(0)}%
-                      </span>
-                    </div>
-                    <Progress value={progress} className="h-2" />
-                    <p className="text-xs text-muted-foreground">
-                      Meta: R${goal.targetAmount.toFixed(0)}
-                    </p>
-                  </div>
-                )
-              })}
+      {/* Status de hoje: uma faixa só, três contadores */}
+      <section aria-label="Situação dos agendamentos de hoje" className="grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-card">
+        {[
+          { label: 'Pendentes', value: appointmentStats?.pending ?? 0, icon: '/assets/icons/pendentes-icon.png' },
+          { label: 'Confirmados', value: appointmentStats?.confirmed ?? 0, icon: '/assets/icons/confirmados-icon.png' },
+          { label: 'Concluídos', value: appointmentStats?.completed ?? 0, icon: '/assets/icons/concluidos-icon.png' },
+        ].map((item) => (
+          <div key={item.label} className="flex flex-col items-center gap-1 px-2 py-3 text-center sm:flex-row sm:justify-center sm:gap-3 sm:px-4 sm:text-left">
+            <div className="h-8 w-8 shrink-0 sm:h-10 sm:w-10">
+              <AppIcon src={item.icon} />
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center flex-1 text-center py-6">
-              <TrendingUp className="w-8 h-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Nenhuma meta ativa</p>
-              <Link href="/dashboard/goals">
-                <Button variant="link" size="sm" className="text-primary mt-1">
-                  Definir uma meta
+            <div>
+              <p className="text-xl font-bold leading-none text-foreground tabular-nums">{item.value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{item.label}</p>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Corpo: agenda e gráfico à esquerda; metas e transações à direita */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          {/* Agenda de Hoje: lista compacta */}
+          <section className="rounded-2xl border border-border bg-card">
+            <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold text-foreground">Agenda de Hoje</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground first-letter:uppercase">
+                  {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
+                </p>
+              </div>
+              <Link href="/dashboard/appointments" className="shrink-0">
+                <Button variant="outline" size="sm" className="gap-2 text-sm">
+                  Ver todos <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Agendamentos de Hoje */}
-      <div className="rounded-3xl border border-border bg-card p-5 backdrop-blur-sm">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Agenda de Hoje</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
-            </p>
-          </div>
-          <Link href="/dashboard/appointments" className="shrink-0">
-            <Button variant="outline" size="sm" className="w-full gap-2 border-white/10 text-xs sm:w-auto">
-              Ver Todos <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </Link>
-        </div>
-
-        {todayAppointments && todayAppointments.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {todayAppointments.map((appt: any) => (
-              <div
-                key={appt.id}
-                className="flex min-h-[17rem] flex-col rounded-2xl border border-border bg-background p-4 transition-all duration-150 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="rounded-xl border border-primary/10 bg-primary/10 px-3 py-2 text-center">
-                    <p className="text-sm font-bold text-primary">
-                      {format(new Date(appt.date), 'dd/MM')}
-                    </p>
-                    <p className="text-base font-bold leading-tight text-primary">
-                      {format(new Date(appt.date), 'HH:mm')}
-                    </p>
-                  </div>
-                  <StatusBadge status={appt.status} />
-                </div>
-
-                <div className="mt-5 min-w-0">
-                  <p className="truncate text-base font-semibold text-foreground">{appt.client?.name}</p>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                    {appt.appointmentServices?.length
-                      ? appt.appointmentServices.map((item: any) => item.service?.name).join(', ')
-                      : appt.service?.name}
-                  </p>
-                  <div className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      {appt.appointmentServices?.length
-                        ? appt.appointmentServices.reduce((total: number, item: any) => total + item.durationMins, 0)
-                        : appt.service?.durationMins} min
-                    </span>
-                    <span className="truncate text-primary/80">
-                      Barbeiro: {appt.barber?.name ?? 'Não definido'}
-                    </span>
-                  </div>
-                  {appt.notes && (
-                    <p className="mt-3 line-clamp-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs italic text-muted-foreground">
-                      &quot;{appt.notes}&quot;
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
-                  <span className="text-sm font-semibold text-foreground">Valor</span>
-                  <span className="rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-1 text-base font-bold text-primary">
-                    R${(appt.appointmentServices?.length
-                      ? appt.appointmentServices.reduce((total: number, item: any) => total + item.price, 0)
-                      : appt.service?.price || 0).toFixed(2)}
-                  </span>
-                </div>
+            {todayAppointments && todayAppointments.length > 0 ? (
+              <ul className="divide-y divide-border">
+                {todayAppointments.map((appt: any) => {
+                  const serviceNames = appt.appointmentServices?.length
+                    ? appt.appointmentServices.map((item: any) => item.service?.name).join(', ')
+                    : appt.service?.name
+                  const price = appt.appointmentServices?.length
+                    ? appt.appointmentServices.reduce((total: number, item: any) => total + item.price, 0)
+                    : appt.service?.price || 0
+                  return (
+                    <li key={appt.id} className="flex items-center gap-4 px-5 py-3">
+                      <p className="w-14 shrink-0 text-base font-semibold text-foreground tabular-nums">
+                        {format(new Date(appt.date), 'HH:mm')}
+                      </p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-foreground">{appt.client?.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {serviceNames}
+                          <span className="hidden sm:inline"> · {appt.barber?.name ?? 'Sem barbeiro'}</span>
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">
+                        <StatusBadge status={appt.status} />
+                        <span className="text-right text-sm font-semibold text-foreground tabular-nums sm:w-24">
+                          {formatCurrency(price)}
+                        </span>
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : (
+              <div className="px-5 py-10 text-center">
+                <CalendarCheck className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Nenhum agendamento para hoje</p>
+                <Link href="/dashboard/appointments">
+                  <Button variant="link" className="mt-1 text-sm text-primary">
+                    Agendar agora
+                  </Button>
+                </Link>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10">
-            <CalendarCheck className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">Nenhum agendamento para hoje</p>
-            <Link href="/dashboard/appointments">
-              <Button variant="link" className="text-primary text-sm mt-1">
-                Agendar agora
-              </Button>
-            </Link>
-          </div>
-        )}
-      </div>
+            )}
+          </section>
 
-      {/* Transações Recentes */}
-      <div className="rounded-3xl border border-border bg-card p-5 backdrop-blur-sm">
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h3 className="text-sm font-semibold text-foreground">Transações Recentes</h3>
-          <Link href="/dashboard/finances" className="shrink-0">
-            <Button variant="outline" size="sm" className="w-full gap-2 border-white/10 text-xs sm:w-auto">
-              Ver Todas <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </Link>
+          <RevenueChart data={chartData ?? []} />
         </div>
-        {recentTransactions && recentTransactions.length > 0 ? (
-          <div className="flex flex-col gap-3 lg:gap-0 lg:divide-y lg:divide-border">
-            {recentTransactions.map((txn: any) => (
-              <div
-                key={txn.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/30 p-4 transition-all duration-150 active:scale-[0.99] active:bg-muted lg:rounded-none lg:border-0 lg:bg-transparent lg:p-3 lg:active:scale-100"
+
+        <div className="flex flex-col gap-6">
+          {/* Metas */}
+          <section className="rounded-2xl border border-border bg-card p-5">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h3 className="text-base font-semibold text-foreground">Metas ativas</h3>
+              <Link
+                href="/dashboard/goals"
+                className="inline-flex min-h-11 items-center rounded-xl px-2 text-sm font-medium text-primary transition-all active:scale-[0.98]"
               >
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
-                      txn.type === 'INCOME'
-                        ? 'bg-success/10 text-success'
-                        : 'bg-destructive/10 text-destructive'
-                    }`}
-                  >
-                    {txn.type === 'INCOME' ? (
-                      <TrendingUp className="h-5 w-5" />
-                    ) : (
-                      <XCircle className="h-5 w-5" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-foreground">{txn.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(txn.date), "d 'de' MMM 'de' yyyy", { locale: ptBR })}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className={`shrink-0 text-sm font-bold ${
-                    txn.type === 'INCOME' ? 'text-success' : 'text-destructive'
-                  }`}
-                >
-                  {txn.type === 'INCOME' ? '+' : '-'}R${txn.amount.toFixed(2)}
-                </span>
+                Gerenciar
+              </Link>
+            </div>
+            {goals && goals.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                {goals.map((goal: any) => {
+                  const progress = Math.min(((revenue?.monthly ?? 0) / goal.targetAmount) * 100, 100)
+                  return (
+                    <div key={goal.id} className="flex flex-col gap-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium text-foreground">{goal.title}</span>
+                        <span className="font-semibold text-foreground tabular-nums">{progress.toFixed(0)}%</span>
+                      </div>
+                      <Progress value={progress} className="h-2" />
+                      <p className="text-xs text-muted-foreground">Meta: {formatCurrency(goal.targetAmount)}</p>
+                    </div>
+                  )
+                })}
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground text-center py-6">Nenhuma transação ainda</p>
-        )}
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <TrendingUp className="mb-2 h-8 w-8 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Nenhuma meta ativa</p>
+                <Link href="/dashboard/goals">
+                  <Button variant="link" size="sm" className="mt-1 text-primary">
+                    Definir uma meta
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </section>
+
+          {/* Transações recentes */}
+          <section className="rounded-2xl border border-border bg-card">
+            <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
+              <h3 className="whitespace-nowrap text-base font-semibold text-foreground">Transações recentes</h3>
+              <Link href="/dashboard/finances" className="shrink-0">
+                <Button variant="outline" size="sm" className="text-sm">
+                  Ver todas
+                </Button>
+              </Link>
+            </div>
+            {recentTransactions && recentTransactions.length > 0 ? (
+              <ul className="divide-y divide-border">
+                {recentTransactions.map((txn: any) => (
+                  <li key={txn.id} className="flex items-center justify-between gap-3 px-5 py-3">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                          txn.type === 'INCOME' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
+                        }`}
+                      >
+                        {txn.type === 'INCOME' ? <TrendingUp className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">{txn.description}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(txn.date), "d 'de' MMM", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`shrink-0 text-sm font-semibold tabular-nums ${
+                        txn.type === 'INCOME' ? 'text-success' : 'text-destructive'
+                      }`}
+                    >
+                      {txn.type === 'INCOME' ? '+' : '-'}{formatCurrency(txn.amount)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="px-5 py-8 text-center text-sm text-muted-foreground">Nenhuma transação ainda</p>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   )
