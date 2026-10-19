@@ -207,7 +207,7 @@ export async function GET() {
     const barbearia = await requireTenant()
     const services = await prisma.service.findMany({
       where: { barbeariaId: barbearia.id, active: true },
-      select: { id: true, name: true, price: true, durationMins: true, description: true },
+      select: { id: true, name: true, price: true, durationMins: true, description: true, imageUrl: true },
       orderBy: { name: 'asc' },
     })
 

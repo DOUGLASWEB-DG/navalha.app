@@ -144,6 +144,8 @@ async function main() {
     ['DELETE', '/api/products/[id]', 'b-product'],
     ['PATCH', '/api/services/[id]', 'b-service', { name: 'invadido' }],
     ['DELETE', '/api/services/[id]', 'b-service'],
+    ['POST', '/api/services/[id]/image', 'b-service'],
+    ['DELETE', '/api/services/[id]/image', 'b-service'],
     ['PATCH', '/api/users/[id]', 'b-admin', { active: false }],
     ['DELETE', '/api/users/[id]', 'b-barber'],
   ]
@@ -209,6 +211,7 @@ async function main() {
     ['GET', '/api/finances/reports'], ['GET', '/api/finances/stats'], ['GET', '/api/goals'], ['POST', '/api/goals'], ['DELETE', '/api/goals/[id]'],
     ['GET', '/api/products'], ['POST', '/api/products'], ['PATCH', '/api/products/[id]'], ['DELETE', '/api/products/[id]'],
     ['GET', '/api/services'], ['POST', '/api/services'], ['PATCH', '/api/services/[id]'], ['DELETE', '/api/services/[id]'],
+    ['POST', '/api/services/[id]/image'], ['DELETE', '/api/services/[id]/image'],
     ['GET', '/api/users'], ['POST', '/api/users'], ['PATCH', '/api/users/[id]'], ['DELETE', '/api/users/[id]'],
     ['GET', '/api/whatsapp/connect'], ['GET', '/api/whatsapp/instance'], ['POST', '/api/whatsapp/instance'],
   ]

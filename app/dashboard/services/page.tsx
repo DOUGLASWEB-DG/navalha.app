@@ -99,7 +99,13 @@ export default function ServicesPage() {
 
                 {/* Corpo do Card */}
                 <div className="flex-1 mt-1">
-                  <p className="text-base font-bold text-foreground line-clamp-1">{svc.name}</p>
+                  <div className="flex items-center gap-3">
+                    {svc.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={svc.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-xl border border-border object-cover" />
+                    )}
+                    <p className="text-base font-bold text-foreground line-clamp-1">{svc.name}</p>
+                  </div>
                   {svc.description ? (
                     <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{svc.description}</p>
                   ) : (
