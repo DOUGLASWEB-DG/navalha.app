@@ -1,23 +1,27 @@
-# Fotos de serviço (uploads)
+# Fotos de serviço e de barbeiro (uploads)
 
-Estado: o admin envia a foto de um serviço em Serviços > Editar serviço; ela aparece na página de agendamento
-(`/book`). Foto de barbeiro (`avatarUrl`) ainda não tem tela nem rota (o campo existe no banco).
+Estado: o admin envia a foto de um serviço (Serviços > Editar serviço) e a de um barbeiro/admin (Equipe > Editar).
+As duas aparecem na página de agendamento (`/book`); a do barbeiro também no card da Equipe. Só o ADMIN troca fotos.
+Deploy na VPS (volume, init no Docker, backup): `docs/deploy.md`.
 
 ## Como funciona
 
 | Peça | Arquivo |
 |---|---|
 | Validação e conversão (JPEG/PNG/WebP, 2 MB, 40 MP, saída WebP até 800 px, sem EXIF/GPS) | `lib/uploads/image.ts` |
-| Gravação no disco, chave `<barbeariaId>/services/<uuid>.webp`, marcador do volume | `lib/uploads/storage.ts` |
-| Envio e remoção (somente ADMIN da barbearia) | `app/api/services/[id]/image/route.ts` |
+| Gravação no disco, chave `<barbeariaId>/<services\|avatars>/<uuid>.webp`, marcador do volume | `lib/uploads/storage.ts` |
+| Recebimento do arquivo e troca segura (comum às duas rotas) | `lib/uploads/route-helpers.ts` |
+| Envio e remoção (somente ADMIN da barbearia) | `app/api/services/[id]/image/route.ts`, `app/api/users/[id]/avatar/route.ts` |
 | Leitura pública | `app/media/[...key]/route.ts` |
-| Formulário do admin | `components/services/service-form-modal.tsx` |
+| Campo de foto dos formulários | `components/shared/photo-field.tsx` |
 
-- O banco guarda só a URL pública (`Service.imageUrl = /media/<chave>`); o cliente nunca informa o caminho.
+- O banco guarda só a URL pública (`Service.imageUrl` / `User.avatarUrl` = `/media/<chave>`); o cliente nunca informa o caminho.
+- Excluir o serviço ou o usuário apaga a foto do disco.
 - Cada troca de foto gera um UUID novo, por isso a URL pode ficar em cache para sempre (`immutable`).
 - A rota `/media` só entrega a foto ao Host da barbearia dona dela. O matcher do middleware ignora URLs `.webp`,
   então a rota confere o tenant sozinha.
-- `getServiceImage` em `app/book/page.tsx` continua como reserva para serviço sem foto.
+- `getServiceImage` em `app/book/page.tsx` continua como reserva para serviço sem foto; barbeiro sem foto (ou com
+  arquivo que não carrega) mostra o ícone.
 
 ## Configuração por servidor
 
@@ -28,8 +32,9 @@ Estado: o admin envia a foto de um serviço em Serviços > Editar serviço; ela 
 
 ### Docker
 
-Monte o volume em `UPLOADS_DIR` e rode o init dentro do container, uma vez. O usuário do container (`nextjs`, uid 1001)
-precisa de permissão de escrita na pasta do volume.
+Monte o volume em `UPLOADS_DIR` (a imagem já define `/data/uploads`) e inicialize o volume uma vez. A imagem final
+não tem `npm run`/`tsx`: o comando equivalente ao `uploads:init` está em `docs/deploy.md`. O usuário do container
+(`nextjs`, uid 1001) precisa de permissão de escrita na pasta do volume; volume nomeado novo já herda esse dono.
 
 ```yaml
 services:
@@ -58,16 +63,18 @@ recusar com 413 dentro do app exigiria uma checagem de `content-length` no `midd
 
 ### Backup
 
-As fotos são só arquivos: inclua o volume no backup junto com o `pg_dump`. Restaurar o banco sem o volume deixa
-`imageUrl` apontando para arquivos inexistentes (a página cai na imagem reserva).
+As fotos são só arquivos: inclua o volume no backup junto com o `pg_dump` (comandos e mudança de servidor em
+`docs/deploy.md`). Restaurar o banco sem o volume deixa as URLs apontando para arquivos inexistentes (serviço cai na
+imagem reserva, barbeiro no ícone).
 
 ## Testes
 
 - Unitários (sem servidor): `npm test` (`tests/uploads.test.ts`).
-- Ponta a ponta (servidor real, banco local, ALTERA e restaura um serviço da barbearia A): ver o cabeçalho de
-  `tests/integration/uploads.ts` e `npm run test:uploads`.
+- Ponta a ponta (servidor real, banco local, ALTERA e restaura um serviço e um barbeiro da barbearia A, e cria um
+  usuário temporário): ver o cabeçalho de `tests/integration/uploads.ts` e `npm run test:uploads`.
 - A suíte de isolamento (`npm run test:isolation`) cobre os endpoints de envio e remoção entre barbearias.
 
 ## Fora do escopo desta etapa
 
-Foto de barbeiro, recorte no navegador, limpeza de arquivos órfãos por rotina e armazenamento em objeto (S3/Supabase).
+Recorte no navegador, o próprio barbeiro trocar a foto, limpeza de arquivos órfãos por rotina (dívida registrada em
+`docs/deploy.md`) e armazenamento em objeto (S3/Supabase).

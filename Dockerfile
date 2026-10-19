@@ -37,6 +37,12 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# Pasta das fotos: ponto de montagem do volume (docs/deploy.md). Criada vazia e do usuário nextjs para o volume
+# nomeado herdar o dono na primeira montagem. Sem VOLUME aqui e sem o marcador: se o volume não for montado,
+# o envio de foto falha com 503 em vez de gravar dentro do container e perder tudo no próximo deploy.
+RUN mkdir -p /data/uploads && chown nextjs:nodejs /data/uploads
+ENV UPLOADS_DIR=/data/uploads
+
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma

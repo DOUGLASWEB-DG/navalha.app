@@ -1,0 +1,22 @@
+# Nada de segredo dentro da imagem: as variáveis entram pelo ambiente do container (ver docs/deploy.md).
+# O Next lê .env* no build; se fossem copiados, os valores ficariam gravados na imagem.
+.env
+.env.*
+!.env.example
+
+# Gerados ou do ambiente local (a imagem instala e compila do zero)
+node_modules
+.next
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+coverage
+
+# Fotos ficam no volume, nunca na imagem
+.uploads
+
+# Repositório e ferramentas
+.git
+.gitattributes
+.DS_Store
+npm-debug.log*
