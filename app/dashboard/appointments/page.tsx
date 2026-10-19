@@ -201,7 +201,7 @@ export default function AppointmentsPage() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-11 w-11 shrink-0 text-muted-foreground hover:text-foreground xl:h-9 xl:w-9"
+            className="h-11 w-11 shrink-0 text-muted-foreground hover:text-foreground xl:h-9 xl:min-h-0 xl:w-9"
             aria-label={`Mais ações do agendamento de ${appt.client?.name ?? 'cliente'}`}
           >
             <MoreVertical className="h-4 w-4" />
@@ -383,7 +383,7 @@ export default function AppointmentsPage() {
                             <td className="px-4 py-3">
                               <p className="truncate font-medium text-foreground">{appt.client?.name}</p>
                               {appt.client?.phone && (
-                                <p className="text-xs text-muted-foreground tabular-nums">{formatBrazilPhone(appt.client.phone)}</p>
+                                <p className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">{formatBrazilPhone(appt.client.phone)}</p>
                               )}
                             </td>
                             <td className="px-4 py-3">
@@ -401,8 +401,8 @@ export default function AppointmentsPage() {
                               </div>
                             </td>
                             <td className="px-4 py-3">
-                              <div className="flex items-center justify-end gap-1">
-                                {renderPrimary(appt, actions, 'h-9 px-3')}
+                              <div className="flex items-center justify-end gap-2">
+                                {renderPrimary(appt, actions, 'min-h-0 h-9 w-[7.5rem] justify-center px-3')}
                                 {renderMenu(appt, actions)}
                               </div>
                             </td>
@@ -428,7 +428,7 @@ export default function AppointmentsPage() {
                               </p>
                               <p className="truncate font-medium text-foreground">{appt.client?.name}</p>
                               {appt.client?.phone && (
-                                <p className="text-xs text-muted-foreground tabular-nums">{formatBrazilPhone(appt.client.phone)}</p>
+                                <p className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">{formatBrazilPhone(appt.client.phone)}</p>
                               )}
                             </div>
                             <div className="flex shrink-0 items-start gap-1">
