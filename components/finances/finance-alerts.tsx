@@ -141,13 +141,13 @@ export function FinanceAlerts() {
                 <span className={cn('mt-0.5 flex-shrink-0', cfg.text)}>{cfg.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className={cn('text-[10px] font-semibold tracking-wide', cfg.text)}>
+                    <span className={cn('text-xs font-semibold tracking-wide', cfg.text)}>
                       {cfg.label}
                     </span>
                     <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                   </div>
                   <p className="text-sm text-foreground leading-relaxed">{alert.message}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {new Date(alert.createdAt).toLocaleString('pt-BR')}
                   </p>
                 </div>
@@ -192,12 +192,12 @@ export function FinanceAlerts() {
                   <span className={cn('mt-0.5 flex-shrink-0', cfg.text)}>{cfg.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className={cn('text-[10px] font-semibold tracking-wide', cfg.text)}>
+                      <span className={cn('text-xs font-semibold tracking-wide', cfg.text)}>
                         {cfg.label}
                       </span>
                     </div>
                     <p className="text-sm text-foreground">{alert.message}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {new Date(alert.createdAt).toLocaleString('pt-BR')}
                     </p>
                   </div>

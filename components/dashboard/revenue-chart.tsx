@@ -63,7 +63,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
             }}
           >
             {/* Valor fixo em cima da barra */}
-            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] text-primary font-bold whitespace-nowrap">
+            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-primary font-bold whitespace-nowrap">
               {point.income > 0 ? `R$${point.income}` : ''}
             </span>
           </div>
@@ -77,14 +77,14 @@ export function RevenueChart({ data }: RevenueChartProps) {
             }}
           >
             {/* Valor fixo em cima da barra */}
-            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[9px] text-destructive font-bold whitespace-nowrap">
+            <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-destructive font-bold whitespace-nowrap">
               {point.expense > 0 ? `R$${point.expense}` : ''}
             </span>
           </div>
 
         </div>
         
-        <span className="text-[10px] text-zinc-500 mt-4 font-bold ">
+        <span className="text-xs text-zinc-500 mt-4 font-bold ">
           {point.day}
         </span>
       </div>

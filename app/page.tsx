@@ -290,10 +290,10 @@ export default function LandingPage() {
                       </div>
                       <div>
                         <p className="text-xs font-semibold text-foreground">João Data</p>
-                        <p className="text-[11px] text-muted-foreground">Corte — 14:00</p>
+                        <p className="text-xs text-muted-foreground">Corte — 14:00</p>
                       </div>
                     </div>
-                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                       Confirmado
                     </span>
                   </div>
@@ -307,7 +307,7 @@ export default function LandingPage() {
       {/* Serviços */}
       <section id="servicos" className="py-16 px-6 max-w-5xl mx-auto border-t border-border/40">
         <div className="text-center mb-10">
-          <p className="text-xs text-primary tracking-widest font-semibold mb-1">Nosso Portifólio</p>
+          <p className="text-xs text-primary tracking-wide font-semibold mb-1">Nosso Portifólio</p>
           <h2 className="text-3xl font-bold ">Nossa Galeria </h2>
         </div>
 
@@ -334,7 +334,7 @@ export default function LandingPage() {
       <section id="sobre" className="py-16 px-6 bg-muted/20 border-y border-border/50">
         <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <p className="text-xs text-primary tracking-widest font-semibold mb-1">Sobre o Sistema</p>
+            <p className="text-xs text-primary tracking-wide font-semibold mb-1">Sobre o Sistema</p>
             <h2 className="text-3xl font-bold mb-3">
               Tecnologia de Ponta
             </h2>
@@ -389,7 +389,7 @@ export default function LandingPage() {
                 <Icon className="w-4 h-4 text-primary" />
               </div>
               <div>
-                <p className="text-[11px] text-muted-foreground font-medium">{label}</p>
+                <p className="text-xs text-muted-foreground font-medium">{label}</p>
                 <p className="text-xs font-semibold text-foreground mt-0.5">{value}</p>
               </div>
             </a>
@@ -415,7 +415,7 @@ export default function LandingPage() {
       <footer className="border-t border-border/60 py-6 px-6 bg-card">
         <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <AppBrand size="sm" />
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} {tenantConfig.name}. Todos os direitos reservados.
           </p>
         </div>

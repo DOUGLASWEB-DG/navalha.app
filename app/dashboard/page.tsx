@@ -13,6 +13,9 @@ import {
   AlertCircle,
   XCircle,
   ArrowRight,
+  Wallet,
+  CalendarRange,
+  CalendarDays,
 } from 'lucide-react'
 import Link from 'next/link'
 import { StatCard } from '@/components/dashboard/stat-card'
@@ -75,7 +78,7 @@ export default function DashboardPage() {
           title="Receita de Hoje"
           value={`R$${(revenue?.daily ?? 0).toFixed(2)}`}
           subtitle="Faturamento do dia"
-          iconUrl="/assets/receitahoje-icon.png"
+          icon={Wallet}
           accent="gold"
           trend={{ value: '12%', positive: true }}
         />
@@ -83,21 +86,21 @@ export default function DashboardPage() {
           title="Receita Semanal"
           value={`R$${(revenue?.weekly ?? 0).toFixed(2)}`}
           subtitle="Faturamento da semana"
-          iconUrl="/assets/receitasamanal-icon.png"
+          icon={CalendarRange}
           accent="green"
         />
         <StatCard
           title="Receita Mensal"
           value={`R$${(revenue?.monthly ?? 0).toFixed(2)}`}
           subtitle="Faturamento do mês"
-          iconUrl="/assets/receitamensal-icon.png"
+          icon={CalendarDays}
           accent="blue"
         />
         <StatCard
           title="Total de Clientes"
           value={String(totalClients ?? 0)}
           subtitle="Cadastrados no sistema"
-          iconUrl="/assets/totalclientes-icon.png"
+          icon={Users}
           accent="gold"
         />
       </div>
@@ -105,8 +108,8 @@ export default function DashboardPage() {
       {/* Status dos Agendamentos — swipe no mobile */}
       <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 touch-pan-x lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:pb-0 lg:snap-none">
         <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl overflow-hidden">
-            <img src="/assets/pendentes-icon.png" alt="Pendentes" className="w-full h-full object-contain" />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-warning/20 bg-warning/10 text-warning">
+            <Clock className="h-5 w-5" aria-hidden />
           </div>
           <div className="mt-3 lg:mt-0">
             <p className="text-xl font-bold text-foreground">{appointmentStats?.pending ?? 0}</p>
@@ -114,8 +117,8 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl overflow-hidden">
-            <img src="/assets/confirmados-icon.png" alt="Confirmados" className="w-full h-full object-contain" />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-info/20 bg-info/10 text-info">
+            <CalendarCheck className="h-5 w-5" aria-hidden />
           </div>
           <div className="mt-3 lg:mt-0">
             <p className="text-xl font-bold text-foreground">{appointmentStats?.confirmed ?? 0}</p>
@@ -123,8 +126,8 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="min-w-[min(100%,11rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-all duration-150 active:scale-[0.98] active:bg-muted lg:min-w-0 lg:flex lg:items-center lg:gap-4">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl overflow-hidden">
-            <img src="/assets/concluidos-icon.png" alt="Concluídos" className="w-full h-full object-contain" />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-success/20 bg-success/10 text-success">
+            <CheckCircle2 className="h-5 w-5" aria-hidden />
           </div>
           <div className="mt-3 lg:mt-0">
             <p className="text-xl font-bold text-foreground">{appointmentStats?.completed ?? 0}</p>

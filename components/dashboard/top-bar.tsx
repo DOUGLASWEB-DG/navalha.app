@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
-import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Shield } from 'lucide-react'
+import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Shield, UserCog } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -83,12 +83,12 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground hover:text-foreground hover:from-muted hover:to-muted/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="relative transition-colors"
               aria-label="Notificações"
             >
-              <Bell className="h-4 w-4 drop-shadow-sm" strokeWidth={2.5} />
+              <Bell className="h-5 w-5" aria-hidden />
               {unreadCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card animate-in zoom-in">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-white shadow-sm ring-2 ring-card animate-in zoom-in">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
@@ -98,7 +98,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             <div className="p-4 border-b border-border flex items-center justify-between">
               <p className="text-sm font-bold text-foreground">Notificações</p>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs font-bold">
                   {unreadCount} Novas
                 </span>
               )}
@@ -113,13 +113,13 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                           "w-1.5 h-1.5 rounded-full shrink-0",
                           alert.severity === 'DANGER' ? 'bg-red-500' : alert.severity === 'WARNING' ? 'bg-amber-500' : 'bg-blue-500'
                         )} />
-                        <span className="text-[10px] font-bold tracking-widest text-muted-foreground">
+                        <span className="text-xs font-bold tracking-wide text-muted-foreground">
                           {alert.severity === 'DANGER' ? 'Crítico' : alert.severity === 'WARNING' ? 'Atenção' : 'Info'}
                         </span>
-                        {!alert.read && <span className="text-[10px] font-bold text-primary ml-auto">Nova</span>}
+                        {!alert.read && <span className="text-xs font-bold text-primary ml-auto">Nova</span>}
                       </div>
                       <p className="text-xs text-foreground leading-relaxed line-clamp-2">{alert.message}</p>
-                      <p className="text-[9px] text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(alert.createdAt), "d 'de' MMM 'às' HH:mm", { locale: ptBR })}
                       </p>
                     </Link>
@@ -146,10 +146,10 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden relative bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground hover:text-foreground hover:from-muted hover:to-muted/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="lg:hidden relative transition-colors"
               aria-label="Mais opções"
             >
-              <MoreHorizontal className="h-4 w-4 drop-shadow-sm" strokeWidth={2.5} />
+              <MoreHorizontal className="h-5 w-5" aria-hidden />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -160,25 +160,19 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
               <>
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/goals" className="cursor-pointer gap-3">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/metas-icon.png" alt="Metas" className="w-full h-full object-contain" />
-                    </div>
+                    <Target className="h-5 w-5 shrink-0" aria-hidden />
                     Metas
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/products" className="cursor-pointer gap-3">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/produtos-icon.png" alt="Produtos" className="w-full h-full object-contain" />
-                    </div>
+                    <Package className="h-5 w-5 shrink-0" aria-hidden />
                     Produtos
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/users" className="cursor-pointer gap-3">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <img src="/assets/equipe-icon.png" alt="Equipe" className="w-full h-full object-contain" />
-                    </div>
+                    <UserCog className="h-5 w-5 shrink-0" aria-hidden />
                     Equipe
                   </Link>
                 </DropdownMenuItem>
@@ -186,9 +180,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             )}
             <DropdownMenuItem asChild className="min-h-12 rounded-xl">
               <Link href="/book" target="_blank" rel="noopener noreferrer" className="cursor-pointer gap-3">
-                <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded-md bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground">
-                  <Globe className="h-3.5 w-3.5 drop-shadow-sm" strokeWidth={2.5} />
-                </div>
+                <Globe className="h-5 w-5 shrink-0" aria-hidden />
                 Página de agendamento
               </Link>
             </DropdownMenuItem>
@@ -197,9 +189,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
               onClick={handleLogout}
               className="min-h-12 cursor-pointer gap-3 rounded-xl text-destructive focus:bg-destructive/10 focus:text-destructive"
             >
-              <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded-md bg-gradient-to-b from-destructive/20 to-transparent border border-destructive/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-destructive/80">
-                <LogOut className="h-3.5 w-3.5 drop-shadow-sm" strokeWidth={2.5} />
-              </div>
+              <LogOut className="h-5 w-5 shrink-0" aria-hidden />
               Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

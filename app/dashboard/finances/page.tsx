@@ -260,7 +260,7 @@ function TransactionsView({
                           <span className="text-muted-foreground">·</span>
                           {txn.categoryRef ? (
                             <span
-                              className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                              className="rounded-full px-2 py-0.5 text-xs font-medium"
                               style={{
                                 background: `${txn.categoryRef.color}20`,
                                 color: txn.categoryRef.color,

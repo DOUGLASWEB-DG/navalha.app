@@ -152,7 +152,7 @@ export default function UsersPage() {
         ) : (
           <div className="text-center py-20">
             <div className="w-20 h-20 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]">
-              <Shield className="w-10 h-10 text-primary drop-shadow-[0_0_10px_rgba(245,158,11,0.4)]" />
+              <Shield className="w-10 h-10 text-primary" />
             </div>
             <p className="text-lg font-bold text-foreground mb-2">Nenhum usuário cadastrado</p>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">

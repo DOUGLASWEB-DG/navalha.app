@@ -69,21 +69,21 @@ export function FinanceDashboard() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-[10px] opacity-70 mb-1 ">Receita Mês</p>
+              <p className="text-xs opacity-70 mb-1 ">Receita Mês</p>
               <p className="text-base font-bold">{formatCurrency(currentMonth?.income ?? 0)}</p>
             </div>
             <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-[10px] opacity-70 mb-1 ">Despesas Mês</p>
+              <p className="text-xs opacity-70 mb-1 ">Despesas Mês</p>
               <p className="text-base font-bold">{formatCurrency(currentMonth?.expense ?? 0)}</p>
             </div>
             <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-[10px] opacity-70 mb-1 ">Lucro</p>
+              <p className="text-xs opacity-70 mb-1 ">Lucro</p>
               <p className={cn('text-base font-bold', profit < 0 && 'text-red-300')}>
                 {formatCurrency(profit)}
               </p>
             </div>
             <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-[10px] opacity-70 mb-1 ">Margem</p>
+              <p className="text-xs opacity-70 mb-1 ">Margem</p>
               <p className="text-base font-bold">{profitMargin.toFixed(1)}%</p>
             </div>
           </div>

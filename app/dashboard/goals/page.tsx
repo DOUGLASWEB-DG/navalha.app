@@ -142,7 +142,7 @@ export default function GoalsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {isCompleted && (
-                        <Trophy className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                        <Trophy className="w-5 h-5 text-primary" />
                       )}
                       <Button
                         variant="ghost"
@@ -229,7 +229,7 @@ export default function GoalsPage() {
       {(!goals || goals.length === 0) && (
         <div className="text-center py-20">
           <div className="w-20 h-20 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]">
-            <Target className="w-10 h-10 text-primary drop-shadow-[0_0_10px_rgba(245,158,11,0.4)]" />
+            <Target className="w-10 h-10 text-primary" />
           </div>
           <p className="text-lg font-bold text-foreground mb-2">Nenhuma meta definida</p>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">

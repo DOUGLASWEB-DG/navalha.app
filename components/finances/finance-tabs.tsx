@@ -47,7 +47,7 @@ export function FinanceTabs({ active, onChange, alertCount = 0 }: FinanceTabsPro
             <span className="hidden whitespace-nowrap sm:inline">{tab.label}</span>
             {tab.value === 'alerts' && alertCount > 0 && (
               <span className={cn(
-                'absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center',
+                'absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center',
                 isActive ? 'bg-white text-primary' : 'bg-destructive text-white'
               )}>
                 {alertCount > 9 ? '9+' : alertCount}
