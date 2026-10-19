@@ -16,8 +16,10 @@
     "db:studio": "prisma studio",
     "db:reset": "tsx scripts/require-local-db.ts db:reset && prisma migrate reset",
     "setup": "npm run db:push && npm run db:seed",
+    "uploads:init": "tsx scripts/uploads-init.ts",
     "test": "tsx --test tests/*.test.ts",
     "test:isolation": "tsx tests/integration/isolation.ts",
+    "test:uploads": "tsx tests/integration/uploads.ts",
     "test:fixture": "tsx tests/fixtures/tenant-b.ts"
   },
   "prisma": {

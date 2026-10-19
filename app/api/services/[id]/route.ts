@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { deleteObject, keyFromUrl } from '@/lib/uploads/storage'
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -31,7 +32,12 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   try {
     const { barbearia } = await requireTenantAdmin()
     const { id } = await params
+    const service = await prisma.service.findFirst({ where: { id, barbeariaId: barbearia.id }, select: { imageUrl: true } })
+    if (!service) throw notFound()
     await prisma.service.delete({ where: { id, barbeariaId: barbearia.id } })
+    // Serviço excluído: a foto fica órfã no disco, então é removida (falha aqui não desfaz a exclusão)
+    const key = keyFromUrl(service.imageUrl)
+    if (key) await deleteObject(key).catch((error) => console.error('[Services DELETE] foto órfã não removida', error))
     return NextResponse.json({ success: true })
   } catch (error) {
     const handled = tenantErrorResponse(error)

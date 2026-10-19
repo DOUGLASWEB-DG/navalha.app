@@ -96,6 +96,7 @@ interface Service {
   price: number
   durationMins: number
   description: string | null
+  imageUrl?: string | null
 }
 
 interface Barber {
@@ -521,7 +522,7 @@ function BookingContent() {
                       <div className="flex min-w-0 items-center gap-4">
                         <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-border bg-muted shadow-sm">
                           <img
-                            src={getServiceImage(svc.name)}
+                            src={svc.imageUrl || getServiceImage(svc.name)}
                             alt=""
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
