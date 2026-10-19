@@ -16,8 +16,6 @@ import {
   LogOut,
   Shield,
   Package,
-  UserCog,
-  type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { tenantConfig } from '@/config/tenant'
@@ -29,15 +27,15 @@ interface SidebarProps {
   onToggle: () => void
 }
 
-const navItems: { label: string; href: string; icon: LucideIcon; adminOnly?: boolean }[] = [
-  { label: 'Painel', href: '/dashboard', icon: LayoutDashboard, adminOnly: true },
-  { label: 'Agendamentos', href: '/dashboard/appointments', icon: CalendarDays },
-  { label: 'Clientes', href: '/dashboard/clients', icon: Users, adminOnly: true },
-  { label: 'Finanças', href: '/dashboard/finances', icon: DollarSign, adminOnly: true },
-  { label: 'Metas', href: '/dashboard/goals', icon: Target, adminOnly: true },
-  { label: 'Serviços', href: '/dashboard/services', icon: Scissors, adminOnly: true },
-  { label: 'Produtos', href: '/dashboard/products', icon: Package, adminOnly: true },
-  { label: 'Equipe', href: '/dashboard/users', icon: UserCog, adminOnly: true },
+const navItems = [
+  { label: 'Painel', href: '/dashboard', iconUrl: '/assets/painel-icon.png', adminOnly: true },
+  { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/agendamentos-icon.png' },
+  { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/clientes-icon.png', adminOnly: true },
+  { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/finaces-icon.png', adminOnly: true },
+  { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/metas-icon.png', adminOnly: true },
+  { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/servicos-icon.png', adminOnly: true },
+  { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/produtos-icon.png', adminOnly: true },
+  { label: 'Equipe', href: '/dashboard/users', iconUrl: '/assets/equipe-icon.png', adminOnly: true },
 ]
 
 const bottomItems = [
@@ -106,13 +104,18 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80'
               )}
             >
-              <item.icon className="h-5 w-5 shrink-0" strokeWidth={isActive ? 2.25 : 2} aria-hidden />
+              <div className={cn(
+                "flex items-center justify-center shrink-0 w-8 h-8 rounded-lg transition-all duration-200 overflow-hidden",
+                isActive ? "opacity-100" : "opacity-75 grayscale-[30%] group-hover:opacity-100 group-hover:grayscale-0"
+              )}>
+                <img src={item.iconUrl} alt={item.label} className="w-full h-full object-contain" />
+              </div>
               {open && (
                 <span className="text-sm font-medium">{item.label}</span>
               )}
               {showBadge && (
                 <span className={cn(
-                  'flex items-center justify-center rounded-full text-xs font-bold',
+                  'flex items-center justify-center rounded-full text-[10px] font-bold',
                   open
                     ? 'ml-auto w-5 h-5 bg-destructive text-white'
                     : 'absolute -top-1 -right-1 w-4 h-4 bg-destructive text-white'
@@ -140,7 +143,9 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                 open ? 'gap-3 px-3 py-2.5 hover:bg-muted/30' : 'justify-center p-2.5'
               )}
             >
-              <Icon className="h-5 w-5 shrink-0" aria-hidden />
+              <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground group-hover:from-muted group-hover:to-muted/30 group-hover:text-primary group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200">
+                <Icon className="w-4 h-4 drop-shadow-sm" strokeWidth={2.5} />
+              </div>
               {open && <span className="text-sm font-medium">{item.label}</span>}
             </Link>
           )
@@ -155,7 +160,9 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
             open ? 'gap-3 px-3 py-2.5 hover:bg-destructive/5' : 'justify-center p-2.5'
           )}
         >
-          <LogOut className="h-5 w-5 shrink-0" aria-hidden />
+          <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-gradient-to-b from-destructive/20 to-transparent border border-destructive/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-destructive/80 group-hover:from-destructive/30 group-hover:to-destructive/10 group-hover:text-destructive group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200">
+            <LogOut className="w-4 h-4 drop-shadow-sm" strokeWidth={2.5} />
+          </div>
           {open && <span className="text-sm font-medium">Sair</span>}
         </button>
       </div>
