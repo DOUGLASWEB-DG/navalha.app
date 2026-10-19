@@ -86,7 +86,27 @@ não tem script (ver dívidas).
   não conte com o padrão: `request_body { max_size 3MB }` no site do Navalha. Nginx: `client_max_body_size 3m;`.
   Com esse limite, o proxy barra tudo acima de 3 MB; entre 2 e 3 MB o Next ainda pode responder 500 intermitente em vez
   de 413 (o arquivo é recusado do mesmo jeito). A checagem no `middleware.ts` ficou adiada (decisão de 2026-10-19).
-  **NÃO COMPROVADO:** a resposta exata do Caddy acima do limite (testar na fase do proxy).
+  Comprovado na VPS (Caddy 2.10.2, `reverse_proxy` para um backend de eco, 2026-10-19): 2,5 MB passa; 2,9 MB e 4 MB
+  recebem 413, inclusive com envio chunked (sem `Content-Length`). No Caddy "3MB" = 3.000.000 bytes (não 3 MiB); a foto
+  máxima com o multipart fica perto de 2,1 MB. Atenção: o limite só age quando o corpo é lido; atrás de `file_server`
+  um POST recebe 405 de qualquer tamanho, então teste sempre pela rota que faz proxy.
+- Monte a **pasta** do Caddyfile no container (`./caddy:/etc/caddy:ro`), não o arquivo: editores e `sed -i` gravam um
+  arquivo novo (outro inode) e um bind de arquivo único continua mostrando o antigo, sem erro nenhum (aconteceu no teste).
+
+## 5.1 Estado da VPS (2026-10-19)
+
+Ubuntu 24.04 x86_64, 1 vCPU, 3,8 GB RAM, 48 GB disco. Fase 2 (proteção) e fase 3 (Docker + Caddy) feitas:
+
+- SSH só por chave (`/etc/ssh/sshd_config.d/00-navalha-hardening.conf`, lido antes dos arquivos da cloud-init).
+- ufw: entrada só 22, 80, 443 (TCP) e 443/UDP. Portas publicadas por container passam por cima do ufw: só o Caddy
+  publica; Postgres e app nunca publicam porta.
+- fail2ban no SSH com `journalmatch = _SYSTEMD_UNIT=ssh.service` (o padrão procura `sshd.service`, que no Ubuntu 24.04
+  não existe, e não bloquearia ninguém).
+- Swap de 2 GB, `swappiness=10`. Logs do Docker limitados a 3 x 10 MB por container.
+- `/opt/navalha`: `compose.yml` (projeto `navalha`), `caddy/Caddyfile`, `site-teste/` (página temporária em `:80`).
+- Sobrevive a reinício (testado): firewall, swap, fail2ban, Docker e Caddy voltam sozinhos.
+- Sem DNS apontando para a VPS ainda; HTTPS depende de um registro A (ex.: `teste.navalha.app`, DNS na Cloudflare).
+- Build da imagem: no PC, enviada com `docker save | ssh ... docker load` (1 vCPU compila devagar).
 - Repassar o Host original (o app escolhe a barbearia pelo Host) e preencher o cabeçalho de IP usado em
   `RATE_LIMIT_IP_HEADER`.
 - Detalhe do 500 do Next em corpos grandes: `docs/uploads.md`.
