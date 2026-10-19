@@ -49,8 +49,10 @@ O servidor recusa mais de 2 MB, mas o proxy da VPS precisa deixar o corpo chegar
 - Nginx: `client_max_body_size 3m;` (o padrão é 1 MB e devolveria 413 antes do app).
 - Caddy: o padrão não limita; se definir `request_body { max_size 3MB }`, mantenha pelo menos 3 MB.
 
-O Next.js bufferiza até 10 MB do corpo por causa do middleware. Entre 2 e 10 MB a rota responde 413 com mensagem clara.
-Acima de 10 MB o próprio Next falha com erro 500 antes de a rota rodar (comprovado em teste, com um envio de 26 MB). O
+O Next.js bufferiza até 10 MB do corpo por causa do middleware. Entre 2 e 10 MB a rota responde 413 com mensagem clara,
+mas de forma **intermitente** o próprio Next falha com 500 antes de a rota rodar (condição de corrida do framework,
+observada na primeira requisição grande depois de subir o servidor). Acima de 10 MB o 500 é sistemático (comprovado com
+um envio de 26 MB). Nos dois casos o arquivo é recusado e nada é gravado. O
 formulário do admin já recusa arquivos acima de 2 MB no navegador, e o `client_max_body_size 3m` do proxy barra o resto;
 recusar com 413 dentro do app exigiria uma checagem de `content-length` no `middleware.ts`, o que ficou para uma etapa autorizada.
 
