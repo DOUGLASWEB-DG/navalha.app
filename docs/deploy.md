@@ -82,8 +82,11 @@ não tem script (ver dívidas).
 
 ## 5. Proxy (Caddy ou Nginx)
 
-- Limite de corpo de pelo menos 3 MB (fotos têm até 2 MB). Nginx: `client_max_body_size 3m;` (padrão 1 MB). Caddy não
-  limita por padrão.
+- Limite de corpo de **3 MB, configurado explicitamente** (fotos têm até 2 MB). Caddy não limita por padrão, então
+  não conte com o padrão: `request_body { max_size 3MB }` no site do Navalha. Nginx: `client_max_body_size 3m;`.
+  Com esse limite, o proxy barra tudo acima de 3 MB; entre 2 e 3 MB o Next ainda pode responder 500 intermitente em vez
+  de 413 (o arquivo é recusado do mesmo jeito). A checagem no `middleware.ts` ficou adiada (decisão de 2026-10-19).
+  **NÃO COMPROVADO:** a resposta exata do Caddy acima do limite (testar na fase do proxy).
 - Repassar o Host original (o app escolhe a barbearia pelo Host) e preencher o cabeçalho de IP usado em
   `RATE_LIMIT_IP_HEADER`.
 - Detalhe do 500 do Next em corpos grandes: `docs/uploads.md`.
