@@ -88,7 +88,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             >
               <Bell className="h-4 w-4 drop-shadow-sm" strokeWidth={2.5} />
               {unreadCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-white shadow-sm ring-2 ring-card animate-in zoom-in">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-white shadow-sm ring-2 ring-card animate-in zoom-in">
                   {unreadCount > 99 ? '99+' : unreadCount}
                 </span>
               )}
@@ -98,7 +98,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             <div className="p-4 border-b border-border flex items-center justify-between">
               <p className="text-sm font-bold text-foreground">Notificações</p>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-destructive/10 text-destructive text-xs font-bold">
                   {unreadCount} Novas
                 </span>
               )}
@@ -113,13 +113,13 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                           "w-1.5 h-1.5 rounded-full shrink-0",
                           alert.severity === 'DANGER' ? 'bg-red-500' : alert.severity === 'WARNING' ? 'bg-amber-500' : 'bg-blue-500'
                         )} />
-                        <span className="text-[10px] font-bold tracking-widest text-muted-foreground">
+                        <span className="text-xs font-bold tracking-wide text-muted-foreground">
                           {alert.severity === 'DANGER' ? 'Crítico' : alert.severity === 'WARNING' ? 'Atenção' : 'Info'}
                         </span>
-                        {!alert.read && <span className="text-[10px] font-bold text-primary ml-auto">Nova</span>}
+                        {!alert.read && <span className="text-xs font-bold text-primary ml-auto">Nova</span>}
                       </div>
                       <p className="text-xs text-foreground leading-relaxed line-clamp-2">{alert.message}</p>
-                      <p className="text-[9px] text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         {format(new Date(alert.createdAt), "d 'de' MMM 'às' HH:mm", { locale: ptBR })}
                       </p>
                     </Link>

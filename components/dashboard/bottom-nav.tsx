@@ -95,14 +95,14 @@ export function BottomNav() {
               )}>
                 <img src={item.iconUrl} alt={item.label} className="w-full h-full object-contain" />
                 {showBadge && (
-                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-none text-white tabular-nums z-10">
+                  <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold leading-none text-white tabular-nums z-10">
                     {alertCount > 9 ? '9+' : alertCount}
                   </span>
                 )}
               </span>
               <span
                 className={cn(
-                  'text-[10px] font-semibold leading-tight truncate max-w-[4.25rem] text-center',
+                  'text-xs font-semibold leading-tight truncate max-w-[4.25rem] text-center',
                   active ? 'text-primary font-bold' : 'text-muted-foreground'
                 )}
               >
