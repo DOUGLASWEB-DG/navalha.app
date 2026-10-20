@@ -22,7 +22,7 @@ Os nomes estão em `.env.example`. Em produção:
 |---|---|
 | `DATABASE_URL`, `DIRECT_URL` | banco de produção (decisão pendente: Supabase atual ou Postgres em Docker na VPS) |
 | `JWT_SECRET` | obrigatório; trocar invalida todas as sessões |
-| `TENANT_ROOT_DOMAIN` | `navalha.app` (subdomínios das barbearias); a América também responde em `americabarbearia.tech` (`Barbearia.customDomain`) |
+| `TENANT_ROOT_DOMAIN` | `navalhaapp.tech` (subdomínios das barbearias); a América também responde em `americabarbearia.tech` (`Barbearia.customDomain`) |
 | `UPLOADS_DIR` | já vem `/data/uploads` na imagem; só mude junto com o ponto de montagem |
 | `RATE_LIMIT_IP_HEADER` | cabeçalho de IP que o proxy da VPS **sobrescreve** (ex.: `x-real-ip`); vazio = sem limite por IP. Nunca aponte para um cabeçalho que o cliente consiga forjar |
 | `EVO_API_KEY`, `NEXT_PUBLIC_EVO_URL`, `ADMIN_PHONE` | WhatsApp (Evolution); `NEXT_PUBLIC_*` é lido no **build**, não no start |
@@ -105,7 +105,7 @@ Ubuntu 24.04 x86_64, 1 vCPU, 3,8 GB RAM, 48 GB disco. Fase 2 (proteção) e fase
 - Swap de 2 GB, `swappiness=10`. Logs do Docker limitados a 3 x 10 MB por container.
 - `/opt/navalha`: `compose.yml` (projeto `navalha`), `caddy/Caddyfile`, `site-teste/` (página temporária em `:80`).
 - Sobrevive a reinício (testado): firewall, swap, fail2ban, Docker e Caddy voltam sozinhos.
-- Sem DNS apontando para a VPS ainda; HTTPS depende de um registro A (ex.: `teste.navalha.app`, DNS na Cloudflare).
+- Sem DNS apontando para a VPS ainda; HTTPS depende de um registro A (ex.: `america.navalhaapp.tech`, DNS na Cloudflare).
 - Build da imagem: no PC, enviada com `docker save | ssh ... docker load` (1 vCPU compila devagar).
 - Repassar o Host original (o app escolhe a barbearia pelo Host) e preencher o cabeçalho de IP usado em
   `RATE_LIMIT_IP_HEADER`.

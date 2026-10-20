@@ -28,7 +28,7 @@ funcional, com commit por fase em branch própria.
 | 4 | App + PostgreSQL de teste, suítes contra o servidor real | Em andamento |
 | 5 | Backup do banco e das fotos, restauração testada | Pendente |
 | 6 | Dados da América vindos do Supabase (backup validado, comparação só leitura) | Pendente |
-| 7 | DNS: `americabarbearia.tech` e `*.navalha.app` para a VPS | Pendente |
+| 7 | DNS: `americabarbearia.tech` e `america.navalhaapp.tech` para a VPS (raiz redireciona para a América) | Pendente |
 
 ## 2. Antes de uma segunda barbearia real
 

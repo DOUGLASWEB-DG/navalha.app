@@ -5,7 +5,7 @@
 
 ## Contexto
 
-Cada barbearia precisa do seu endereço (`america.navalha.app`) e, opcionalmente, de um domínio próprio
+Cada barbearia precisa do seu endereço (`america.navalhaapp.tech`) e, opcionalmente, de um domínio próprio
 (`americabarbearia.tech`). A barbearia de uma requisição não pode depender de dado enviado pelo cliente.
 
 ## Decisão
@@ -20,11 +20,11 @@ Cada barbearia precisa do seu endereço (`america.navalha.app`) e, opcionalmente
 ## Alternativas consideradas
 
 - **Barbearia no caminho (`/b/america/...`):** DNS mais simples, mas mistura rotas e facilita erro de escopo.
-- **Cookie em `.navalha.app`:** permitiria login compartilhado entre subdomínios, que é justamente o que não se quer.
+- **Cookie em `.navalhaapp.tech`:** permitiria login compartilhado entre subdomínios, que é justamente o que não se quer.
 - **Barbearia escolhida no login:** depende do cliente; rejeitada.
 
 ## Consequências
 
 - Produção precisa de DNS por barbearia (ou curinga) e de proxy que repasse o Host original.
 - Desenvolvimento usa `america.localhost:3000`.
-- Login em `america.navalha.app` não vale em `americabarbearia.tech` (endereços diferentes, sessões diferentes).
+- Login em `america.navalhaapp.tech` não vale em `americabarbearia.tech` (endereços diferentes, sessões diferentes).

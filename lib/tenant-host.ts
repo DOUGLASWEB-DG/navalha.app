@@ -56,9 +56,9 @@ export function parseTenantHost(rawHost: string | null | undefined, rootDomain: 
   return { kind: 'customDomain', domain: host }
 }
 
-// Domínio da plataforma. Em produção precisa ser explícito (TENANT_ROOT_DOMAIN=navalha.app); sem ele só
+// Domínio da plataforma. Em produção precisa ser explícito (TENANT_ROOT_DOMAIN=navalhaapp.tech); sem ele só
 // domínios próprios funcionam. Fora de produção o padrão é "localhost" (america.localhost:3000).
-// DECISÃO PENDENTE: o próprio domínio raiz (navalha.app) responde 404 até existir a página da plataforma.
+// DECISÃO PENDENTE: o próprio domínio raiz (navalhaapp.tech) responde 404 até existir a página da plataforma.
 export function getTenantRootDomain(env: NodeJS.ProcessEnv = process.env): string | null {
   const configured = env.TENANT_ROOT_DOMAIN?.trim()
   if (configured) return normalizeHost(configured)

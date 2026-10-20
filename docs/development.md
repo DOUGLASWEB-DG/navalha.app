@@ -30,7 +30,7 @@ Referência completa e comentada: [`.env.example`](../.env.example). O `.env` nu
 | `DATABASE_URL`, `DIRECT_URL` | banco do `docker-compose.yml` | **Só banco local.** Os comandos que gravam recusam outro host |
 | `JWT_SECRET` | qualquer valor aleatório com 32+ caracteres | Obrigatório; sem padrão no código |
 | `SEED_ADMIN_PASSWORD` | 12+ caracteres | Senha do admin criado pelo seed (`admin@administrador.com`) |
-| `TENANT_ROOT_DOMAIN` | vazio (vale `localhost`) | Produção: `navalha.app` |
+| `TENANT_ROOT_DOMAIN` | vazio (vale `localhost`) | Produção: `navalhaapp.tech` |
 | `UPLOADS_DIR` | `./.uploads` | Pasta das fotos (fora do Git) |
 | `RATE_LIMIT_IP_HEADER` | vazio | Só com proxy que sobrescreve o cabeçalho |
 | `NEXT_PUBLIC_EVO_URL`, `EVO_API_KEY` | vazio ou endereço inválido | Sem eles nenhuma mensagem sai da máquina |
@@ -70,7 +70,7 @@ Observação: o Prisma CLI lê apenas `.env` (não `.env.local`).
 | Sintoma | Causa e solução |
 |---|---|
 | 404 em `localhost:3000` | Use `america.localhost:3000` |
-| 404 em `america.localhost:3000` | `TENANT_ROOT_DOMAIN` definido como `navalha.app` no `.env`: deixe vazio |
+| 404 em `america.localhost:3000` | `TENANT_ROOT_DOMAIN` definido como `navalhaapp.tech` no `.env`: deixe vazio |
 | Login funciona no `next dev` mas não no `next start` local | Em produção o cookie é `Secure` e o navegador não o guarda em HTTP |
 | Foto: "UPLOADS_DIR não configurada" ou "volume não montado" (503) | Defina `UPLOADS_DIR` e rode `npm run uploads:init` |
 | `EPERM` no build (Windows) | Um `next dev` está segurando a DLL do Prisma: pare o servidor e repita |
