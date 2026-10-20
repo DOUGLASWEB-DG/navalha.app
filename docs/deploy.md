@@ -126,9 +126,13 @@ Ubuntu 24.04 x86_64, 1 vCPU, 3,8 GB RAM, 48 GB disco. Fase 2 (proteção) e fase
   raiz, subdomínio desconhecido, IP e `america.navalha.app` dão 404; login certo/errado, cookie HttpOnly + Secure sem
   Domain, sessão não vale em outro Host, foto de 0,9 MB e de 9,9 MB aceitas 3 vezes seguidas e servidas como WebP só
   no Host da América.
-- Pendente: o registro A `america` na Cloudflare e trocar o Caddyfile pelo `caddy/Caddyfile.novo` (site
-  `america.navalhaapp.tech` com 16 MiB e a raiz/www redirecionando com 302), comprovar o 413 acima de 16 MiB, HTTPS
-  pelo navegador e reinício da VPS. Backups das configurações anteriores em `/opt/navalha/backup-config/`.
+- DNS `america` criado (2026-10-20) e Caddy com `america.navalhaapp.tech` (16 MiB) e a raiz/www redirecionando com
+  302; certificado Let's Encrypt emitido. Comprovado pela internet: `/login` e `/book` 200, HTTP vira HTTPS (308), raiz e
+  www 302 para a América mantendo o caminho, sem `Server`/`X-Powered-By`; logado, foto real de 9,9 MB aceita 3x
+  seguidas; 17 MiB chunked recebe 413 do Caddy; 17 MiB com `Content-Length` recebe 413 do app ("no máximo 15 MB").
+  Sem login, a rota de foto responde 401 **antes** de ler o corpo (por isso o limite do proxy só aparece logado).
+- Pendente: reinício da VPS com o app (fase 3 testou só firewall/swap/fail2ban/Docker/Caddy). Sem HSTS por enquanto
+  (decisão futura). Backups das configurações anteriores em `/opt/navalha/backup-config/`.
 
 ## 6. Backup e restauração
 
