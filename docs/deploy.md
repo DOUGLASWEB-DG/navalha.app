@@ -131,8 +131,9 @@ Ubuntu 24.04 x86_64, 1 vCPU, 3,8 GB RAM, 48 GB disco. Fase 2 (proteção) e fase
   www 302 para a América mantendo o caminho, sem `Server`/`X-Powered-By`; logado, foto real de 9,9 MB aceita 3x
   seguidas; 17 MiB chunked recebe 413 do Caddy; 17 MiB com `Content-Length` recebe 413 do app ("no máximo 15 MB").
   Sem login, a rota de foto responde 401 **antes** de ler o corpo (por isso o limite do proxy só aparece logado).
-- Pendente: reinício da VPS com o app (fase 3 testou só firewall/swap/fail2ban/Docker/Caddy). Sem HSTS por enquanto
-  (decisão futura). Backups das configurações anteriores em `/opt/navalha/backup-config/`.
+- Reinício com o app comprovado (2026-10-20 11:22): firewall, fail2ban, swap, Docker, app, banco, volume de fotos,
+  HTTPS e o redirecionamento da raiz voltaram sozinhos. No log aparecem `Failed to find Server Action "x"`: robôs
+  testando ações do Next; inofensivo. Sem HSTS por enquanto (decisão futura). Backups das configurações anteriores em `/opt/navalha/backup-config/`.
 
 ## 6. Backup e restauração
 
