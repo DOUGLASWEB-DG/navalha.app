@@ -25,7 +25,7 @@ Os nomes estão em `.env.example`. Em produção:
 | `TENANT_ROOT_DOMAIN` | `navalhaapp.tech` (subdomínios das barbearias); a América também responde em `americabarbearia.tech` (`Barbearia.customDomain`) |
 | `UPLOADS_DIR` | já vem `/data/uploads` na imagem; só mude junto com o ponto de montagem |
 | `RATE_LIMIT_IP_HEADER` | cabeçalho de IP que o proxy da VPS **sobrescreve** (ex.: `x-real-ip`); vazio = sem limite por IP. Nunca aponte para um cabeçalho que o cliente consiga forjar |
-| `EVO_API_KEY`, `NEXT_PUBLIC_EVO_URL`, `ADMIN_PHONE` | WhatsApp (Evolution); `NEXT_PUBLIC_*` é lido no **build**, não no start |
+| `EVO_API_KEY`, `NEXT_PUBLIC_EVO_URL`, `ADMIN_PHONE` | WhatsApp (Evolution). Só o servidor usa `NEXT_PUBLIC_EVO_URL` (`lib/whatsapp.ts`) e ele é lido **ao rodar**, não no build (conferido no bundle da imagem `0a34901`: `process.env.NEXT_PUBLIC_EVO_URL` continua no código). Se um dia for usado em componente do navegador, passa a ser fixado no build |
 
 ## 3. Fotos: volume persistente
 
@@ -93,7 +93,7 @@ não tem script (ver dívidas).
 - Monte a **pasta** do Caddyfile no container (`./caddy:/etc/caddy:ro`), não o arquivo: editores e `sed -i` gravam um
   arquivo novo (outro inode) e um bind de arquivo único continua mostrando o antigo, sem erro nenhum (aconteceu no teste).
 
-## 5.1 Estado da VPS (2026-10-19)
+## 5.1 Estado da VPS (2026-10-20)
 
 Ubuntu 24.04 x86_64, 1 vCPU, 3,8 GB RAM, 48 GB disco. Fase 2 (proteção) e fase 3 (Docker + Caddy) feitas:
 
@@ -105,11 +105,30 @@ Ubuntu 24.04 x86_64, 1 vCPU, 3,8 GB RAM, 48 GB disco. Fase 2 (proteção) e fase
 - Swap de 2 GB, `swappiness=10`. Logs do Docker limitados a 3 x 10 MB por container.
 - `/opt/navalha`: `compose.yml` (projeto `navalha`), `caddy/Caddyfile`, `site-teste/` (página temporária em `:80`).
 - Sobrevive a reinício (testado): firewall, swap, fail2ban, Docker e Caddy voltam sozinhos.
-- Sem DNS apontando para a VPS ainda; HTTPS depende de um registro A (ex.: `america.navalhaapp.tech`, DNS na Cloudflare).
-- Build da imagem: no PC, enviada com `docker save | ssh ... docker load` (1 vCPU compila devagar).
+- DNS (Cloudflare, nuvem cinza): `navalhaapp.tech` e `www` apontam para a VPS, com certificado. `navalha.app` NÃO é
+  do projeto (outra conta Cloudflare, site de terceiros): nunca configurar nada nele.
+- Build da imagem: no PC, enviada com `docker save | gzip | ssh ... 'gunzip | docker load'` (1 vCPU compila devagar).
 - Repassar o Host original (o app escolhe a barbearia pelo Host) e preencher o cabeçalho de IP usado em
   `RATE_LIMIT_IP_HEADER`.
 - Detalhe do 500 do Next em corpos grandes: `docs/uploads.md`.
+
+### Fase 4 (2026-10-20): app + banco de TESTE
+
+- App `navalha-app:0a34901`, Postgres **17** (volume `postgres_teste17`; o volume antigo `postgres_teste`, do 15, ficou
+  guardado sem uso). `TENANT_ROOT_DOMAIN=navalhaapp.tech`; a América responde em `america.navalhaapp.tech`.
+- Migrations: CLI do Prisma na mesma versão do projeto, num container descartável na rede do compose:
+  `docker run --rm --network navalha_default --env-file navalha.env -v <pasta prisma>:/w/prisma:ro -w /w node:20-alpine
+  npx -y prisma@6.19.3 migrate deploy --schema prisma/schema.prisma`. As 6 migrations aplicadas; o banco tem só a América.
+- Admin de teste e as 15 categorias padrão criados por SQL (o seed recusa banco remoto). A senha foi gerada na VPS e
+  fica só em `/opt/navalha/admin-teste.txt` (600). A imagem final não traz `bcryptjs` como módulo solto (o Next
+  empacota), por isso o hash foi gerado num `node:20-alpine` com `bcryptjs@2.4.3`.
+- Fumaça dentro da rede do compose (23 verificações, sem falhas): `/login` e `/book` respondem só no Host da América;
+  raiz, subdomínio desconhecido, IP e `america.navalha.app` dão 404; login certo/errado, cookie HttpOnly + Secure sem
+  Domain, sessão não vale em outro Host, foto de 0,9 MB e de 9,9 MB aceitas 3 vezes seguidas e servidas como WebP só
+  no Host da América.
+- Pendente: o registro A `america` na Cloudflare e trocar o Caddyfile pelo `caddy/Caddyfile.novo` (site
+  `america.navalhaapp.tech` com 16 MiB e a raiz/www redirecionando com 302), comprovar o 413 acima de 16 MiB, HTTPS
+  pelo navegador e reinício da VPS. Backups das configurações anteriores em `/opt/navalha/backup-config/`.
 
 ## 6. Backup e restauração
 
