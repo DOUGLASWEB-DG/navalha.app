@@ -95,7 +95,7 @@ test('recusa arquivo vazio, grande demais, SVG e texto disfarçado', async () =>
   await rejects(processImage(Buffer.alloc(0)), 400, /vazio/)
   const tooBig = Buffer.alloc(MAX_UPLOAD_BYTES + 1)
   tooBig.set([0xff, 0xd8, 0xff])
-  await rejects(processImage(tooBig), 413, /2 MB/)
+  await rejects(processImage(tooBig), 413, /15 MB/)
   await rejects(processImage(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>')), 400, /Formato não suportado/)
   await rejects(processImage(Buffer.from('não sou uma foto, só me chamo foto.jpg')), 400, /Formato não suportado/)
 })

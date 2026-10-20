@@ -1,5 +1,6 @@
 import { ApiError } from '@/lib/api-error'
-import { MAX_UPLOAD_BYTES, processImage } from '@/lib/uploads/image'
+import { processImage } from '@/lib/uploads/image'
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MESSAGE } from '@/lib/uploads/limits'
 import { buildObjectKey, deleteObject, keyFromUrl, objectUrl, saveObject, type UploadKind } from '@/lib/uploads/storage'
 
 // Partes comuns das rotas de foto (serviço e avatar). A rota decide quem pode e qual registro; aqui fica só o
@@ -12,7 +13,7 @@ const MULTIPART_OVERHEAD_BYTES = 64 * 1024
 export async function readImageUpload(req: Request): Promise<Buffer> {
   const declaredLength = Number(req.headers.get('content-length') ?? 0)
   if (declaredLength > MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES) {
-    throw new ApiError(413, 'A foto pode ter no máximo 2 MB.')
+    throw new ApiError(413, MAX_UPLOAD_MESSAGE)
   }
   let file: FormDataEntryValue | null
   try {

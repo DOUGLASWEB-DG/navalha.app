@@ -12,7 +12,7 @@ funcional, com commit por fase em branch própria.
 | 1.5 | Limites de tentativa, reserva pública, redirecionamento seguro | Concluído |
 | 2 | Schema por migrations, tabela `Barbearia`, `barbeariaId`, `User.active` | Concluído |
 | 3 | Multi-tenant pelo Host, sessão por barbearia, fuso da barbearia, testes de isolamento | Concluído |
-| 4 | Fotos de serviço e de barbeiro, imagem Docker, guia de deploy | Concluído (limite de envio em revisão: 2 MB para 15 MB) |
+| 4 | Fotos de serviço e de barbeiro, imagem Docker, guia de deploy | Concluído (limite de foto 15 MB desde 2026-10-20) |
 | VPS | Servidor protegido, Docker, Caddy, app com banco de teste | Em andamento (fase 4 de 7) |
 | 5 | Exclusão por engano com motivo e trilha (soft delete) | Planejado |
 | 6 | Eventos com `barbeariaId`, n8n, WhatsApp e endereço por barbearia | Planejado |

@@ -147,7 +147,12 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public files (images, etc.)
+     * - envio de foto (api/services/<id>/image, api/users/<id>/avatar): no Next 15.5, o middleware em Node.js
+     *   corrompe de forma intermitente corpos acima de ~100 KB ("Response body object should not be disturbed
+     *   or locked", 500 em ~25% dos envios; medido em 2026-10-19). Fora do middleware: 0 falhas em 100.
+     *   ATENÇÃO: rota nesta lista não passa pela barreira de tenant nem de sessão daqui. Ela PRECISA validar
+     *   tudo no handler (requireTenantAdmin), e a suíte de isolamento precisa cobri-la.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/services/[^/]+/image$|api/users/[^/]+/avatar$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

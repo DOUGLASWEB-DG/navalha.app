@@ -82,14 +82,14 @@ não tem script (ver dívidas).
 
 ## 5. Proxy (Caddy ou Nginx)
 
-- Limite de corpo de **3 MB, configurado explicitamente** (fotos têm até 2 MB). Caddy não limita por padrão, então
-  não conte com o padrão: `request_body { max_size 3MB }` no site do Navalha. Nginx: `client_max_body_size 3m;`.
-  Com esse limite, o proxy barra tudo acima de 3 MB; entre 2 e 3 MB o Next ainda pode responder 500 intermitente em vez
-  de 413 (o arquivo é recusado do mesmo jeito). A checagem no `middleware.ts` ficou adiada (decisão de 2026-10-19).
-  Comprovado na VPS (Caddy 2.10.2, `reverse_proxy` para um backend de eco, 2026-10-19): 2,5 MB passa; 2,9 MB e 4 MB
-  recebem 413, inclusive com envio chunked (sem `Content-Length`). No Caddy "3MB" = 3.000.000 bytes (não 3 MiB); a foto
-  máxima com o multipart fica perto de 2,1 MB. Atenção: o limite só age quando o corpo é lido; atrás de `file_server`
-  um POST recebe 405 de qualquer tamanho, então teste sempre pela rota que faz proxy.
+- Limite de corpo de **16 MiB, configurado explicitamente** (fotos têm até 15 MB, `lib/uploads/limits.ts`). Caddy não
+  limita por padrão, então não conte com o padrão: `request_body { max_size 16MiB }` no site do Navalha (no Caddy "MB"
+  = 1.000.000 bytes, por isso `MiB`). Nginx: `client_max_body_size 16m;`. Mudou de 3 MB para 16 MiB em 2026-10-20 junto
+  com o limite de foto (2 MB para 15 MB) e a saída das rotas de envio do matcher do middleware (`docs/uploads.md`).
+  Comprovado na VPS com 3 MB (Caddy 2.10.2, `reverse_proxy` para um backend de eco, 2026-10-19): abaixo do limite passa;
+  acima recebe 413, inclusive com envio chunked (sem `Content-Length`). O valor de 16 MiB precisa ser comprovado de novo.
+  Atenção: o limite só age quando o corpo é lido; atrás de `file_server` um POST recebe 405 de qualquer tamanho, então
+  teste sempre pela rota que faz proxy.
 - Monte a **pasta** do Caddyfile no container (`./caddy:/etc/caddy:ro`), não o arquivo: editores e `sed -i` gravam um
   arquivo novo (outro inode) e um bind de arquivo único continua mostrando o antigo, sem erro nenhum (aconteceu no teste).
 
@@ -138,7 +138,8 @@ de novo. Confira o dono uid 1001 depois de extrair (`chown -R 1001:1001` se nece
 
 - **Limpeza de fotos órfãs:** não existe rotina. Sobram arquivos quando a remoção falha (vira log) ou num restore
   parcial. Proposta futura: script que lista arquivos sem URL no banco e apaga após conferência.
-- **500 do Next acima de 2 MB:** depende de uma checagem de `content-length` no `middleware.ts` (aguarda autorização).
+- **500 do Next em envio de foto:** resolvido em 2026-10-20 tirando as rotas de envio do matcher do middleware
+  (`docs/uploads.md`). Acima de 15 MB o app ainda pode responder 500 em vez de 413; o proxy (16 MiB) barra o resto.
 - **Um container só:** rate limit e cache de tenant ficam em memória; com 2 réplicas cada uma conta separado.
 - **Provisionar barbearia em banco remoto:** sem script seguro ainda.
 - **Cron de lembretes** (`scripts/cron.ts`) não está no container; WhatsApp só na barbearia padrão (Blocos 6/7).

@@ -85,7 +85,7 @@ interface Target {
   publicUrl: (book: any, id: string) => string | null | undefined
 }
 
-async function runTarget(t: Target, tokens: { tA?: string; tABarber?: string; tB?: string }, jpeg: Buffer, huge: Buffer) {
+async function runTarget(t: Target, tokens: { tA?: string; tABarber?: string; tB?: string }, jpeg: Buffer, huge: Buffer, large: [string, Buffer][]) {
   const { tA, tABarber, tB } = tokens
   const upload = (host: string, id: string, token: string | undefined, fileName: string, mime: string, data: Buffer, field?: string) => {
     const m = multipart(fileName, mime, data, field)
@@ -117,10 +117,10 @@ async function runTarget(t: Target, tokens: { tA?: string; tABarber?: string; tB
     ['corpo que não é multipart', await raw(A, 'POST', t.route(t.aId), { token: tA, ...json({}) })],
   ]
   for (const [label, r] of bad) check(L(`${label}: 400`), r.status === 400, `status=${r.status}`)
-  // Acima de 2 MB a rota responde 413. O Next, por bufferizar o corpo para o middleware, às vezes falha com 500 ANTES
-  // de a rota rodar (ver docs/uploads.md). A suíte garante que o arquivo é recusado e que nada é gravado.
+  // Acima do limite (15 MB) a rota responde 413 pelo tamanho declarado, antes de ler o corpo. Se ainda aparecer 500,
+  // é o Next falhando antes da rota (ver docs/uploads.md): a suíte garante que o arquivo é recusado e nada é gravado.
   const bigRes = await upload(A, t.aId, tA, 'g.png', 'image/png', huge)
-  check(L('arquivo acima de 2 MB é recusado (413, ou 500 do framework) sem gravar'), [413, 500].includes(bigRes.status), `status=${bigRes.status}`)
+  check(L('arquivo acima de 15 MB é recusado (413, ou 500 do framework) sem gravar'), [413, 500].includes(bigRes.status), `status=${bigRes.status}`)
   if (bigRes.status !== 413) console.log(`aviso: [${t.label}] arquivo grande respondeu ${bigRes.status} em vez de 413 (comportamento do Next, ver docs/uploads.md)`)
   check(L('nenhuma foto gravada após entradas inválidas'), !(await t.readUrl(t.aId)))
 
@@ -165,6 +165,22 @@ async function runTarget(t: Target, tokens: { tA?: string; tABarber?: string; tB
   check(L('DELETE: URL passa a 404'), (await raw(A, 'GET', url2)).status === 404)
   check(L('DELETE repetido: 200 (idempotente)'), (await raw(A, 'DELETE', t.route(t.aId), { token: tA })).status === 200)
 
+  // 9. Fotos grandes VÁLIDAS (o caso de celular): várias seguidas, porque o 500 do Next era intermitente
+  for (const [label, data] of large) {
+    const statuses: number[] = []
+    let lastUrl = ''
+    for (let i = 0; i < 3; i++) {
+      const res = await upload(A, t.aId, tA, 'grande.jpg', 'image/jpeg', data)
+      statuses.push(res.status)
+      if (res.json?.[t.responseField]) { lastUrl = res.json[t.responseField]; createdFiles.push(fileOf(lastUrl)) }
+    }
+    check(L(`${label}: aceita nas 3 tentativas`), statuses.every((s) => s === 200), `status=${statuses.join(',')}`)
+    const meta = lastUrl ? await sharp((await raw(A, 'GET', lastUrl)).body).metadata() : null
+    check(L(`${label}: guardada como WebP de até 800 px`), meta?.format === 'webp' && Math.max(meta.width ?? 9999, meta.height ?? 9999) <= 800, `${meta?.format} ${meta?.width}x${meta?.height}`)
+  }
+  await raw(A, 'DELETE', t.route(t.aId), { token: tA })
+  check(L('fotos grandes: só a última fica no disco, removida no DELETE'), createdFiles.every((f) => !fs.existsSync(f)))
+
   // Limpeza do que este alvo criou
   await t.clearUrl(t.aId)
   for (const file of createdFiles) fs.rmSync(file, { force: true })
@@ -186,8 +202,14 @@ async function main() {
     .withMetadata({ orientation: 6 })
     .toBuffer()
   check('foto de teste tem EXIF antes do envio', Boolean((await sharp(jpeg).metadata()).exif))
-  const huge = await sharp({ create: { width: 1200, height: 1200, channels: 3, background: { r: 128, g: 128, b: 128 }, noise: { type: 'gaussian', mean: 128, sigma: 60 } } }).png().toBuffer()
-  check('arquivo grande de teste passa de 2 MB', huge.length > 2 * 1024 * 1024, `tamanho=${huge.length}`)
+  // Ruído não comprime: o PNG fica perto de 3 bytes por pixel
+  const huge = await sharp({ create: { width: 2400, height: 2400, channels: 3, background: { r: 128, g: 128, b: 128 }, noise: { type: 'gaussian', mean: 128, sigma: 60 } } }).png().toBuffer()
+  check('arquivo grande de teste passa de 15 MB', huge.length > 15 * 1024 * 1024, `tamanho=${huge.length}`)
+  // Válidas: uma de ~10 MB (pesada em bytes) e uma de 50 MP (pesada em pixels, como as de celular de 50 MP)
+  const heavy = await sharp({ create: { width: 3600, height: 2800, channels: 3, background: { r: 90, g: 90, b: 90 }, noise: { type: 'gaussian', mean: 128, sigma: 50 } } }).jpeg({ quality: 97 }).toBuffer()
+  const megapixels = await sharp({ create: { width: 8160, height: 6120, channels: 3, background: { r: 40, g: 120, b: 200 } } }).jpeg().toBuffer()
+  check('foto válida pesada tem entre 8 e 15 MB', heavy.length > 8 * 1024 * 1024 && heavy.length < 15 * 1024 * 1024, `tamanho=${heavy.length}`)
+  const large: [string, Buffer][] = [[`foto de ${(heavy.length / 1048576).toFixed(1)} MB`, heavy], ['foto de 50 MP', megapixels]]
 
   const targets: Target[] = [
     {
@@ -203,7 +225,7 @@ async function main() {
       publicUrl: (book, id) => book?.barbers?.find((b: any) => b.id === id)?.avatarUrl,
     },
   ]
-  for (const target of targets) await runTarget(target, { tA, tABarber, tB }, jpeg, huge)
+  for (const target of targets) await runTarget(target, { tA, tABarber, tB }, jpeg, huge, large)
 
   // Caminhos maliciosos na leitura pública (valem para as duas pastas)
   for (const evil of [

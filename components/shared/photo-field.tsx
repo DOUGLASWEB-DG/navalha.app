@@ -6,10 +6,10 @@ import { ImagePlus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, MAX_UPLOAD_MESSAGE } from '@/lib/uploads/limits'
 
-// Campo de foto dos formulários (serviço e usuário). Mesmos limites do servidor (lib/uploads/image.ts);
+// Campo de foto dos formulários (serviço e usuário). Mesmos limites do servidor (lib/uploads/limits.ts);
 // o servidor continua sendo quem decide.
-const MAX_PHOTO_BYTES = 2 * 1024 * 1024
 const ACCEPTED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 export function usePhotoField(savedUrl: string | null | undefined) {
@@ -42,8 +42,8 @@ export function usePhotoField(savedUrl: string | null | undefined) {
       event.target.value = ''
       return
     }
-    if (chosen.size > MAX_PHOTO_BYTES) {
-      toast.error('Foto muito grande', { description: 'A foto pode ter no máximo 2 MB.' })
+    if (chosen.size > MAX_UPLOAD_BYTES) {
+      toast.error('Foto muito grande', { description: MAX_UPLOAD_MESSAGE })
       event.target.value = ''
       return
     }
@@ -136,7 +136,7 @@ export function PhotoField({ field, label, inputId, disabled, round }: PhotoFiel
               Remover foto
             </Button>
           )}
-          <p className="text-xs text-muted-foreground">JPEG, PNG ou WebP, até 2 MB.</p>
+          <p className="text-xs text-muted-foreground">JPEG, PNG ou WebP, até {MAX_UPLOAD_MB} MB.</p>
         </div>
       </div>
     </div>

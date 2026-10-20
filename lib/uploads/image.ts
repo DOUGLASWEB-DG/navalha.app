@@ -1,12 +1,15 @@
 import sharp from 'sharp'
 import { ApiError } from '@/lib/api-error'
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MESSAGE } from '@/lib/uploads/limits'
 
-// Fotos de serviço e de barbeiro: no máximo 2 MB na entrada; saída WebP com o lado maior em até 800 px.
-export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024
+// Fotos de serviço e de barbeiro: entrada até MAX_UPLOAD_BYTES (lib/uploads/limits.ts); saída WebP com o lado
+// maior em até 800 px.
+export { MAX_UPLOAD_BYTES }
 export const MAX_IMAGE_SIDE = 800
 // Teto de pixels decodificados (largura x altura). Bloqueia "bombas de descompressão": um arquivo pequeno
-// que declara dimensões enormes e esgotaria a memória ao ser aberto. 40 MP cobre fotos de celular.
-export const MAX_INPUT_PIXELS = 40_000_000
+// que declara dimensões enormes e esgotaria a memória ao ser aberto. 60 MP cobre celulares de 48/50 MP;
+// decodificar no teto usa cerca de 250 MB de memória.
+export const MAX_INPUT_PIXELS = 60_000_000
 
 export type ImageType = 'jpeg' | 'png' | 'webp'
 
@@ -25,7 +28,7 @@ export function detectImageType(data: Uint8Array): ImageType | null {
 // imagem limpa: sem metadados (EXIF, localização GPS), com a rotação aplicada e no tamanho padrão.
 export async function processImage(input: Uint8Array, options: { maxInputPixels?: number } = {}): Promise<Buffer> {
   if (input.length === 0) throw new ApiError(400, 'Arquivo vazio.')
-  if (input.length > MAX_UPLOAD_BYTES) throw new ApiError(413, 'A foto pode ter no máximo 2 MB.')
+  if (input.length > MAX_UPLOAD_BYTES) throw new ApiError(413, MAX_UPLOAD_MESSAGE)
   if (!detectImageType(input)) throw new ApiError(400, 'Formato não suportado. Envie uma foto JPEG, PNG ou WebP.')
 
   try {

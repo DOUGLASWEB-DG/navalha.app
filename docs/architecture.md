@@ -9,7 +9,7 @@ Versão do documento: 2026-10-19. Descreve o **estado atual** do código. O que 
                 Internet
                     |
         +-----------v-----------+
-        |  Caddy (HTTPS, 80/443) |  limite de corpo 3 MB, X-Real-IP, sem cabeçalhos de versão
+        |  Caddy (HTTPS, 80/443) |  limite de corpo 16 MiB, X-Real-IP, sem cabeçalhos de versão
         +-----------+-----------+
                     | Host original
         +-----------v-----------+

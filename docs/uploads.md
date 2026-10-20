@@ -8,7 +8,7 @@ Deploy na VPS (volume, init no Docker, backup): `docs/deploy.md`.
 
 | Peça | Arquivo |
 |---|---|
-| Validação e conversão (JPEG/PNG/WebP, 2 MB, 40 MP, saída WebP até 800 px, sem EXIF/GPS) | `lib/uploads/image.ts` |
+| Validação e conversão (JPEG/PNG/WebP, 15 MB, 60 MP, saída WebP até 800 px, sem EXIF/GPS) | `lib/uploads/image.ts` |
 | Gravação no disco, chave `<barbeariaId>/<services\|avatars>/<uuid>.webp`, marcador do volume | `lib/uploads/storage.ts` |
 | Recebimento do arquivo e troca segura (comum às duas rotas) | `lib/uploads/route-helpers.ts` |
 | Envio e remoção (somente ADMIN da barbearia) | `app/api/services/[id]/image/route.ts`, `app/api/users/[id]/avatar/route.ts` |
@@ -49,17 +49,21 @@ volumes:
 
 ### Limites de tamanho no proxy
 
-O servidor recusa mais de 2 MB, mas o proxy da VPS precisa deixar o corpo chegar até lá:
+O servidor recusa mais de 15 MB (`lib/uploads/limits.ts`; fotos de celular de 12 a 50 MP têm de 3 a 15 MB), mas o
+proxy da VPS precisa deixar o corpo chegar até lá:
 
-- Nginx: `client_max_body_size 3m;` (o padrão é 1 MB e devolveria 413 antes do app).
-- Caddy: o padrão não limita; se definir `request_body { max_size 3MB }`, mantenha pelo menos 3 MB.
+- Nginx: `client_max_body_size 16m;` (o padrão é 1 MB e devolveria 413 antes do app).
+- Caddy: o padrão não limita; defina `request_body { max_size 16MiB }` (com `MB` o Caddy conta 1.000.000 bytes).
 
-O Next.js bufferiza até 10 MB do corpo por causa do middleware. Entre 2 e 10 MB a rota responde 413 com mensagem clara,
-mas de forma **intermitente** o próprio Next falha com 500 antes de a rota rodar (condição de corrida do framework,
-observada na primeira requisição grande depois de subir o servidor). Acima de 10 MB o 500 é sistemático (comprovado com
-um envio de 26 MB). Nos dois casos o arquivo é recusado e nada é gravado. O
-formulário do admin já recusa arquivos acima de 2 MB no navegador, e o `client_max_body_size 3m` do proxy barra o resto;
-recusar com 413 dentro do app exigiria uma checagem de `content-length` no `middleware.ts`, o que ficou para uma etapa autorizada.
+As duas rotas de envio (`api/services/<id>/image` e `api/users/<id>/avatar`) ficam **fora do matcher do middleware**.
+No Next 15.5 o middleware em Node.js bufferiza o corpo e, de forma intermitente, corrompia envios acima de ~100 KB
+("Response body object should not be disturbed or locked": 500 em ~25% dos envios, medido em 2026-10-19); fora do
+middleware foram 0 falhas em 100. Isso é seguro porque os handlers resolvem a barbearia pelo próprio Host
+(`getCurrentBarbearia`) e exigem `requireTenantAdmin`; o middleware não injeta cabeçalho de tenant que pudesse ser
+forjado. A suíte de isolamento cobre as 4 rotas+métodos. Efeito colateral: o envio de foto não renova a sessão.
+`experimental.middlewareClientMaxBodySize` (16 MB, `next.config.js`) continua acima do limite para as demais rotas.
+
+Ao mudar `MAX_UPLOAD_BYTES`, ajuste junto o `next.config.js` e o proxy; os dois precisam ficar acima dele.
 
 ### Backup
 
