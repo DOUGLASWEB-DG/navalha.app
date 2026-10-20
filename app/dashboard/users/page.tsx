@@ -17,8 +17,11 @@ import { UserFormModal } from '@/components/users/user-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
 
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 export default function UsersPage() {
   const [modalOpen, setModalOpen] = useState(false)
@@ -36,18 +39,13 @@ export default function UsersPage() {
       if (!ok) return
     }
     try {
-      const res = await fetch(`/api/users/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ active }),
-      })
-      const data = await res.json().catch(() => null)
-      if (!res.ok) throw new Error(data?.error)
+      await apiRequest(`/api/users/${id}`, { method: 'PATCH', json: { active } })
       mutate()
-      toast.success('Sucesso!', { description: active ? 'Usuário reativado.' : 'Usuário desativado.' })
+      toast.success(active ? 'Usuário reativado' : 'Usuário desativado', {
+        description: active ? 'Ele já pode entrar e receber agendamentos.' : 'Ele não consegue mais entrar nem receber novos agendamentos.',
+      })
     } catch (error) {
-      const message = error instanceof Error && error.message ? error.message : 'Falha ao atualizar o usuário.'
-      toast.error('Erro', { description: message })
+      showError(active ? 'Não foi possível reativar o usuário' : 'Não foi possível desativar o usuário', error)
     }
   }
 

@@ -20,8 +20,9 @@ import {
 import { cn } from '@/lib/utils'
 import { AppIcon } from '@/components/shared/app-icon'
 import { tenantConfig } from '@/config/tenant'
+import { apiFetcher } from '@/lib/http-errors'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 interface SidebarProps {
   open: boolean

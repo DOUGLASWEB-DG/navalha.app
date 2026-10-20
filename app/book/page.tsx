@@ -549,6 +549,11 @@ function BookingContent() {
                           <img
                             src={svc.imageUrl || getServiceImage(svc.name)}
                             alt=""
+                            onError={(e) => {
+                              // Foto cadastrada que não abre (arquivo removido, rede): usa a imagem padrão do serviço
+                              const fallback = getServiceImage(svc.name)
+                              if (!e.currentTarget.src.endsWith(fallback)) e.currentTarget.src = fallback
+                            }}
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />

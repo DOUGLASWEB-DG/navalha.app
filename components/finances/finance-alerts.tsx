@@ -15,8 +15,9 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
+import { apiFetcher } from '@/lib/http-errors'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 const severityConfig = {
   INFO: {

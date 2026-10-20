@@ -26,6 +26,8 @@ import {
 import { Target, Type, Calendar, DollarSign } from 'lucide-react'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
 const schema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -102,20 +104,15 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
 
   async function onSubmit(data: FormData) {
     try {
-      const res = await fetch('/api/goals', {
+      await apiRequest('/api/goals', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          targetAmount: parseFloat(data.targetAmount),
-        }),
+        json: { ...data, targetAmount: parseFloat(data.targetAmount) },
       })
 
-      if (!res.ok) throw new Error('Falha ao salvar')
-      toast.success('Sucesso!', { description: 'Meta criada com sucesso.' })
+      toast.success('Meta criada', { description: 'Acompanhe o progresso dela no painel.' })
       onSaved()
-    } catch {
-      toast.error('Erro', { description: 'Falha ao criar meta.' })
+    } catch (error) {
+      showError('Não foi possível criar a meta', error)
     }
   }
 

@@ -6,7 +6,8 @@ import { ImagePlus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
-import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB, MAX_UPLOAD_MESSAGE } from '@/lib/uploads/limits'
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from '@/lib/uploads/limits'
+import { apiRequest, errorMessage } from '@/lib/http-errors'
 
 // Campo de foto dos formulários (serviço e usuário). Mesmos limites do servidor (lib/uploads/limits.ts);
 // o servidor continua sendo quem decide.
@@ -38,12 +39,16 @@ export function usePhotoField(savedUrl: string | null | undefined) {
     const chosen = event.target.files?.[0]
     if (!chosen) return
     if (!ACCEPTED_PHOTO_TYPES.includes(chosen.type)) {
-      toast.error('Formato não suportado', { description: 'Envie uma foto JPEG, PNG ou WebP.' })
+      toast.error('Formato de foto não suportado', {
+        description: `"${chosen.name}" não é JPEG, PNG ou WebP. Escolha outra foto.`,
+      })
       event.target.value = ''
       return
     }
     if (chosen.size > MAX_UPLOAD_BYTES) {
-      toast.error('Foto muito grande', { description: MAX_UPLOAD_MESSAGE })
+      toast.error('Foto muito grande', {
+        description: `"${chosen.name}" tem ${(chosen.size / 1024 / 1024).toFixed(1).replace('.', ',')} MB e o máximo é ${MAX_UPLOAD_MB} MB. Escolha uma foto menor.`,
+      })
       event.target.value = ''
       return
     }
@@ -63,17 +68,28 @@ export function usePhotoField(savedUrl: string | null | undefined) {
 
 export type PhotoFieldState = ReturnType<typeof usePhotoField>
 
+// Textos próprios do envio de foto. O 503 do servidor cita variáveis de ambiente: isso fica só no log do servidor.
+const PHOTO_MESSAGES = {
+  503: 'O armazenamento de fotos não está disponível no momento. Avise o suporte.',
+}
+
 // Envia ou remove a foto depois que o cadastro foi salvo (a rota precisa do id).
 // Devolve a mensagem de erro, ou null quando deu certo ou não havia nada a fazer.
 export async function syncPhoto(endpoint: string, field: PhotoFieldState): Promise<string | null> {
   if (field.file) {
     const body = new FormData()
     body.append('file', field.file)
-    const res = await fetch(endpoint, { method: 'POST', body })
-    if (!res.ok) return (await res.json().catch(() => null))?.error ?? 'Falha ao enviar a foto.'
+    try {
+      await apiRequest(endpoint, { method: 'POST', body, messages: PHOTO_MESSAGES })
+    } catch (error) {
+      return errorMessage(error, 'Não foi possível enviar a foto.')
+    }
   } else if (field.remove && field.savedUrl) {
-    const res = await fetch(endpoint, { method: 'DELETE' })
-    if (!res.ok) return 'Falha ao remover a foto.'
+    try {
+      await apiRequest(endpoint, { method: 'DELETE', messages: PHOTO_MESSAGES })
+    } catch (error) {
+      return errorMessage(error, 'Não foi possível remover a foto.')
+    }
   }
   return null
 }
@@ -136,7 +152,13 @@ export function PhotoField({ field, label, inputId, disabled, round }: PhotoFiel
               Remover foto
             </Button>
           )}
-          <p className="text-xs text-muted-foreground">JPEG, PNG ou WebP, até {MAX_UPLOAD_MB} MB.</p>
+          <p className={cn('text-xs', field.file || field.remove ? 'font-medium text-primary' : 'text-muted-foreground')}>
+            {field.file
+              ? 'Foto escolhida. Ela só é enviada quando você clicar em Salvar.'
+              : field.remove
+                ? 'A foto será removida quando você clicar em Salvar.'
+                : `JPEG, PNG ou WebP, até ${MAX_UPLOAD_MB} MB.`}
+          </p>
         </div>
       </div>
     </div>

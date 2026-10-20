@@ -34,8 +34,11 @@ import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 import { PageHeader } from '@/components/dashboard/page-header'
 
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 const statusFilters = [
   { value: 'ALL', label: 'Todos' },
@@ -157,24 +160,16 @@ export default function AppointmentsPage() {
 
     setUpdatingId(appt.id)
     try {
-      const response = await fetch(`/api/appointments/${appt.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      })
-      if (!response.ok) {
-        const result = await response.json().catch(() => null)
-        throw new Error(result?.error || 'Falha ao atualizar agendamento.')
-      }
+      await apiRequest(`/api/appointments/${appt.id}`, { method: 'PATCH', json: { status } })
       await mutate()
       const statusText = status === 'CONFIRMED'
-        ? 'Agendamento confirmado. O cliente será avisado pelo WhatsApp.'
+        ? 'Agendamento confirmado.'
         : status === 'COMPLETED'
           ? 'Atendimento concluído. Receita registrada no caixa.'
           : 'Agendamento cancelado.'
       toast.success('Status atualizado', { description: statusText })
     } catch (error) {
-      toast.error('Erro', { description: error instanceof Error ? error.message : 'Falha ao atualizar agendamento.' })
+      showError('Não foi possível atualizar o agendamento', error)
     } finally {
       setUpdatingId(null)
     }

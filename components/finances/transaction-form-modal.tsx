@@ -28,8 +28,11 @@ import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 const schema = z.object({
   type: z.enum(['INCOME', 'EXPENSE']),
@@ -114,25 +117,17 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
 
   async function onSubmit(data: FormData) {
     try {
-      const res = await fetch('/api/finances', {
+      await apiRequest('/api/finances', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          amount: parseFloat(data.amount),
-        }),
+        json: { ...data, amount: parseFloat(data.amount) },
       })
 
-      if (!res.ok) throw new Error('Falha ao salvar')
-
-      toast.success('Sucesso!', {
-        description: `${data.type === 'INCOME' ? 'Receita' : 'Despesa'} registrada com sucesso.`,
+      toast.success(`${data.type === 'INCOME' ? 'Receita' : 'Despesa'} registrada`, {
+        description: 'Ela já aparece na lista de transações.',
       })
       onSaved()
-    } catch {
-      toast.error('Erro', {
-        description: 'Falha ao salvar transação.',
-      })
+    } catch (error) {
+      showError('Não foi possível registrar a transação', error)
     }
   }
 

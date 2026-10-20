@@ -24,6 +24,8 @@ import {
 } from '@/components/ui/select'
 import { User, Mail, Lock, ShieldCheck } from 'lucide-react'
 import { PhotoField, syncPhoto, usePhotoField } from '@/components/shared/photo-field'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
 const schema = z.object({
   name: z.string().min(2, 'Nome muito curto'),
@@ -74,7 +76,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
 
   async function onSubmit(data: FormData) {
     if (!user && !data.password) {
-      toast.error('Erro', { description: 'A senha é obrigatória para novos usuários' })
+      toast.error('Defina uma senha', { description: 'Usuários novos precisam de uma senha para conseguir entrar.' })
       return
     }
 
@@ -92,32 +94,29 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         body.password = data.password
       }
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-
-      if (!res.ok) {
-        const d = await res.json()
-        throw new Error(d.error || 'Falha na requisição')
-      }
-      const saved = await res.json()
+      const saved = await apiRequest<{ id: string }>(url, { method, json: body })
 
       // A foto vai depois do cadastro (precisa do id). Se ela falhar, o usuário já está salvo.
+      const sentPhoto = !!photo.file
+      const removedPhoto = photo.remove && !!photo.savedUrl
       const photoError = await syncPhoto(`/api/users/${saved.id}/avatar`, photo)
       if (photoError) {
-        toast.warning('Usuário salvo, mas a foto não foi atualizada', { description: photoError })
+        toast.warning(user ? 'Usuário atualizado, mas a foto não foi salva' : 'Usuário criado, mas a foto não foi salva', {
+          description: `${photoError} Abra o cadastro novamente para tentar enviar a foto.`,
+          duration: 9000,
+        })
       } else {
-        toast.success('Sucesso!', {
-          description: user ? 'Usuário atualizado.' : 'Usuário criado.',
+        toast.success(user ? 'Usuário atualizado' : 'Usuário criado', {
+          description: sentPhoto
+            ? 'A foto nova já aparece na Equipe e na página de agendamento.'
+            : removedPhoto
+              ? 'A foto foi removida.'
+              : 'As alterações foram salvas.',
         })
       }
       onSaved()
-    } catch (err: any) {
-      toast.error('Erro', {
-        description: err.message || 'Falha ao salvar usuário.',
-      })
+    } catch (error) {
+      showError(user ? 'Não foi possível atualizar o usuário' : 'Não foi possível criar o usuário', error)
     }
   }
 

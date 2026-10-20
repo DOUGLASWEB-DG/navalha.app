@@ -18,6 +18,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
 import { formatBrazilPhone, normalizeBrazilPhone } from '@/lib/format'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Nome é obrigatório'),
@@ -63,25 +65,14 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
       const url = client ? `/api/clients/${client.id}` : '/api/clients'
       const method = client ? 'PATCH' : 'POST'
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
+      await apiRequest(url, { method, json: data })
 
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Falha de validação.')
-      }
-
-      toast.success('Sucesso!', {
-        description: client ? 'Cliente atualizado.' : 'Cliente adicionado.',
+      toast.success(client ? 'Cliente atualizado' : 'Cliente adicionado', {
+        description: client ? 'As alterações foram salvas.' : 'Ele já aparece na sua lista de clientes.',
       })
       onSaved()
-    } catch (err: any) {
-      toast.error('Erro', {
-        description: err.message || 'Falha ao salvar cliente.',
-      })
+    } catch (error) {
+      showError(client ? 'Não foi possível atualizar o cliente' : 'Não foi possível adicionar o cliente', error)
     }
   }
 

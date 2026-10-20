@@ -18,8 +18,11 @@ import { ServiceFormModal } from '@/components/services/service-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
 
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 export default function ServicesPage() {
   const [modalOpen, setModalOpen] = useState(false)
@@ -33,11 +36,15 @@ export default function ServicesPage() {
     })
     if (!ok) return
     try {
-      await fetch(`/api/services/${id}`, { method: 'DELETE' })
+      await apiRequest(`/api/services/${id}`, {
+        method: 'DELETE',
+        // O servidor responde 500 quando o serviço já foi usado em agendamentos (o histórico precisa dele)
+        messages: { 500: 'Se este serviço já foi usado em agendamentos, ele precisa ficar no histórico e não pode ser removido.' },
+      })
       mutate()
-      toast.success('Sucesso!', { description: 'Serviço excluído.' })
-    } catch {
-      toast.error('Erro', { description: 'Falha ao excluir serviço.' })
+      toast.success('Serviço excluído', { description: `"${name}" saiu do catálogo e da página de agendamento.` })
+    } catch (error) {
+      showError('Não foi possível excluir o serviço', error)
     }
   }
 
@@ -102,7 +109,7 @@ export default function ServicesPage() {
                   <div className="flex items-center gap-3">
                     {svc.imageUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={svc.imageUrl} alt="" className="h-12 w-12 shrink-0 rounded-xl border border-border object-cover" />
+                      <img src={svc.imageUrl} alt="" onError={(e) => { e.currentTarget.style.display = 'none' }} className="h-12 w-12 shrink-0 rounded-xl border border-border object-cover" />
                     )}
                     <p className="text-base font-bold text-foreground line-clamp-1">{svc.name}</p>
                   </div>

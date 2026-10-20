@@ -31,8 +31,11 @@ import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 
 import { ErrorState, ListSkeleton } from '@/components/shared/data-state'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 interface ClientRow {
   id: string
@@ -80,15 +83,11 @@ export default function ClientsPage() {
     })
     if (!ok) return
     try {
-      const response = await fetch(`/api/clients/${client.id}`, { method: 'DELETE' })
-      if (!response.ok) {
-        const result = await response.json().catch(() => null)
-        throw new Error(result?.error || 'Falha ao excluir cliente.')
-      }
+      await apiRequest(`/api/clients/${client.id}`, { method: 'DELETE' })
       mutate()
-      toast.success('Cliente excluído')
+      toast.success('Cliente excluído', { description: `${client.name} saiu da sua lista de clientes.` })
     } catch (error) {
-      toast.error('Erro', { description: error instanceof Error ? error.message : 'Falha ao excluir cliente.' })
+      showError('Não foi possível excluir o cliente', error)
     }
   }
 

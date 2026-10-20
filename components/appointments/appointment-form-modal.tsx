@@ -28,8 +28,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { User, Scissors, CalendarDays, Clock, FileText, Activity } from 'lucide-react'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
+import { apiFetcher } from '@/lib/http-errors'
+import { apiRequest } from '@/lib/http-errors'
+import { showError } from '@/lib/feedback'
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json())
+const fetcher = apiFetcher
 
 const schema = z.object({
   clientId: z.string().min(1, 'Selecione um cliente'),
@@ -122,10 +125,9 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
       const url = appointment ? `/api/appointments/${appointment.id}` : '/api/appointments'
       const method = appointment ? 'PATCH' : 'POST'
 
-      const res = await fetch(url, {
+      await apiRequest(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        json: {
           clientId: data.clientId,
           serviceIds: data.serviceIds,
           serviceId: data.serviceIds[0],
@@ -133,19 +135,16 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
           date: datetime,
           status: data.status,
           notes: data.notes,
-        }),
+        },
       })
 
-      if (!res.ok) throw new Error('Falha na requisição')
-
-      toast.success('Sucesso!', {
-        description: appointment ? 'Agendamento atualizado.' : 'Agendamento criado.',
+      toast.success(appointment ? 'Agendamento atualizado' : 'Agendamento criado', {
+        description: appointment ? 'As alterações foram salvas na agenda.' : 'O horário já está reservado na agenda.',
       })
       onSaved()
-    } catch {
-      toast.error('Erro', {
-        description: 'Falha ao salvar agendamento.',
-      })
+    } catch (error) {
+      // Regras do servidor (horário ocupado, fora do expediente...) chegam na mensagem
+      showError('Não foi possível salvar o agendamento', error)
     }
   }
 
