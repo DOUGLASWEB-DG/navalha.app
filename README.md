@@ -1,255 +1,115 @@
 # Navalha.app
 
-Sistema de gestao para barbearias, com agenda, clientes, servicos, produtos,
-financeiro e comunicacao automatizada por WhatsApp.
+Plataforma de gestão para barbearias: agenda, agendamento online, clientes, serviços, produtos, financeiro, metas
+e notificações por WhatsApp. Construída como um monólito Next.js preparado para atender várias barbearias
+(multi-tenant), cada uma isolada pelo seu endereço.
 
-> Projeto privado em desenvolvimento. Consulte a equipe antes de usar em
-> producao.
+> **Status:** em desenvolvimento, uso privado. A barbearia América opera hoje na versão anterior (branch `main`).
+> A versão multi-tenant (blocos 0 a 4) está validada localmente e em preparação para a VPS. Veja
+> [docs/roadmap.md](docs/roadmap.md).
 
-## Visao geral
+## Sumário
 
-# Estado atual do projeto
+- [Visão geral](#visão-geral)
+- [Stack](#stack)
+- [Início rápido](#início-rápido)
+- [Comandos](#comandos)
+- [Documentação](#documentação)
+- [Contribuição](#contribuição)
+- [Segurança](#segurança)
 
-## Navalha.app
+## Visão geral
 
-Este documento registra o estado técnico atual do projeto,
-os principais riscos conhecidos e os próximos pontos de evolução.
+| Módulo | O que faz |
+|---|---|
+| Agenda | Agendamentos com vários serviços, conflito de horário verificado em transação serializável |
+| Agendamento online (`/book`) | Página pública da barbearia: serviço, barbeiro, data e horário, dados do cliente |
+| Clientes | Cadastro, histórico e próximo atendimento |
+| Financeiro | Receitas, despesas, categorias, relatórios e alertas |
+| Metas | Metas de faturamento por período |
+| Equipe | Barbeiros e administradores, com desativação no lugar de exclusão |
+| Fotos | Foto de serviço e de barbeiro, convertida para WebP e sem metadados (EXIF/GPS) |
+| Notificações | WhatsApp via Evolution API e eventos para n8n (em evolução) |
 
-O objetivo não é apenas registrar funcionalidades,
-mas acompanhar a evolução da qualidade técnica do sistema.
+Princípios que orientam o projeto (detalhes em [AGENTS.md](AGENTS.md)):
 
----
-
-## Matriz de projeto
-
-| Área | Estado | Observação |
-|---|---|---|
-| Stack | 🟢 Muito boa | Base tecnológica adequada |
-| Estrutura | 🟢 Boa | Organização inicial consistente |
-| Banco/modelagem | 🟡 Precisa evolução | Existem decisões de domínio a consolidar |
-| Agendamento | 🔴 Crítico | Principal ponto técnico atual |
-| UI/Design System | 🟡 Boa base | Precisa padronização |
-| Responsividade | 🔴 Atenção | Componentes compartilhados apresentam problemas mobile |
-| Segurança/RBAC | 🟡 Funciona | Precisa maior centralização e endurecimento |
-| Testes | 🔴 Precisa evoluir | Cobertura insuficiente |
-| CI/CD | 🔴 Precisa estruturar | Pipeline ainda não consolidado |
-| Observabilidade | 🔴 Praticamente ausente | Falta estratégia de logs e monitoramento |
-| Documentação | 🟡 Boa base | Precisa organização técnica |
-| SaaS real | 🔴 Ainda não | Multi-tenant e billing ainda não implementados |
-
----
-
-# Prioridade atual
-
-Agendamento.
-
-A evolução deve seguir:
-
-1. Entendimento do fluxo de agendamento público
-2. Estabilização dos componentes compartilhados de UI
-3. Consolidação de Appointment + AppointmentService
-4. Adaptação das APIs
-5. Adaptação da agenda
-6. Adaptação do financeiro
-7. Adaptação das notificações/WhatsApp
-8. Validação de conflitos de horário
-9. Testes desktop/mobile
-10. Testes automatizados
-11. Versionamento
-
----
-
-# Critério de evolução
-
-Funcionalidades
-
-Ela deve considerar:
-
-- domínio
-- banco de dados
-- API
-- interface
-- validação
-- segurança
-- responsividade
-- testes
-- documentação
-- deploy
-
----
-
-# Próximo marco
-
-## Multi-serviço por agendamento
-
-Permitir que um cliente tenha vários serviços dentro do
-mesmo agendamento.
-
-Exemplo:
-
-Cliente:
-João
-
-Agendamento:
-14:00
-
-Serviços:
-- Corte
-- Barba
-- Sobrancelha
-
-O sistema deve calcular corretamente:
-
-- duração total
-- valor total
-- disponibilidade do barbeiro
-- agenda
-- financeiro
-- notificações
+- **Isolamento entre barbearias** em toda consulta, comprovado por suíte automatizada.
+- **Evidência antes de afirmar:** nada é dado como pronto sem teste que comprove.
+- **Mudanças incrementais** em blocos com critério de aceite, sem refatoração fora do escopo.
 
 ## Stack
 
-- **Frontend e backend:** Next.js 15, React 19 e TypeScript
-- **Estilos:** Tailwind CSS, Radix UI e componentes reutilizaveis
-- **Persistencia:** PostgreSQL com Prisma ORM
-- **Formularios e validacao:** React Hook Form e Zod
-- **Graficos:** Recharts
-- **WhatsApp:** Evolution API
-- **Automacoes:** Node.js, `tsx` e cron
+| Camada | Tecnologia |
+|---|---|
+| Aplicação | Next.js 15.5 (App Router, middleware em Node.js), React 19, TypeScript |
+| Dados | PostgreSQL, Prisma 6.19 (migrations versionadas) |
+| Interface | Tailwind CSS 4, Radix UI, React Hook Form, Zod, SWR, Recharts |
+| Sessão | JWT HS256 (`jose`) em cookie `httpOnly`, preso ao endereço da barbearia |
+| Imagens | sharp (WebP, até 800 px) |
+| Integrações | Evolution API (WhatsApp), n8n (eventos) |
+| Infraestrutura | Docker, Caddy (HTTPS), VPS Ubuntu 24.04 |
 
-## Requisitos
+## Início rápido
 
-- Node.js 20 ou superior
-- npm
-- PostgreSQL (Supabase ou servidor proprio)
-- Docker e Docker Compose, caso use os servicos locais definidos em
-  `docker-compose.yml`
-
-## Configuracao local
-
-### 1. Clone o repositorio
-
-```bash
-git clone https://github.com/DOUGLASWEB-DG/Barbeiro-Atual.git
-cd Barbeiro-Atual
-```
-
-### 2. Instale as dependencias
+Requisitos: Node.js 20+, npm e Docker (para o PostgreSQL local).
 
 ```bash
 npm install
-```
-
-### 3. Configure as variaveis de ambiente
-
-Copie `.env.example` para `.env` e preencha as credenciais do PostgreSQL:
-
-```bash
-cp .env.example .env
-```
-
-Variaveis obrigatorias:
-
-| Variavel | Finalidade |
-| --- | --- |
-| `DATABASE_URL` | Conexao principal com pool de conexoes |
-| `DIRECT_URL` | Conexao direta usada pelo Prisma em migracoes |
-
-Nunca envie o arquivo `.env` para o Git.
-
-### 4. Prepare o banco
-
-```bash
-npm run db:push
-npm run db:seed
-```
-
-### 5. Inicie o sistema
-
-Terminal 1 - aplicacao web:
-
-```bash
+cp .env.example .env          # aponta para o banco LOCAL (porta 5440); defina JWT_SECRET e SEED_ADMIN_PASSWORD
+docker compose up -d db       # PostgreSQL 15 local
+npx prisma migrate deploy     # aplica as migrations
+npm run db:seed               # dados iniciais (recusa banco que não seja local)
+npm run uploads:init          # pasta das fotos
 npm run dev
 ```
 
-Terminal 2 - lembretes automaticos:
+Acesse **http://america.localhost:3000** (cada barbearia responde no seu subdomínio; `localhost:3000` puro dá 404
+de propósito). O passo a passo completo, com variáveis e problemas comuns, está em
+[docs/development.md](docs/development.md).
 
-```bash
-npm run cron
-```
+## Comandos
 
-Acesse [http://localhost:3000](http://localhost:3000).
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Servidor de desenvolvimento |
+| `npm run build` / `npm start` | Build de produção e execução |
+| `npx tsc --noEmit` | Checagem de tipos (**obrigatória**: o build ignora erros de tipo) |
+| `npm run lint` | ESLint |
+| `npm test` | Testes unitários (sem servidor) |
+| `npm run test:fixture` | Dados de teste da barbearia B (banco local) |
+| `npm run test:isolation` | Isolamento entre barbearias contra um servidor real |
+| `npm run test:uploads` | Fotos ponta a ponta contra um servidor real |
+| `npm run db:migrate` / `db:reset` / `db:push` | Banco local (recusam banco remoto) |
+| `npm run cron` | Lembretes por WhatsApp (processo separado) |
 
-## Scripts disponiveis
+## Documentação
 
-| Comando | Descricao |
-| --- | --- |
-| `npm run dev` | Inicia o Next.js em desenvolvimento |
-| `npm run build` | Gera o Prisma Client, atualiza o banco e cria o build |
-| `npm run start` | Inicia a aplicacao compilada |
-| `npm run lint` | Executa o ESLint do projeto |
-| `npm run format` | Formata os arquivos com Prettier |
-| `npm run cron` | Executa o processo de lembretes do WhatsApp |
-| `npm run db:push` | Sincroniza o schema Prisma com o banco |
-| `npm run db:migrate` | Cria e executa uma migracao Prisma |
-| `npm run db:seed` | Carrega dados iniciais |
-| `npm run db:studio` | Abre o Prisma Studio |
-| `npm run db:reset` | Reseta o banco de desenvolvimento |
+| Documento | Conteúdo |
+|---|---|
+| [docs/README.md](docs/README.md) | Índice da documentação |
+| [docs/architecture.md](docs/architecture.md) | Arquitetura, multi-tenant, sessão, fuso, fotos, notificações |
+| [docs/development.md](docs/development.md) | Ambiente local, variáveis, banco, fluxo de trabalho |
+| [docs/testing.md](docs/testing.md) | Estratégia e suítes de teste |
+| [docs/security.md](docs/security.md) | Modelo de segurança e como reportar problemas |
+| [docs/deploy.md](docs/deploy.md) | Deploy em VPS com Docker, backup e estado do servidor |
+| [docs/uploads.md](docs/uploads.md) | Fotos: limites, armazenamento, volume |
+| [docs/roadmap.md](docs/roadmap.md) | Status por bloco, dívidas conhecidas e próximos passos |
+| [docs/decisions/](docs/decisions/README.md) | Registros de decisão de arquitetura (ADRs) |
+| [CHANGELOG.md](CHANGELOG.md) | Histórico de mudanças |
 
-## Estrutura principal
+## Contribuição
 
-```text
-app/
-  api/                 Rotas da API
-  dashboard/           Telas administrativas
-  book/                Fluxo publico de agendamento
-components/            Componentes compartilhados
-config/                Configuracoes da barbearia
-lib/                   Autenticacao, formatacao e integracoes
-prisma/                Schema e seed do banco
-public/                Imagens e assets publicos
-scripts/               Jobs e automacoes
-```
+1. Crie uma branch a partir da branch de integração (`feat/<assunto>` ou `fix/<assunto>`). Nunca commite na `main`.
+2. Antes do commit: `npx tsc --noEmit`, `npm run lint`, `npm test` e `npm run build`.
+3. Mudanças em rotas da API: rode `test:fixture` + `test:isolation` (a suíte falha se houver rota nova sem teste).
+4. Commits no formato `tipo(escopo): descrição` (ex.: `feat(bloco-4c): foto do barbeiro`).
+5. Adicione arquivos pelo nome (`git add <arquivo>`), não `git add .`.
 
-## Configuracoes da barbearia
+## Segurança
 
-Dados institucionais, como nome, identidade e informacoes de contato, ficam
-centralizados em [config/tenant.ts](config/tenant.ts). Ajuste esse arquivo
-conforme a identidade da sua unidade.
+Nunca versione `.env`, chaves ou dumps de banco. Comandos que gravam dados recusam rodar contra banco remoto.
+Modelo completo e como reportar uma falha: [docs/security.md](docs/security.md).
 
-## Qualidade e validacao
+## Licença
 
-Antes de abrir um Pull Request, execute:
-
-```bash
-npx tsc --noEmit
-npm run lint
-```
-
-Para testar uma alteracao visual, valide o dashboard em desktop e celular,
-principalmente as telas de Agenda, Clientes e Agendamentos.
-
-## Fluxo Git recomendado
-
-```bash
-git checkout -b minha-alteracao
-git status
-git add arquivo1 arquivo2
-git commit -m "Descreve a alteracao"
-git push -u origin minha-alteracao
-```
-
-Depois, abra um Pull Request para `main`. Evite usar `git add .` quando houver
-alteracoes de outras tarefas no mesmo diretorio.
-
-## Seguranca
-
-- Nao compartilhe credenciais, tokens ou arquivos `.env`.
-- Valide entradas no frontend e na API.
-- Use HTTPS e variaveis protegidas no ambiente de producao.
-- Revise os logs de integracoes externas antes de publicar.
-
-## Licenca
-
-Uso privado e restrito ao projeto Navalha.app. Consulte os proprietarios antes
-de redistribuir ou publicar este codigo.
+Uso privado e restrito ao projeto Navalha.app. Consulte os proprietários antes de redistribuir ou publicar.
