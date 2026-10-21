@@ -135,6 +135,24 @@ Ubuntu 24.04 x86_64, 1 vCPU, 3,8 GB RAM, 48 GB disco. Fase 2 (proteção) e fase
   HTTPS e o redirecionamento da raiz voltaram sozinhos. No log aparecem `Failed to find Server Action "x"`: robôs
   testando ações do Next; inofensivo. Sem HSTS por enquanto (decisão futura). Backups das configurações anteriores em `/opt/navalha/backup-config/`.
 
+### Mensagens WhatsApp (2026-10-20/21): Evolution na VPS
+
+- Container `evolution` (`evoapicloud/evolution-api:v2.3.7`, versão fixa), **sem porta publicada**: só o app fala com
+  ela, em `http://evolution:8080` (`NEXT_PUBLIC_EVO_URL` e `EVO_API_KEY` no `navalha.env`; a chave e a senha do banco
+  foram geradas na VPS). Banco `evolution` com usuário próprio no mesmo Postgres; sem Redis; telemetria desligada.
+- LGPD: a Evolution guarda só a sessão da instância (`DATABASE_SAVE_DATA_INSTANCE=true`, demais `DATABASE_SAVE_*`
+  false). Conferido: tabelas `Message`, `Contact` e `Chat` vazias depois de conectar um número com ~700 conversas.
+- **Log da Evolution desligado** (`logging: driver: none` no compose): ela imprime o texto de cada mensagem enviada,
+  e isso não depende de `LOG_LEVEL`/`LOG_BAILEYS` (testado). Falhas de envio continuam no log do app. Para investigar,
+  troque temporariamente por `json-file` e volte depois.
+- `CORS_ORIGIN=*`: com um domínio, a Evolution recusa as chamadas do próprio app (sem cabeçalho Origin) com
+  "Not allowed by CORS" (500). Seguro porque ela não tem porta pública.
+- `ENABLE_WHATSAPP_SANDBOX=false` desde 2026-10-21: o envio é real para os telefones do banco (hoje só de teste).
+- Conexão: Configurações (menu de três pontos ou barra lateral, só admin) > "Criar / Conectar WhatsApp" e QR code.
+  Instância única `barberos_main`. Hoje conectado a um número **pessoal de teste**; trocar pelo número da barbearia
+  antes dos dados reais (fase 6).
+- Ainda não instalado: o robô de lembretes (`scripts/cron.ts`). Backups das configurações em `backup-config/`.
+
 ## 6. Backup e restauração
 
 Um backup só está completo com as **duas** partes, tiradas no mesmo momento:
