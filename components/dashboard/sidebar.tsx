@@ -150,8 +150,8 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
                 open ? 'gap-3 px-3 py-2.5 hover:bg-muted/30' : 'justify-center p-2.5'
               )}
             >
-              <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground group-hover:from-muted group-hover:to-muted/30 group-hover:text-primary group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200">
-                <Icon className="w-4 h-4 drop-shadow-sm" strokeWidth={2.5} />
+              <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-muted/50 border border-border text-muted-foreground group-hover:bg-muted group-hover:text-primary transition-all duration-200">
+                <Icon className="w-4 h-4" strokeWidth={2.5} />
               </div>
               {open && <span className="text-sm font-medium">{item.label}</span>}
             </Link>
@@ -167,8 +167,8 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
             open ? 'gap-3 px-3 py-2.5 hover:bg-destructive/5' : 'justify-center p-2.5'
           )}
         >
-          <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-gradient-to-b from-destructive/20 to-transparent border border-destructive/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-destructive/80 group-hover:from-destructive/30 group-hover:to-destructive/10 group-hover:text-destructive group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200">
-            <LogOut className="w-4 h-4 drop-shadow-sm" strokeWidth={2.5} />
+          <div className="flex items-center justify-center shrink-0 w-8 h-8 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive/80 group-hover:bg-destructive/15 group-hover:text-destructive transition-all duration-200">
+            <LogOut className="w-4 h-4" strokeWidth={2.5} />
           </div>
           {open && <span className="text-sm font-medium">Sair</span>}
         </button>

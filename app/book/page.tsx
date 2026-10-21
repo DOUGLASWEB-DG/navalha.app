@@ -252,7 +252,7 @@ function CalendarPicker({
               className={cn(
                 'mx-auto flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all',
                 active
-                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
                   : disabled
                     ? 'cursor-not-allowed text-muted-foreground/25'
                     : 'text-foreground hover:bg-primary/10 hover:text-primary'

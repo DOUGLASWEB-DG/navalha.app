@@ -89,10 +89,10 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground hover:text-foreground hover:from-muted hover:to-muted/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="relative bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
               aria-label="Notificações"
             >
-              <Bell className="h-4 w-4 drop-shadow-sm" strokeWidth={2.5} />
+              <Bell className="h-4 w-4" strokeWidth={2.5} />
               {unreadCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-white shadow-sm ring-2 ring-card animate-in zoom-in">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -152,10 +152,10 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden relative bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground hover:text-foreground hover:from-muted hover:to-muted/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_3px_6px_rgba(0,0,0,0.2)] transition-all duration-200"
+              className="lg:hidden relative bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
               aria-label="Mais opções"
             >
-              <MoreHorizontal className="h-4 w-4 drop-shadow-sm" strokeWidth={2.5} />
+              <MoreHorizontal className="h-4 w-4" strokeWidth={2.5} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -200,8 +200,8 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
             )}
             <DropdownMenuItem asChild className="min-h-12 rounded-xl">
               <Link href="/book" target="_blank" rel="noopener noreferrer" className="cursor-pointer gap-3">
-                <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded-md bg-gradient-to-b from-muted/80 to-transparent border border-white/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-muted-foreground">
-                  <Globe className="h-3.5 w-3.5 drop-shadow-sm" strokeWidth={2.5} />
+                <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded-md bg-muted/50 border border-border text-muted-foreground">
+                  <Globe className="h-3.5 w-3.5" strokeWidth={2.5} />
                 </div>
                 Página de agendamento
               </Link>
@@ -211,8 +211,8 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
               onClick={handleLogout}
               className="min-h-12 cursor-pointer gap-3 rounded-xl text-destructive focus:bg-destructive/10 focus:text-destructive"
             >
-              <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded-md bg-gradient-to-b from-destructive/20 to-transparent border border-destructive/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.15)] text-destructive/80">
-                <LogOut className="h-3.5 w-3.5 drop-shadow-sm" strokeWidth={2.5} />
+              <div className="flex items-center justify-center shrink-0 w-6 h-6 rounded-md bg-destructive/10 border border-destructive/20 text-destructive/80">
+                <LogOut className="h-3.5 w-3.5" strokeWidth={2.5} />
               </div>
               Sair
             </DropdownMenuItem>

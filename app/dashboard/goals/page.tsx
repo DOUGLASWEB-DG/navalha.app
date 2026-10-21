@@ -118,7 +118,7 @@ export default function GoalsPage() {
       {activeGoals.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 px-2">
-            <div className="w-2 h-2 bg-success rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+            <div className="w-2 h-2 bg-success rounded-full" />
             Metas Ativas
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -133,7 +133,7 @@ export default function GoalsPage() {
                   key={goal.id}
                   className={cn(
                     'bg-card border-border shadow-sm rounded-3xl p-6 flex flex-col gap-5 group transition-all duration-200 hover:border-white/20 hover:bg-card',
-                    isCompleted && 'border-primary/30 bg-primary/5 shadow-[inset_0_0_20px_rgba(245,158,11,0.05)]'
+                    isCompleted && 'border-primary/30 bg-primary/5'
                   )}
                 >
                   <div className="flex items-start justify-between">
@@ -236,7 +236,7 @@ export default function GoalsPage() {
       {/* Estado Vazio */}
       {(!goals || goals.length === 0) && (
         <div className="text-center py-20">
-          <div className="w-20 h-20 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-[inset_0_0_20px_rgba(245,158,11,0.1)]">
+          <div className="w-20 h-20 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
             <Target className="w-10 h-10 text-primary" />
           </div>
           <p className="text-lg font-bold text-foreground mb-2">Nenhuma meta definida</p>
