@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { Plus, Package, DollarSign, Pencil, Trash2, MoreVertical, Hash } from 'lucide-react'
+import { Plus, Package, DollarSign, Pencil, Trash2, MoreVertical } from 'lucide-react'
 import { toast } from 'sonner'
 import { confirmAction } from '@/lib/confirm-toast'
 import { Button } from '@/components/ui/button'
@@ -122,7 +122,6 @@ export default function ProductsPage() {
                           ? 'bg-warning/10 text-warning border-warning/20'
                           : 'bg-success/10 text-success border-success/20'
                     }`}>
-                    <Hash className="w-4 h-4" />
                     <span>{p.stock <= 0 ? 'Sem estoque' : p.stock <= 5 ? `Estoque baixo: ${p.stock}` : `${p.stock} em estoque`}</span>
                   </div>
                 </div>
