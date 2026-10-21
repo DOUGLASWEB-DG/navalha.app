@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
-import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Shield } from 'lucide-react'
+import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Shield, Settings } from 'lucide-react'
 import { AppIcon } from '@/components/shared/app-icon'
 import { Button } from '@/components/ui/button'
 import {
@@ -186,6 +186,14 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                       <AppIcon src="/assets/icons/equipe-icon.png" />
                     </div>
                     Equipe
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="min-h-12 rounded-xl">
+                  <Link href="/dashboard/settings" className="cursor-pointer gap-3">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground">
+                      <Settings className="h-4 w-4" strokeWidth={2.25} />
+                    </div>
+                    Configurações
                   </Link>
                 </DropdownMenuItem>
               </>

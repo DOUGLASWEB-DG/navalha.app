@@ -18,7 +18,6 @@ export default function SettingsPage() {
       setStatus('checking');
       const res = await fetch('/api/whatsapp/instance');
       const data = await res.json();
-      console.log('Status data:', data);
       
       if (data?.instance?.state === 'open' || data?.state === 'open' || data?.state === 'CONNECTED') {
         setStatus('connected');
@@ -36,7 +35,6 @@ export default function SettingsPage() {
       setStatus('checking');
       const res = await fetch('/api/whatsapp/instance', { method: 'POST' });
       const data = await res.json();
-      console.log('Create instance data:', data);
       
       toast.success('Comando enviado!');
       
@@ -60,7 +58,6 @@ export default function SettingsPage() {
     try {
       const res = await fetch('/api/whatsapp/connect');
       const data = await res.json();
-      console.log('Connect data:', data);
       
       if (data?.base64) {
         setQrCode(data.base64);
@@ -98,7 +95,7 @@ export default function SettingsPage() {
               WhatsApp Notificações
             </h3>
             <p className="text-sm text-muted-foreground">
-              Conecte seu WhatsApp para receber notificações financeiras.
+              Conecte o WhatsApp da barbearia. É por ele que saem as mensagens de agendamento, confirmação e lembrete para clientes e barbeiros.
             </p>
           </div>
           <div className="p-6 pt-0 space-y-4">

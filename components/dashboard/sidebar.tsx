@@ -16,6 +16,7 @@ import {
   LogOut,
   Shield,
   Package,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AppIcon } from '@/components/shared/app-icon'
@@ -47,6 +48,8 @@ const bottomItems = [
     icon: Globe,
     external: true,
   },
+  // Conexão do WhatsApp; a API só aceita o admin da barbearia (requireWhatsappAdmin)
+  { label: 'Configurações', href: '/dashboard/settings', icon: Settings, external: false, adminOnly: true },
 ]
 
 export function Sidebar({ open, onToggle }: SidebarProps) {
@@ -134,7 +137,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
 
       {/* Itens inferiores */}
       <div className="py-4 px-2 border-t border-border flex flex-col gap-2">
-        {bottomItems.map((item) => {
+        {bottomItems.filter((item) => !item.adminOnly || user?.role === 'ADMIN').map((item) => {
           const Icon = item.icon
           return (
             <Link
