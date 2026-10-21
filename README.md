@@ -121,7 +121,8 @@ Acesse **http://america.localhost:3000**. Variáveis, banco e problemas comuns: 
 | Testes unitários (`npm test`) | 42 testes: fuso horário, barbearia pelo Host, consultas por barbearia, fotos, mensagens de erro, nomes de serviço |
 | Isolamento (`test:isolation`) | 119 verificações em 46 rotas e métodos; cobertura obrigatória de rotas |
 | Fotos (`test:uploads`) | 99 verificações, incluindo fotos de 10 MB e de 50 MP |
-| Gate de cada entrega | `tsc`, lint, testes, build e teste funcional no navegador (computador e celular) |
+| CI (GitHub Actions) | A cada envio e Pull Request: tipos, lint, testes unitários, build e as suítes de isolamento e fotos contra um servidor real com banco descartável ([ci.yml](.github/workflows/ci.yml)) |
+| Gate de cada entrega | CI verde e teste funcional no navegador (computador e celular) |
 
 Estratégia e lacunas conhecidas: [docs/testing.md](docs/testing.md).
 
@@ -142,17 +143,19 @@ Estratégia e lacunas conhecidas: [docs/testing.md](docs/testing.md).
 
 ## Contribuição
 
-1. Crie uma branch a partir da branch de integração (`feat/<assunto>` ou `fix/<assunto>`). Nunca commite na `main`.
+1. Crie uma branch a partir da `main` (`feat/<assunto>` ou `fix/<assunto>`). Nunca commite direto na `main`.
 2. Antes do commit: `npx tsc --noEmit`, `npm run lint`, `npm test` e `npm run build`.
 3. Mudou rota da API: rode `test:fixture` e `test:isolation` (a suíte falha se houver rota nova sem teste).
 4. Mudou tela: confira no navegador, no computador e no celular.
 5. Commits no formato `tipo(escopo): descrição` (ex.: `feat(ui-1): cores com significado nas confirmações`).
 6. Adicione arquivos pelo nome (`git add <arquivo>`), não `git add .`.
+7. Abra um Pull Request para a `main` (o modelo traz o checklist). Só entra com a CI verde; a `main` é o que vai
+   para a VPS.
 
 ## Segurança
 
 Nunca versione `.env`, chaves ou dumps de banco. Comandos que gravam dados recusam rodar contra banco remoto. Em
-produção, segredos ficam só no servidor, em arquivos com permissão 600. Modelo completo e como reportar uma falha:
+produção, segredos ficam só no servidor, em arquivos com permissão 600. Como reportar uma falha: [SECURITY.md](SECURITY.md). Modelo completo:
 [docs/security.md](docs/security.md).
 
 ## Licença

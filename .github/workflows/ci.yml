@@ -1,0 +1,104 @@
+# Gate de qualidade: nada entra na main sem passar por aqui (exigir este check na proteção da branch).
+# Dois trabalhos em paralelo:
+#   verificacao: tipos, lint, testes unitários e build (o build ignora erros de tipo, por isso o tsc separado)
+#   integracao:  banco descartável + servidor real + suítes de isolamento entre barbearias e de fotos
+# Nenhum segredo de produção é usado: o banco é um Postgres efêmero do próprio runner e o JWT_SECRET é gerado na hora.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, 'feat/**', 'fix/**', 'chore/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  verificacao:
+    name: Tipos, lint, testes e build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Checagem de tipos
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
+      - name: Testes unitários
+        run: npm test
+      - name: Build de produção
+        run: npm run build
+
+  integracao:
+    name: Isolamento e fotos (servidor real)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: barberos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d barberos"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Banco local do runner: a guarda (scripts/local-db-guard.ts) só aceita localhost
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/barberos
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/barberos
+      TENANT_ROOT_DOMAIN: navalha.app
+      UPLOADS_DIR: ${{ github.workspace }}/.uploads-ci
+      TEST_PORT: 3130
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Segredo de sessão descartável
+        run: |
+          secret=$(openssl rand -base64 48)
+          echo "::add-mask::$secret"
+          echo "JWT_SECRET=$secret" >> "$GITHUB_ENV"
+      - name: Migrations
+        run: npx prisma migrate deploy
+      - name: Fixture (barbearia B e usuários de teste)
+        run: npm run test:fixture
+      - name: Pasta de fotos
+        run: npm run uploads:init
+      - name: Build
+        run: npm run build
+      - name: Subir o servidor
+        run: |
+          npx next start -p "$TEST_PORT" > server.log 2>&1 &
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -H 'Host: america.navalha.app' "http://127.0.0.1:$TEST_PORT/login" || true)
+            [ "$code" = "200" ] && echo "servidor pronto" && exit 0
+            sleep 2
+          done
+          echo "servidor nao respondeu"; cat server.log; exit 1
+      - name: Isolamento entre barbearias
+        run: npm run test:isolation
+      - name: Fotos ponta a ponta
+        run: npm run test:uploads
+      - name: Log do servidor (em caso de falha)
+        if: failure()
+        run: tail -n 200 server.log
