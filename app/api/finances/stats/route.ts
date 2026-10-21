@@ -17,18 +17,29 @@ export async function GET(req: NextRequest) {
     // Buscamos todas as transações dos últimos N meses de uma só vez.
     // Meses do calendário no fuso da barbearia
     const firstMonth = startOfZonedMonth(now, timeZone, -(monthsParam - 1))
-    const allTransactions = await prisma.transaction.findMany({
-      where: {
-        barbeariaId: barbearia.id,
-        date: { gte: firstMonth },
-      },
-      select: {
-        amount: true,
-        type: true,
-        date: true,
-        categoryId: true,
-      },
-    })
+    const [allTransactions, allTimeTotals] = await Promise.all([
+      prisma.transaction.findMany({
+        where: {
+          barbeariaId: barbearia.id,
+          date: { gte: firstMonth },
+        },
+        select: {
+          amount: true,
+          type: true,
+          date: true,
+          categoryId: true,
+        },
+      }),
+      // Caixa da barbearia: receitas menos despesas de todo o histórico. A tela lê allTime.balance; até
+      // 2026-10-21 o campo não era enviado e o card mostrava sempre R$ 0,00.
+      prisma.transaction.groupBy({
+        by: ['type'],
+        where: { barbeariaId: barbearia.id },
+        _sum: { amount: true },
+      }),
+    ])
+    const allTimeIncome = allTimeTotals.find((t) => t.type === 'INCOME')?._sum.amount ?? 0
+    const allTimeExpense = allTimeTotals.find((t) => t.type === 'EXPENSE')?._sum.amount ?? 0
 
     // ─── Processamento em Memória (muito mais rápido) ───────────────
     const monthlyMap = new Map<
@@ -124,7 +135,7 @@ export async function GET(req: NextRequest) {
       trends: { expense: expenseTrend, income: incomeTrend },
       monthlyData,
       categoryBreakdown: categoryData,
-      // allTime pode ser otimizado similarmente se necessário, ou calculado de outra forma
+      allTime: { income: allTimeIncome, expense: allTimeExpense, balance: allTimeIncome - allTimeExpense },
     })
   } catch (error) {
     const handled = tenantErrorResponse(error)

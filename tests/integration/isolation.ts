@@ -130,6 +130,10 @@ async function main() {
   const reports = (await request(A, 'GET', '/api/finances/reports?period=12', { token: tA })).json
   check('reports: despesas = soma de A no banco', Math.abs(reports.totals.expense - await sumA('EXPENSE')) < 0.001, `api=${reports.totals.expense}`)
   check('reports: receitas = soma de A no banco', Math.abs(reports.totals.income - await sumA('INCOME')) < 0.001, `api=${reports.totals.income}`)
+  // Caixa da barbearia (card "Caixa da Barbearia"): todo o histórico de A, sem a despesa de B (777)
+  const stats = (await request(A, 'GET', '/api/finances/stats?months=6', { token: tA })).json
+  const balanceA = (await sumA('INCOME')) - (await sumA('EXPENSE'))
+  check('stats: caixa = receitas - despesas de A no banco', typeof stats?.allTime?.balance === 'number' && Math.abs(stats.allTime.balance - balanceA) < 0.001, `api=${stats?.allTime?.balance} banco=${balanceA}`)
   const dash = (await request(A, 'GET', '/api/dashboard', { token: tA })).json
   const aClients = Number(await scalar(`select count(*) from "Client" where "barbeariaId"='barbearia-america' and "isActive"`))
   check('dashboard: total de clientes = clientes ativos de A', dash.totalClients === aClients, `api=${dash.totalClients} banco=${aClients}`)
