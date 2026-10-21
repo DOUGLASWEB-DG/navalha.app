@@ -7,6 +7,29 @@ Mudanças relevantes do Navalha.app, da mais recente para a mais antiga. Formato
 
 Ainda não está na `main` nem em produção. Validado localmente e, em parte, na VPS de teste.
 
+### Interface (2026-10-21)
+- Cores com significado: confirmações de excluir, cancelar e desativar com botão vermelho; estoque em vermelho
+  (sem estoque), laranja (estoque baixo) e verde (em estoque), sem o ícone `#` (`fbd431f`, `0b35a9d`).
+- Sem neon nem brilho: efeito 3D do topo e da barra lateral, brilhos dourados, manchas do login (`57d99c8`).
+- Cores fixas trocadas pelas do tema; Relatórios de Finanças sem painéis pretos; card do caixa sem gradiente;
+  verde, laranja e vermelho do tema com contraste acima de 4,5:1 (WCAG AA) (`59c527e`).
+- Configurações (conexão do WhatsApp) no menu de três pontos e na barra lateral, com ícone próprio (`004a008`,
+  `59c527e`).
+- Mensagens de erro e sucesso claras em todas as telas, conferindo o resultado real da API (`0a34901`).
+
+### Corrigido
+- Mensagem de confirmação no WhatsApp mostrava asteriscos quando o nome do serviço terminava com espaço; o cadastro
+  passa a remover espaços das pontas (`6e30c1d`).
+- Envio de foto: até 15 MB e fora do middleware, que corrompia corpos grandes no Next 15.5 (500 em ~25% dos envios)
+  (`fb4819a`).
+
+### Infraestrutura (2026-10-20 e 2026-10-21)
+- VPS fase 4: app, PostgreSQL 17 de teste, HTTPS em `america.navalhaapp.tech`, limite de 16 MiB comprovado pela
+  internet e reinício comprovado (`21de471`, `8cfb048`, `b4e47db`).
+- WhatsApp na VPS: Evolution API sem porta pública, guardando só a sessão e com log desligado (o log copiava o texto
+  das mensagens) (`a2fa73e`).
+- Domínio da plataforma corrigido para `navalhaapp.tech`; `navalha.app` é de terceiros (`7f84eff`).
+
 ### Documentação
 - README reescrito; documentação organizada em `docs/` (arquitetura, desenvolvimento, testes, segurança, roadmap,
   deploy, fotos) e registros de decisão em `docs/decisions/`.
