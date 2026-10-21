@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
-import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Shield, Settings } from 'lucide-react'
+import { Menu, Bell, MoreHorizontal, Globe, LogOut, Target, Package, Shield } from 'lucide-react'
 import { AppIcon } from '@/components/shared/app-icon'
 import { Button } from '@/components/ui/button'
 import {
@@ -37,9 +37,9 @@ const pageTitles: Record<string, string> = {
 }
 
 const severityColors = {
-  INFO: 'text-blue-400 bg-blue-400/10',
-  WARNING: 'text-amber-400 bg-amber-400/10',
-  DANGER: 'text-red-400 bg-red-400/10',
+  INFO: 'text-primary bg-primary/10',
+  WARNING: 'text-warning bg-warning/10',
+  DANGER: 'text-destructive bg-destructive/10',
 }
 
 export function TopBar({ onMenuToggle }: TopBarProps) {
@@ -117,7 +117,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                       <div className="flex items-center gap-2">
                         <span className={cn(
                           "w-1.5 h-1.5 rounded-full shrink-0",
-                          alert.severity === 'DANGER' ? 'bg-red-500' : alert.severity === 'WARNING' ? 'bg-amber-500' : 'bg-blue-500'
+                          alert.severity === 'DANGER' ? 'bg-destructive' : alert.severity === 'WARNING' ? 'bg-warning' : 'bg-primary'
                         )} />
                         <span className="text-xs font-bold tracking-wide text-muted-foreground">
                           {alert.severity === 'DANGER' ? 'Crítico' : alert.severity === 'WARNING' ? 'Atenção' : 'Info'}
@@ -190,8 +190,8 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/settings" className="cursor-pointer gap-3">
-                    <div className="flex h-6 w-6 shrink-0 items-center justify-center text-muted-foreground">
-                      <Settings className="h-4 w-4" strokeWidth={2.25} />
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
+                      <AppIcon src="/assets/icons/configuracoes-icon.png" />
                     </div>
                     Configurações
                   </Link>

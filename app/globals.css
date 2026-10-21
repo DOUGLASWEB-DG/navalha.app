@@ -29,14 +29,15 @@
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
     
-    --destructive: 0 84% 60%;
+    /* Tons com contraste >= 4,5:1 para texto no branco e no fundo tingido a 10% (WCAG AA), medido em 2026-10-21 */
+    --destructive: 0 84% 45%;
     --destructive-foreground: 210 40% 98%;
     
-    --success: 142 71% 45%; /* Verde */
+    --success: 142 71% 28%; /* Verde */
     --success-foreground: 0 0% 100%;
     
-    --warning: 38 92% 50%; /* Laranja/Amarelo de Alerta */
-    --warning-foreground: 48 96% 89%;
+    --warning: 32 95% 33%; /* Laranja de atenção */
+    --warning-foreground: 0 0% 100%;
     
     --info: 210 90% 62%;
     --info-foreground: 0 0% 100%;

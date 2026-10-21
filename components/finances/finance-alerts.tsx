@@ -22,23 +22,23 @@ const fetcher = apiFetcher
 const severityConfig = {
   INFO: {
     icon: <Info size={16} />,
-    bg: 'bg-blue-500/5',
-    border: 'border-blue-500/20',
-    text: 'text-blue-500',
+    bg: 'bg-primary/5',
+    border: 'border-primary/20',
+    text: 'text-primary',
     label: 'Informação',
   },
   WARNING: {
     icon: <AlertTriangle size={16} />,
-    bg: 'bg-amber-500/5',
-    border: 'border-amber-500/20',
-    text: 'text-amber-500',
+    bg: 'bg-warning/5',
+    border: 'border-warning/20',
+    text: 'text-warning',
     label: 'Atenção',
   },
   DANGER: {
     icon: <TrendingDown size={16} />,
-    bg: 'bg-red-500/5',
-    border: 'border-red-500/20',
-    text: 'text-red-500',
+    bg: 'bg-destructive/5',
+    border: 'border-destructive/20',
+    text: 'text-destructive',
     label: 'Crítico',
   },
 }

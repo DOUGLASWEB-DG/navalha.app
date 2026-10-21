@@ -102,10 +102,10 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2 text-sm font-medium">
               Status:{' '}
               {status === 'checking' && <span className="text-muted-foreground">Verificando...</span>}
-              {status === 'connected' && <span className="text-emerald-500 flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> Conectado</span>}
-              {status === 'disconnected' && <span className="text-rose-500 flex items-center gap-1"><AlertCircle className="h-4 w-4" /> Desconectado</span>}
-              {status === 'error' && <span className="text-rose-500 flex items-center gap-1"><AlertCircle className="h-4 w-4" /> Erro de conexão</span>}
-              {status === 'waiting_qr' && <span className="text-amber-500">Aguardando leitura do QR</span>}
+              {status === 'connected' && <span className="text-success flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> Conectado</span>}
+              {status === 'disconnected' && <span className="text-destructive flex items-center gap-1"><AlertCircle className="h-4 w-4" /> Desconectado</span>}
+              {status === 'error' && <span className="text-destructive flex items-center gap-1"><AlertCircle className="h-4 w-4" /> Erro de conexão</span>}
+              {status === 'waiting_qr' && <span className="text-warning">Aguardando leitura do QR</span>}
             </div>
 
             {status === 'disconnected' && (
@@ -123,7 +123,7 @@ export default function SettingsPage() {
             {qrCode && status === 'waiting_qr' && (
               <div className="mt-4 flex flex-col items-center justify-center p-4 border rounded-lg bg-white">
                 <img src={qrCode} alt="WhatsApp QR Code" className="w-48 h-48" />
-                <p className="text-xs text-center mt-2 text-gray-500">Abra o WhatsApp &gt; Aparelhos Conectados &gt; Conectar Aparelho</p>
+                <p className="text-xs text-center mt-2 text-muted-foreground">Abra o WhatsApp &gt; Aparelhos Conectados &gt; Conectar Aparelho</p>
               </div>
             )}
           </div>

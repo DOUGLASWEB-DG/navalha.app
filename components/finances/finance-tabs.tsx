@@ -25,7 +25,7 @@ const tabs: { value: FinanceTab; label: string; icon: React.ElementType }[] = [
 
 export function FinanceTabs({ active, onChange, alertCount = 0 }: FinanceTabsProps) {
   return (
-    <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory items-stretch gap-1 overflow-x-auto rounded-xl border border-white/10 bg-zinc-900/80 p-1 touch-pan-x backdrop-blur-sm">
+    <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory items-stretch gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 touch-pan-x">
       {tabs.map((tab) => {
         const Icon = tab.icon
         const isActive = active === tab.value
@@ -40,7 +40,7 @@ export function FinanceTabs({ active, onChange, alertCount = 0 }: FinanceTabsPro
               'relative flex min-h-12 shrink-0 snap-start items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-150 active:scale-[0.98]',
               isActive
                 ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-white/5'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-muted'
             )}
           >
             <Icon className="h-5 w-5 shrink-0" />

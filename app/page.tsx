@@ -292,7 +292,7 @@ export default function LandingPage() {
                     </div>
                     <div className="p-3 border border-border/60 rounded-xl bg-muted/20">
                       <p className="text-xs text-muted-foreground">Faturamento</p>
-                      <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">R$ 840,00</p>
+                      <p className="text-lg font-bold text-success mt-0.5">R$ 840,00</p>
                     </div>
                     <div className="p-3 border border-border/60 rounded-xl bg-muted/20">
                       <p className="text-xs text-muted-foreground">Presença</p>
@@ -310,7 +310,7 @@ export default function LandingPage() {
                         <p className="text-xs text-muted-foreground">Corte — 14:00</p>
                       </div>
                     </div>
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/20">
                       Confirmado
                     </span>
                   </div>

@@ -16,7 +16,6 @@ import {
   LogOut,
   Shield,
   Package,
-  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { AppIcon } from '@/components/shared/app-icon'
@@ -39,6 +38,8 @@ const navItems = [
   { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/icons/servicos-icon.png', adminOnly: true },
   { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/icons/produtos-icon.png', adminOnly: true },
   { label: 'Equipe', href: '/dashboard/users', iconUrl: '/assets/icons/equipe-icon.png', adminOnly: true },
+  // Conexão do WhatsApp; a API só aceita o admin da barbearia (requireWhatsappAdmin)
+  { label: 'Configurações', href: '/dashboard/settings', iconUrl: '/assets/icons/configuracoes-icon.png', adminOnly: true },
 ]
 
 const bottomItems = [
@@ -48,8 +49,6 @@ const bottomItems = [
     icon: Globe,
     external: true,
   },
-  // Conexão do WhatsApp; a API só aceita o admin da barbearia (requireWhatsappAdmin)
-  { label: 'Configurações', href: '/dashboard/settings', icon: Settings, external: false, adminOnly: true },
 ]
 
 export function Sidebar({ open, onToggle }: SidebarProps) {
@@ -137,7 +136,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
 
       {/* Itens inferiores */}
       <div className="py-4 px-2 border-t border-border flex flex-col gap-2">
-        {bottomItems.filter((item) => !item.adminOnly || user?.role === 'ADMIN').map((item) => {
+        {bottomItems.map((item) => {
           const Icon = item.icon
           return (
             <Link

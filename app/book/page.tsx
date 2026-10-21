@@ -718,11 +718,11 @@ function BookingContent() {
                           : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-accent/50'
                       )}
                     >
-                      <span className={cn("text-xs font-bold tracking-tighter mb-1", isSelected ? "text-zinc-900" : "text-muted-foreground")}>
+                      <span className={cn("text-xs font-bold tracking-tighter mb-1", isSelected ? "text-primary-foreground/80" : "text-muted-foreground")}>
                          {format(date, 'EEE', { locale: ptBR })}
                       </span>
                       <span className="text-2xl font-bold leading-none">{format(date, 'd')}</span>
-                      <span className={cn("text-xs font-bold tracking-tighter mt-1", isSelected ? "text-zinc-800" : "text-muted-foreground")}>
+                      <span className={cn("text-xs font-bold tracking-tighter mt-1", isSelected ? "text-primary-foreground/80" : "text-muted-foreground")}>
                         {format(date, 'MMM', { locale: ptBR })}
                       </span>
                     </button>
@@ -809,7 +809,7 @@ function BookingContent() {
         {step === 'success' && (
           <div className="text-center py-10 animate-in fade-in zoom-in-95 duration-700">
             <div className="relative w-24 h-24 mx-auto mb-8">
-              <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
+              <div className="absolute -inset-2 bg-success/10 rounded-full" />
               <div className="relative w-full h-full bg-success rounded-full flex items-center justify-center shadow-lg border-4 border-card">
                 <CheckCircle2 className="w-12 h-12 text-primary-foreground" />
               </div>

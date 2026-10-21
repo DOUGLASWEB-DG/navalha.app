@@ -152,8 +152,8 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
                 className={cn(
                   'flex-1 min-h-12 rounded-xl border py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none',
                   currentType === 'INCOME'
-                    ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald-400'
-                    : 'border-border bg-card text-muted-foreground hover:text-muted-foreground'
+                    ? 'border-success/30 bg-success/10 text-success'
+                    : 'border-border bg-card text-muted-foreground hover:text-foreground'
                 )}
               >
                 Receita
@@ -165,8 +165,8 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
                 className={cn(
                   'flex-1 min-h-12 rounded-xl border py-3 text-sm font-semibold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none',
                   currentType === 'EXPENSE'
-                    ? 'border-red-400/40 bg-red-500/15 text-red-400'
-                    : 'border-border bg-card text-muted-foreground hover:text-muted-foreground'
+                    ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                    : 'border-border bg-card text-muted-foreground hover:text-foreground'
                 )}
               >
                 Despesa

@@ -51,40 +51,35 @@ export function FinanceDashboard() {
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Hero Card — Caixa do Negócio */}
       <div
-        className="rounded-2xl p-6 text-white relative overflow-hidden shadow-lg"
-        style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%)' }}
+        className="rounded-2xl border border-border bg-card p-6 shadow-sm"
       >
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, white 0%, transparent 50%)' }}
-        />
         <div className="relative">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <p className="text-sm font-medium opacity-80">Caixa da Barbearia</p>
+              <p className="text-sm font-medium text-muted-foreground">Caixa da Barbearia</p>
               <p className="text-4xl font-bold mt-1">{formatCurrency(allTime?.balance ?? 0)}</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
               <DollarSign size={22} />
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-xs opacity-70 mb-1 ">Receita Mês</p>
+            <div className="bg-muted/50 rounded-xl px-3 py-2.5">
+              <p className="text-xs text-muted-foreground mb-1">Receita Mês</p>
               <p className="text-base font-bold">{formatCurrency(currentMonth?.income ?? 0)}</p>
             </div>
-            <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-xs opacity-70 mb-1 ">Despesas Mês</p>
+            <div className="bg-muted/50 rounded-xl px-3 py-2.5">
+              <p className="text-xs text-muted-foreground mb-1">Despesas Mês</p>
               <p className="text-base font-bold">{formatCurrency(currentMonth?.expense ?? 0)}</p>
             </div>
-            <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-xs opacity-70 mb-1 ">Lucro</p>
-              <p className={cn('text-base font-bold', profit < 0 && 'text-red-300')}>
+            <div className="bg-muted/50 rounded-xl px-3 py-2.5">
+              <p className="text-xs text-muted-foreground mb-1">Lucro</p>
+              <p className={cn('text-base font-bold', profit < 0 && 'text-destructive')}>
                 {formatCurrency(profit)}
               </p>
             </div>
-            <div className="bg-white/15 rounded-xl px-3 py-2.5">
-              <p className="text-xs opacity-70 mb-1 ">Margem</p>
+            <div className="bg-muted/50 rounded-xl px-3 py-2.5">
+              <p className="text-xs text-muted-foreground mb-1">Margem</p>
               <p className="text-base font-bold">{profitMargin.toFixed(1)}%</p>
             </div>
           </div>
@@ -144,21 +139,21 @@ export function FinanceDashboard() {
             <AreaChart data={monthlyData ?? []} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorDes" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--chart-5))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--chart-5))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: '#6b7280', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`} />
+              <XAxis dataKey="month" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: '#6b7280' }} />
-              <Area type="monotone" dataKey="receitas" name="Receitas" stroke="#2563eb" fill="url(#colorRec)" strokeWidth={2} dot={false} />
-              <Area type="monotone" dataKey="despesas" name="Despesas" stroke="#ef4444" fill="url(#colorDes)" strokeWidth={2} dot={false} />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: 'hsl(var(--muted-foreground))' }} />
+              <Area type="monotone" dataKey="receitas" name="Receitas" stroke="hsl(var(--chart-2))" fill="url(#colorRec)" strokeWidth={2} dot={false} />
+              <Area type="monotone" dataKey="despesas" name="Despesas" stroke="hsl(var(--chart-5))" fill="url(#colorDes)" strokeWidth={2} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
