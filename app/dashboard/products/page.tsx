@@ -32,6 +32,7 @@ export default function ProductsPage() {
     const ok = await confirmAction({
       title: `Excluir produto "${name}"?`,
       confirmLabel: 'Excluir',
+      tone: 'danger',
     })
     if (!ok) return
     try {
@@ -113,11 +114,16 @@ export default function ProductsPage() {
                     <p className="mt-1 text-sm text-muted-foreground italic">Sem descrição</p>
                   )}
                   
+                  {/* Vermelho só quando falta (0); estoque baixo é aviso (laranja), não erro */}
                   <div className={`mt-4 flex items-center gap-2 text-sm font-medium px-3 py-2 rounded-lg border w-fit ${
-                      p.stock <= 5 ? 'bg-destructive/10 text-destructive border-destructive/20' : 'bg-muted/50 text-muted-foreground border-border'
+                      p.stock <= 0
+                        ? 'bg-destructive/10 text-destructive border-destructive/20'
+                        : p.stock <= 5
+                          ? 'bg-warning/10 text-warning border-warning/20'
+                          : 'bg-success/10 text-success border-success/20'
                     }`}>
                     <Hash className="w-4 h-4" />
-                    <span>{p.stock} em estoque</span>
+                    <span>{p.stock <= 0 ? 'Sem estoque' : p.stock <= 5 ? `Estoque baixo: ${p.stock}` : `${p.stock} em estoque`}</span>
                   </div>
                 </div>
 

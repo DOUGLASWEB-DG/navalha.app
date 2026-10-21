@@ -35,6 +35,7 @@ export default function UsersPage() {
         title: `Desativar "${name}"?`,
         description: 'O usuário perde o acesso e deixa de receber agendamentos novos. O histórico é mantido.',
         confirmLabel: 'Desativar',
+        tone: 'danger',
       })
       if (!ok) return
     }

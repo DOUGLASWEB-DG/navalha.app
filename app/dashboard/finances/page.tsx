@@ -57,6 +57,7 @@ export default function FinancesPage() {
     const ok = await confirmAction({
       title: 'Excluir esta transação?',
       confirmLabel: 'Excluir',
+      tone: 'danger',
     })
     if (!ok) return
     try {

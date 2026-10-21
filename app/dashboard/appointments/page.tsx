@@ -153,6 +153,7 @@ export default function AppointmentsPage() {
         title: `Cancelar agendamento de ${appt.client?.name ?? 'cliente'}?`,
         description: 'O horário volta a ficar livre na agenda.',
         confirmLabel: 'Cancelar agendamento',
+        tone: 'danger',
         cancelLabel: 'Voltar',
       })
       if (!ok) return

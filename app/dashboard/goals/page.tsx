@@ -52,6 +52,7 @@ export default function GoalsPage() {
     const ok = await confirmAction({
       title: 'Excluir esta meta?',
       confirmLabel: 'Excluir',
+      tone: 'danger',
     })
     if (!ok) return
     try {

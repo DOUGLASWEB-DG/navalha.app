@@ -80,6 +80,7 @@ export default function ClientsPage() {
       title: `Excluir cliente "${client.name}"?`,
       description: 'O cliente deixa de aparecer na lista. O histórico de agendamentos é mantido.',
       confirmLabel: 'Excluir',
+      tone: 'danger',
     })
     if (!ok) return
     try {

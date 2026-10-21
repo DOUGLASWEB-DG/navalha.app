@@ -33,6 +33,7 @@ export default function ServicesPage() {
     const ok = await confirmAction({
       title: `Excluir serviço "${name}"?`,
       confirmLabel: 'Excluir',
+      tone: 'danger',
     })
     if (!ok) return
     try {
