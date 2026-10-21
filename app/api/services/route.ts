@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { requireTenantAdmin, requireTenantUser, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().trim().min(1, 'Name is required'),
   description: z.string().optional(),
   price: z.number().positive('Price must be positive'),
   durationMins: z.number().int().positive().default(30),

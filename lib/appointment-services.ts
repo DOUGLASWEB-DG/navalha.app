@@ -76,8 +76,10 @@ export function getAppointmentServiceSummary(
   const hasPivot = Boolean(appointment.appointmentServices && appointment.appointmentServices.length > 0)
   
   if (hasPivot && appointment.appointmentServices) {
+    // Sem espaço nas pontas: as mensagens do WhatsApp põem o nome em negrito (*Corte*), e "*Corte *" aparece com
+    // os asteriscos. Serviços antigos podem ter sido salvos com espaço antes de o cadastro passar a remover.
     const names = appointment.appointmentServices
-      .map((item) => item.service?.name)
+      .map((item) => item.service?.name?.trim())
       .filter((name): name is string => Boolean(name))
 
     const totals = appointment.appointmentServices.reduce(
@@ -90,17 +92,18 @@ export function getAppointmentServiceSummary(
 
     return {
       names,
-      namesJoined: names.join(', ') || (appointment.service?.name ?? ''),
+      namesJoined: names.join(', ') || (appointment.service?.name?.trim() ?? ''),
       totalPrice: totals.price,
       totalDurationMins: totals.durationMins,
       count: appointment.appointmentServices.length,
     }
   }
 
-  const fallbackName = appointment.service?.name ? [appointment.service.name] : []
+  const legacyName = appointment.service?.name?.trim()
+  const fallbackName = legacyName ? [legacyName] : []
   return {
     names: fallbackName,
-    namesJoined: appointment.service?.name ?? '',
+    namesJoined: legacyName ?? '',
     totalPrice: appointment.service?.price ?? 0,
     totalDurationMins: appointment.service?.durationMins ?? 0,
     count: fallbackName.length,

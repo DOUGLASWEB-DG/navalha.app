@@ -5,7 +5,7 @@ import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 import { deleteObject, keyFromUrl } from '@/lib/uploads/storage'
 
 const updateSchema = z.object({
-  name: z.string().min(1).optional(),
+  name: z.string().trim().min(1).optional(),
   description: z.string().optional(),
   price: z.number().positive().optional(),
   durationMins: z.number().int().positive().optional(),
