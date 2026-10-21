@@ -192,8 +192,9 @@ async function main() {
   const tB = await login(B, 'b.admin@local.dev')
   check('logins de teste (rode a fixture antes)', Boolean(tA && tABarber && tB))
 
-  const svc = await prisma.service.findFirst({ where: { barbeariaId: 'barbearia-america', active: true }, select: { id: true } })
-  if (!svc) throw new Error('A barbearia A precisa de um serviço ativo.')
+  // Serviço fixo da América criado pela fixture (não usa serviço real, que pode já ter foto)
+  const svc = await prisma.service.findUnique({ where: { id: 'smoke-service' }, select: { id: true } })
+  if (!svc) throw new Error('Rode a fixture antes (npm run test:fixture): falta o serviço smoke-service.')
 
   // Foto grande, girada pelo EXIF e com GPS: a saída deve vir sem metadados e com no máximo 800 px
   const jpeg = await sharp({ create: { width: 1600, height: 1200, channels: 3, background: { r: 200, g: 60, b: 60 } } })

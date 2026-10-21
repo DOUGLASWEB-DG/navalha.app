@@ -93,9 +93,10 @@ async function main() {
   check('logins de teste (rode a fixture antes)', Boolean(tA && tABarber && tB))
   route('POST', '/api/auth/login')
 
-  const aClient = await scalar(`select id from "Client" where "barbeariaId"='barbearia-america' and "isActive" limit 1`)
-  const aService = await scalar(`select id from "Service" where "barbeariaId"='barbearia-america' and active limit 1`)
-  const aAppt = await scalar(`select id from "Appointment" where "barbeariaId"='barbearia-america' order by "createdAt" limit 1`)
+  // Registros fixos da América criados pela fixture: a suíte não depende dos dados que o banco já tiver
+  const aClient = 'smoke-client'
+  const aService = 'smoke-service'
+  const aAppt = 'smoke-appt'
 
   // 1. Listagens e agregações de A não contêm B
   const lists: [string, string, string][] = [

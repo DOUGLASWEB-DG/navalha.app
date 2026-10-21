@@ -1,5 +1,6 @@
 // Fixture dos testes de isolamento: barbearia B (teste-b, America/Sao_Paulo) com um registro de cada tabela,
-// ids fixos "b-*", e usuários de teste da América (smoke-*). Senha de todos: Smoke-Teste-2026.
+// ids fixos "b-*", e registros de teste da América (smoke-*: admin, barbeiro, cliente, serviço, agendamento).
+// Senha dos usuários: Smoke-Teste-2026.
 // Recria do zero a cada execução (apaga B e os usuários smoke antes). SÓ roda em banco local.
 //
 // Uso: npm run test:fixture
@@ -53,6 +54,25 @@ async function main() {
     ],
     skipDuplicates: true,
   })
+  // Registros fixos da América usados pelas suítes (cliente, serviço, agendamento). Criados só se faltarem: num banco
+  // novo (CI) a América não tem nada; num banco local com dados, não são recriados nem alterados.
+  await prisma.client.upsert({
+    where: { id: 'smoke-client' }, update: {},
+    create: { id: 'smoke-client', barbeariaId: DEFAULT_BARBEARIA_ID, name: 'SMOKE Cliente A', phone: '5569900000001' },
+  })
+  await prisma.service.upsert({
+    where: { id: 'smoke-service' }, update: {},
+    create: { id: 'smoke-service', barbeariaId: DEFAULT_BARBEARIA_ID, name: 'SMOKE Servico A', price: 40, durationMins: 30 },
+  })
+  if (!(await prisma.appointment.findUnique({ where: { id: 'smoke-appt' }, select: { id: true } }))) {
+    await prisma.appointment.create({
+      data: {
+        id: 'smoke-appt', barbeariaId: DEFAULT_BARBEARIA_ID, clientId: 'smoke-client', serviceId: 'smoke-service', barberId: 'smoke-barber',
+        date: new Date('2026-12-03T14:00:00Z'), status: 'CONFIRMED',
+        appointmentServices: { create: [{ serviceId: 'smoke-service', price: 40, durationMins: 30 }] },
+      },
+    })
+  }
   await prisma.client.create({ data: { id: 'b-client', barbeariaId: B_ID, name: 'B Cliente', phone: '5511988887777' } })
   await prisma.service.create({ data: { id: 'b-service', barbeariaId: B_ID, name: 'B Servico', price: 99, durationMins: 30 } })
   await prisma.appointment.create({
