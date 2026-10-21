@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
+import { categoryColor } from '@/lib/chart'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 import { apiFetcher } from '@/lib/http-errors'
@@ -218,7 +219,7 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
                       <div className="flex items-center gap-2">
                         <span
                           className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                          style={{ background: c.color }}
+                          style={{ background: categoryColor(c.color) }}
                         />
                         {c.name}
                       </div>

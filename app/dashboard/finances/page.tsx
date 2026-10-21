@@ -5,6 +5,7 @@ import useSWR from 'swr'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { toZonedWallClock } from '@/lib/time-zone'
+import { categoryColor } from '@/lib/chart'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 import {
   Plus,
@@ -267,13 +268,8 @@ function TransactionsView({
                         <>
                           <span className="text-muted-foreground">·</span>
                           {txn.categoryRef ? (
-                            <span
-                              className="rounded-full px-2 py-0.5 text-xs font-medium"
-                              style={{
-                                background: `${txn.categoryRef.color}20`,
-                                color: txn.categoryRef.color,
-                              }}
-                            >
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                              <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: categoryColor(txn.categoryRef.color) }} />
                               {txn.categoryRef.name}
                             </span>
                           ) : (

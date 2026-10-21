@@ -2,7 +2,7 @@
 
 import useSWR from 'swr'
 import {
-  AreaChart, Area, PieChart, Pie, Cell,
+  AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import {
@@ -14,6 +14,7 @@ import {
   ArrowDownRight,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
+import { CHART_AXIS_TICK, CHART_COLORS, CHART_GRID, formatAxisCurrency, formatMonthLabel } from '@/lib/chart'
 import { CategoryBreakdown } from './category-breakdown'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -24,8 +25,8 @@ const fetcher = apiFetcher
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-card border border-border rounded-xl p-3 shadow-xl">
-      <p className="text-xs font-medium text-muted-foreground mb-2">{label}</p>
+    <div className="bg-card border border-border rounded-xl p-3 shadow-md">
+      <p className="text-xs font-medium text-muted-foreground mb-2">{formatMonthLabel(label)}</p>
       {payload.map((p: any, i: number) => (
         <div key={i} className="flex items-center gap-2 text-xs">
           <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
@@ -129,77 +130,24 @@ export function FinanceDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Fluxo de Caixa — 6 meses */}
         <div className="lg:col-span-2 bg-card border border-border rounded-xl p-5">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <p className="text-sm font-semibold text-foreground">Fluxo de Caixa</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Receitas × Despesas — últimos 6 meses</p>
-            </div>
+          <div className="mb-5">
+            <p className="text-sm font-semibold text-foreground">Fluxo de Caixa</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Quanto entrou e quanto saiu em cada mês — últimos 6 meses</p>
           </div>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={monthlyData ?? []} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.35} />
-                  <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorDes" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--chart-5))" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(var(--chart-5))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`} />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: 'hsl(var(--muted-foreground))' }} />
-              <Area type="monotone" dataKey="receitas" name="Receitas" stroke="hsl(var(--chart-2))" fill="url(#colorRec)" strokeWidth={2} dot={false} />
-              <Area type="monotone" dataKey="despesas" name="Despesas" stroke="hsl(var(--chart-5))" fill="url(#colorDes)" strokeWidth={2} dot={false} />
+            <AreaChart data={monthlyData ?? []} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={CHART_GRID} vertical={false} />
+              <XAxis dataKey="month" tick={CHART_AXIS_TICK} tickFormatter={formatMonthLabel} axisLine={false} tickLine={false} />
+              <YAxis width={72} tick={CHART_AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={formatAxisCurrency} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: CHART_GRID }} />
+              <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: 'hsl(var(--muted-foreground))' }} />
+              <Area type="monotone" dataKey="receitas" name="Receitas" stroke={CHART_COLORS.receitas} fill={CHART_COLORS.receitas} fillOpacity={0.1} strokeWidth={2} dot={false} activeDot={{ r: 5, strokeWidth: 2, stroke: 'hsl(var(--card))' }} />
+              <Area type="monotone" dataKey="despesas" name="Despesas" stroke={CHART_COLORS.despesas} fill={CHART_COLORS.despesas} fillOpacity={0.1} strokeWidth={2} dot={false} activeDot={{ r: 5, strokeWidth: 2, stroke: 'hsl(var(--card))' }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Pie Chart — Categorias */}
-        <div className="bg-card border border-border rounded-xl p-5">
-          <p className="text-sm font-semibold text-foreground mb-1">Despesas por Categoria</p>
-          <p className="text-xs text-muted-foreground mb-4">Mês atual</p>
-          {categoryBreakdown && categoryBreakdown.length > 0 ? (
-            <>
-              <ResponsiveContainer width="100%" height={150}>
-                <PieChart>
-                  <Pie
-                    data={categoryBreakdown}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={70}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {categoryBreakdown.map((entry: any, i: number) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-1.5 mt-3">
-                {categoryBreakdown.slice(0, 5).map((entry: any, i: number) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: entry.color }} />
-                      <span className="text-xs text-muted-foreground truncate">{entry.name}</span>
-                    </div>
-                    <span className="text-xs font-medium text-foreground">{formatCurrency(entry.value)}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-[180px] text-muted-foreground text-sm">
-              Sem dados ainda
-            </div>
-          )}
-        </div>
+        <CategoryBreakdown data={categoryBreakdown ?? []} title="Onde você mais gastou" subtitle="Mês atual" />
       </div>
 
       {/* Indicador de Saúde Financeira */}
@@ -273,6 +221,8 @@ function KPICard({ title, value, trend, invertTrend, icon, iconBg, iconColor, va
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
+const SKELETON_HEIGHTS = [45, 70, 35, 90, 55, 65, 30, 80, 50, 75, 40, 60]
+
 function FinanceDashboardSkeleton() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -291,19 +241,18 @@ function FinanceDashboardSkeleton() {
             <Skeleton className="h-[2px] w-full opacity-20" />
           </div>
           <div className="mt-8 flex gap-2 items-end h-16">
-            {[...Array(12)].map((_, i) => (
-              <Skeleton key={i} className="flex-1 rounded-t-sm" style={{ height: `${Math.random() * 80 + 20}%` }} />
+            {/* Alturas fixas: valores aleatórios geravam HTML diferente no servidor e no navegador (aviso de hidratação) */}
+            {SKELETON_HEIGHTS.map((h, i) => (
+              <Skeleton key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%` }} />
             ))}
           </div>
         </div>
-        {/* Fake Pie Chart Skeleton */}
-        <div className="h-72 rounded-xl border border-border bg-card p-5 flex flex-col items-center justify-center gap-4">
-          <Skeleton className="h-4 w-40 self-start" />
-          <Skeleton className="w-32 h-32 rounded-full mt-4" />
-          <div className="w-full space-y-2 mt-4">
-            <Skeleton className="h-3 w-full" />
-            <Skeleton className="h-3 w-3/4" />
-          </div>
+        {/* Barras por categoria */}
+        <div className="h-72 rounded-xl border border-border bg-card p-5 flex flex-col gap-4">
+          <Skeleton className="h-4 w-40" />
+          {[100, 70, 45, 30, 15].map((w) => (
+            <Skeleton key={w} className="h-2" style={{ width: `${w}%` }} />
+          ))}
         </div>
       </div>
     </div>

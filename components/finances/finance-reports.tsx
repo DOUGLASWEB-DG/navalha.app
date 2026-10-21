@@ -7,9 +7,6 @@ import {
   Bar,
   LineChart,
   Line,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -19,6 +16,7 @@ import {
 } from 'recharts'
 import { Download, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
+import { CHART_AXIS_TICK, CHART_COLORS, CHART_GRID, formatAxisCurrency, formatMonthLabel } from '@/lib/chart'
 import { CategoryBreakdown } from './category-breakdown'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -31,7 +29,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
   return (
     <div className="rounded-xl border border-border bg-card p-3 shadow-md">
-      <p className="mb-2 text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mb-2 text-xs font-medium text-muted-foreground">{formatMonthLabel(label)}</p>
       {payload.map((p: any, i: number) => (
         <div key={i} className="flex items-center gap-2 text-xs">
           <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
@@ -93,14 +91,14 @@ export function FinanceReports() {
         <Button
           onClick={handleExport}
           variant="outline"
-          className="gap-2 border-white/10 text-foreground transition-all active:scale-[0.98]"
+          className="gap-2 text-foreground transition-all active:scale-[0.98]"
         >
           <Download className="h-4 w-4" />
           Exportar CSV
         </Button>
       </div>
 
-      {/* Totais — grid alinhado, valores grandes e cores vibrantes */}
+      {/* Totais do período */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all active:scale-[0.99]">
           <div className="flex items-center gap-3">
@@ -155,86 +153,56 @@ export function FinanceReports() {
 
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <p className="mb-1 text-sm font-semibold text-foreground">Receitas × Despesas</p>
-        <p className="mb-5 text-xs text-muted-foreground">Comparativo mensal — últimos {period} meses</p>
+        <p className="mb-5 text-xs text-muted-foreground">Quanto entrou e quanto saiu em cada mês — últimos {period} meses</p>
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={monthlyData ?? []} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-            <XAxis dataKey="month" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: 'hsl(var(--muted-foreground))' }} />
-            <Bar dataKey="receitas" name="Receitas" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="despesas" name="Despesas" fill="hsl(var(--chart-5))" radius={[4, 4, 0, 0]} />
+          <BarChart data={monthlyData ?? []} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2}>
+            <CartesianGrid stroke={CHART_GRID} vertical={false} />
+            <XAxis dataKey="month" tick={CHART_AXIS_TICK} tickFormatter={formatMonthLabel} axisLine={false} tickLine={false} />
+            <YAxis width={72} tick={CHART_AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={formatAxisCurrency} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: 'hsl(var(--muted-foreground))' }} />
+            <Bar dataKey="receitas" name="Receitas" fill={CHART_COLORS.receitas} radius={[4, 4, 0, 0]} maxBarSize={24} />
+            <Bar dataKey="despesas" name="Despesas" fill={CHART_COLORS.despesas} radius={[4, 4, 0, 0]} maxBarSize={24} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-          <p className="mb-1 text-sm font-semibold text-foreground">Evolução do Patrimônio</p>
-          <p className="mb-5 text-xs text-muted-foreground">Saldo acumulado ao longo do tempo</p>
+          <p className="mb-1 text-sm font-semibold text-foreground">Evolução do Saldo</p>
+          <p className="mb-5 text-xs text-muted-foreground">Quanto a barbearia acumulou mês a mês (receitas menos despesas)</p>
           <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={netWorthData ?? []} margin={{ top: 0, right: 4, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v: number) => `R$${(v / 1000).toFixed(0)}k`}
-              />
-              <Tooltip content={<CustomTooltip />} />
+            <LineChart data={netWorthData ?? []} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={CHART_GRID} vertical={false} />
+              <XAxis dataKey="month" tick={CHART_AXIS_TICK} tickFormatter={formatMonthLabel} axisLine={false} tickLine={false} />
+              <YAxis width={72} tick={CHART_AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={formatAxisCurrency} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: CHART_GRID }} />
               <Line
                 type="monotone"
                 dataKey="patrimonio"
-                name="Patrimônio"
-                stroke="hsl(var(--chart-1))"
-                strokeWidth={2.5}
-                dot={{ r: 3, fill: 'hsl(var(--chart-1))' }}
+                name="Saldo"
+                stroke={CHART_COLORS.saldo}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                dot={{ r: 4, fill: CHART_COLORS.saldo, strokeWidth: 2, stroke: 'hsl(var(--card))' }}
+                activeDot={{ r: 5, strokeWidth: 2, stroke: 'hsl(var(--card))' }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <CategoryBreakdown
-            data={categoryBreakdown ?? []}
-            title="Gastos por Categoria"
-            subtitle={`Últimos ${period} meses`}
-          />
-
-          {categoryBreakdown && categoryBreakdown.length > 0 && (
-            <div className="flex items-center justify-center rounded-2xl border border-border bg-card p-5 shadow-sm">
-              <ResponsiveContainer width="100%" height={180}>
-                <PieChart>
-                  <Pie
-                    data={categoryBreakdown}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {categoryBreakdown.map((entry: any, i: number) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
+        <CategoryBreakdown
+          data={categoryBreakdown ?? []}
+          title="Onde você mais gastou"
+          subtitle={`Últimos ${period} meses`}
+        />
       </div>
     </div>
   )
 }
+
+const SKELETON_BARS = [[60, 35], [45, 50], [70, 30], [55, 40], [80, 45], [50, 25], [65, 55], [40, 30]]
 
 function ReportsSkeleton() {
   return (
@@ -251,10 +219,11 @@ function ReportsSkeleton() {
       {/* Fake Bar Chart */}
       <div className="h-72 rounded-2xl border border-border bg-card p-5 flex flex-col justify-end gap-2">
         <div className="flex items-end justify-around h-48 w-full">
-          {[...Array(8)].map((_, i) => (
+          {/* Alturas fixas: valores aleatórios geravam HTML diferente no servidor e no navegador (aviso de hidratação) */}
+          {SKELETON_BARS.map(([a, b], i) => (
             <div key={i} className="flex gap-1 items-end h-full w-12">
-              <Skeleton className="w-full rounded-t-sm" style={{ height: `${Math.random() * 60 + 20}%` }} />
-              <Skeleton className="w-full rounded-t-sm" style={{ height: `${Math.random() * 60 + 20}%` }} />
+              <Skeleton className="w-full rounded-t-sm" style={{ height: `${a}%` }} />
+              <Skeleton className="w-full rounded-t-sm" style={{ height: `${b}%` }} />
             </div>
           ))}
         </div>
