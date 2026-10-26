@@ -11,6 +11,7 @@ import {
   Plus,
   TrendingUp,
   TrendingDown,
+  DollarSign,
   Trash2,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -170,8 +171,8 @@ function TransactionsView({
       <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 touch-pan-x lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:pb-0 lg:snap-none">
         <div className="min-w-[min(100%,13rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-150 active:scale-[0.99] lg:min-w-0">
           <div className="mb-2 flex items-center gap-2">
-            <div className="h-10 w-10 shrink-0">
-              <AppIcon src="/assets/icons/receitamensal-icon.png" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-success/20 bg-success/10">
+              <TrendingUp className="h-5 w-5 text-success" />
             </div>
             <p className="text-xs font-medium text-muted-foreground">Receitas</p>
           </div>
@@ -188,8 +189,15 @@ function TransactionsView({
         </div>
         <div className="min-w-[min(100%,13rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-150 active:scale-[0.99] lg:min-w-0">
           <div className="mb-2 flex items-center gap-2">
-            <div className={cn('h-10 w-10 shrink-0', summary.profit < 0 && 'opacity-60 grayscale')}>
-              <AppIcon src="/assets/icons/finaces-icon.png" />
+            <div
+              className={cn(
+                'flex h-10 w-10 items-center justify-center rounded-xl border',
+                summary.profit >= 0 ? 'border-primary/20 bg-primary/10' : 'border-destructive/20 bg-destructive/10'
+              )}
+            >
+              <DollarSign
+                className={cn('h-5 w-5', summary.profit >= 0 ? 'text-primary' : 'text-destructive')}
+              />
             </div>
             <p className="text-xs font-medium text-muted-foreground">Lucro</p>
           </div>
