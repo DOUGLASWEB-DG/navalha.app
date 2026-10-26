@@ -6,15 +6,7 @@ import { format, isWithinInterval } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
-import {
-  Target,
-  Plus,
-  Trash2,
-  TrendingUp,
-  Users,
-  CalendarCheck,
-  Trophy,
-} from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { confirmAction } from '@/lib/confirm-toast'
 import { Button } from '@/components/ui/button'
@@ -23,6 +15,7 @@ import { GoalFormModal } from '@/components/goals/goal-form-modal'
 import { cn } from '@/lib/utils'
 
 import { PageHeader } from '@/components/dashboard/page-header'
+import { AppIcon } from '@/components/shared/app-icon'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
 import { showError } from '@/lib/feedback'
@@ -30,9 +23,9 @@ import { showError } from '@/lib/feedback'
 const fetcher = apiFetcher
 
 const goalTypeConfig = {
-  REVENUE: { label: 'Receita', icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' },
-  CLIENTS: { label: 'Novos Clientes', icon: Users, color: 'text-info', bg: 'bg-info/10 border-info/20' },
-  APPOINTMENTS: { label: 'Agendamentos', icon: CalendarCheck, color: 'text-success', bg: 'bg-success/10 border-success/20' },
+  REVENUE: { label: 'Receita', iconUrl: '/assets/icons/receitamensal-icon.png' },
+  CLIENTS: { label: 'Novos Clientes', iconUrl: '/assets/icons/totalclientes-icon.png' },
+  APPOINTMENTS: { label: 'Agendamentos', iconUrl: '/assets/icons/agendamentos-icon.png' },
 }
 
 const periodLabels: Record<string, string> = {
@@ -103,6 +96,7 @@ export default function GoalsPage() {
     <div className="mx-auto max-w-6xl space-y-8 animate-fade-in">
       <PageHeader
         title="Metas"
+        iconUrl="/assets/icons/metas-icon.png"
         description="Acompanhe seus objetivos de negócio e crescimento"
       >
         <Button
@@ -124,7 +118,6 @@ export default function GoalsPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {activeGoals.map((goal: any) => {
               const config = goalTypeConfig[goal.type as keyof typeof goalTypeConfig]
-              const Icon = config.icon
               const progress = getProgress(goal)
               const isCompleted = progress >= 100
 
@@ -138,8 +131,8 @@ export default function GoalsPage() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={cn('w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0', config.bg)}>
-                        <Icon className={cn('w-6 h-6', config.color)} />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-muted/60 p-1.5">
+                        <AppIcon src={config.iconUrl} />
                       </div>
                       <div>
                         <p className="text-base font-semibold text-foreground leading-tight">{goal.title}</p>
@@ -150,7 +143,7 @@ export default function GoalsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {isCompleted && (
-                        <Trophy className="w-5 h-5 text-primary" />
+                        <span className="h-7 w-7 shrink-0"><AppIcon src="/assets/icons/concluidos-icon.png" /></span>
                       )}
                       <Button
                         variant="ghost"
@@ -169,7 +162,8 @@ export default function GoalsPage() {
                       <span className={cn('text-3xl font-bold tracking-tight', isCompleted ? 'text-primary' : 'text-foreground')}>
                         {progress.toFixed(0)}%
                       </span>
-                      <span className="text-sm font-medium text-muted-foreground bg-background px-2.5 py-1 rounded-lg border border-border">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground bg-background px-2.5 py-1 rounded-lg border border-border">
+                        <span className="h-5 w-5 shrink-0"><AppIcon src="/assets/icons/metas-icon.png" /></span>
                         Alvo: {goal.type === 'REVENUE' ? 'R$' : ''}{goal.targetAmount.toLocaleString('pt-BR')}
                       </span>
                     </div>
@@ -202,11 +196,10 @@ export default function GoalsPage() {
             <div className="flex flex-col divide-y divide-white/5">
               {pastGoals.map((goal: any) => {
                 const config = goalTypeConfig[goal.type as keyof typeof goalTypeConfig]
-                const Icon = config.icon
                 return (
                   <div key={goal.id} className="flex items-center gap-4 px-5 py-4 group transition-colors hover:bg-white/5">
-                    <div className={cn('w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 opacity-60', config.bg)}>
-                      <Icon className={cn('w-5 h-5', config.color)} />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted/60 p-1 opacity-70">
+                      <AppIcon src={config.iconUrl} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{goal.title}</p>
@@ -236,8 +229,8 @@ export default function GoalsPage() {
       {/* Estado Vazio */}
       {(!goals || goals.length === 0) && (
         <div className="text-center py-20">
-          <div className="w-20 h-20 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <Target className="w-10 h-10 text-primary" />
+          <div className="mx-auto mb-6 h-24 w-24">
+            <AppIcon src="/assets/icons/metas-icon.png" />
           </div>
           <p className="text-lg font-bold text-foreground mb-2">Nenhuma meta definida</p>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">

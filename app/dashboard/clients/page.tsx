@@ -7,7 +7,6 @@ import { ptBR } from 'date-fns/locale'
 import {
   Plus,
   Search,
-  Users,
   MessageCircle,
   Pencil,
   Trash2,
@@ -26,6 +25,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ClientFormModal } from '@/components/clients/client-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
+import { AppIcon } from '@/components/shared/app-icon'
+import { getAvatarTone } from '@/components/shared/avatar-tone'
 import { formatBrazilPhone, formatDate, getInitial, normalizeBrazilPhone } from '@/lib/format'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
@@ -182,8 +183,8 @@ export default function ClientsPage() {
                   <tr key={client.id} className="transition-colors hover:bg-muted/30">
                     <td className="px-5 py-3">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                          <span className="text-sm font-semibold text-primary">{getInitial(client.name)}</span>
+                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${getAvatarTone(client.name)}`}>
+                          <span className="text-sm font-semibold">{getInitial(client.name)}</span>
                         </div>
                         <div className="min-w-0">
                           <p className="truncate font-medium text-foreground">{client.name}</p>
@@ -229,8 +230,8 @@ export default function ClientsPage() {
               {clients.map((client) => (
                 <li key={client.id} className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                      <span className="text-base font-semibold text-primary">{getInitial(client.name)}</span>
+                    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${getAvatarTone(client.name)}`}>
+                      <span className="text-base font-semibold">{getInitial(client.name)}</span>
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium text-foreground">{client.name}</p>
@@ -278,7 +279,9 @@ export default function ClientsPage() {
           </>
         ) : (
           <div className="text-center py-14">
-            <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <div className="mx-auto mb-3 h-16 w-16">
+              <AppIcon src="/assets/icons/clientes-icon.png" />
+            </div>
             <p className="text-sm font-semibold text-foreground mb-1">
               {search ? 'Nenhum cliente encontrado' : 'Nenhum cliente ainda'}
             </p>
