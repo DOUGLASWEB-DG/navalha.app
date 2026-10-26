@@ -14,7 +14,7 @@ const AVATAR_TONES = [
 ] as const
 
 export function getAvatarTone(seed: string | null | undefined): string {
-  const text = (seed ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim()
+  const text = (seed ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
   let hash = 0
   for (let i = 0; i < text.length; i++) hash = (hash * 31 + text.charCodeAt(i)) >>> 0
   return AVATAR_TONES[hash % AVATAR_TONES.length]

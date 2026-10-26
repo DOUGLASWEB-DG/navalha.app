@@ -1,6 +1,6 @@
 'use client'
 
-import { useId } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ArrowDownRight, ArrowUpRight, CalendarDays } from 'lucide-react'
 import { CHART_AXIS_TICK, CHART_COLORS, formatAxisCurrency, formatMonthLabel } from '@/lib/chart'
@@ -89,6 +89,11 @@ interface DotProps {
 
 export function CashBalanceCard({ balance, monthlyData, currentMonth, trends, months, onMonthsChange }: CashBalanceCardProps) {
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
+  // Quem pediu menos movimento no aparelho vê as linhas já desenhadas, sem a animação de entrada
+  const [reduceMotion, setReduceMotion] = useState(false)
+  useEffect(() => {
+    setReduceMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  }, [])
   const [whole, cents] = splitCents(balance)
 
   const bestIncome = indexOfMax(monthlyData.map((m) => m.receitas))
@@ -184,7 +189,7 @@ export function CashBalanceCard({ balance, monthlyData, currentMonth, trends, mo
               aria-pressed={months === p.value}
               onClick={() => onMonthsChange(p.value)}
               className={cn(
-                'min-h-8 rounded-md px-3 py-1.5 text-[11px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+                'min-h-11 rounded-md px-3.5 py-1.5 text-[11px] sm:min-h-8 sm:px-3 font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
                 months === p.value ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -220,6 +225,7 @@ export function CashBalanceCard({ balance, monthlyData, currentMonth, trends, mo
               strokeWidth={2.5}
               dot={highlight(bestIncome, CHART_COLORS.receitas)}
               activeDot={{ r: 6, fill: CHART_COLORS.receitas, stroke: 'hsl(var(--card))', strokeWidth: 3 }}
+              isAnimationActive={!reduceMotion}
               animationBegin={120}
               animationDuration={1200}
               animationEasing="ease-out"
@@ -232,6 +238,7 @@ export function CashBalanceCard({ balance, monthlyData, currentMonth, trends, mo
               strokeWidth={2.5}
               dot={highlight(bestExpense, CHART_COLORS.despesas)}
               activeDot={{ r: 6, fill: CHART_COLORS.despesas, stroke: 'hsl(var(--card))', strokeWidth: 3 }}
+              isAnimationActive={!reduceMotion}
               animationBegin={240}
               animationDuration={1200}
               animationEasing="ease-out"
