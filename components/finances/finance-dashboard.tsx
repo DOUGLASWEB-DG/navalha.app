@@ -14,6 +14,7 @@ import {
   ArrowDownRight,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
+import { AppIcon } from '@/components/shared/app-icon'
 import { CHART_AXIS_TICK, CHART_COLORS, CHART_GRID, formatAxisCurrency, formatMonthLabel } from '@/lib/chart'
 import { CategoryBreakdown } from './category-breakdown'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -93,6 +94,7 @@ export function FinanceDashboard() {
           title="Receitas do Mês"
           value={formatCurrency(currentMonth?.income ?? 0)}
           trend={trends?.income}
+          iconUrl="/assets/icons/receitamensal-icon.png"
           icon={<TrendingUp className="w-4 h-4" />}
           iconBg="bg-success/10 border-success/20"
           iconColor="text-success"
@@ -111,6 +113,7 @@ export function FinanceDashboard() {
         <KPICard
           title="Lucro Líquido"
           value={formatCurrency(profit)}
+          iconUrl="/assets/icons/finaces-icon.png"
           icon={<DollarSign className="w-4 h-4" />}
           iconBg={profit >= 0 ? 'bg-primary/10 border-primary/20' : 'bg-destructive/10 border-destructive/20'}
           iconColor={profit >= 0 ? 'text-primary' : 'text-destructive'}
@@ -193,21 +196,29 @@ interface KPICardProps {
   trend?: number
   invertTrend?: boolean
   icon: React.ReactNode
+  /** Ícone ilustrado de public/assets/icons; quando existe, no lugar do ícone simples */
+  iconUrl?: string
   iconBg: string
   iconColor: string
   valueColor: string
 }
 
-function KPICard({ title, value, trend, invertTrend, icon, iconBg, iconColor, valueColor }: KPICardProps) {
+function KPICard({ title, value, trend, invertTrend, icon, iconUrl, iconBg, iconColor, valueColor }: KPICardProps) {
   const trendPositive = invertTrend ? (trend ?? 0) < 0 : (trend ?? 0) > 0
 
   return (
     <div className="bg-card border border-border rounded-xl p-4">
       <div className="flex items-center justify-between mb-2">
         <p className="text-xs text-muted-foreground font-medium tracking-wide">{title}</p>
-        <div className={cn('w-8 h-8 rounded-lg border flex items-center justify-center', iconBg)}>
-          <span className={iconColor}>{icon}</span>
-        </div>
+        {iconUrl ? (
+          <div className="h-10 w-10 shrink-0">
+            <AppIcon src={iconUrl} />
+          </div>
+        ) : (
+          <div className={cn('w-8 h-8 rounded-lg border flex items-center justify-center', iconBg)}>
+            <span className={iconColor}>{icon}</span>
+          </div>
+        )}
       </div>
       <p className={cn('text-xl font-bold', valueColor)}>{value}</p>
       {trend !== undefined && trend !== 0 && (
