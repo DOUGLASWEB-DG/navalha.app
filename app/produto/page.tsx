@@ -20,8 +20,11 @@ export const metadata: Metadata = {
 // Letreiro de barbearia nos títulos; o corpo segue na Inter do app. A variável fica só nesta página.
 const display = Barlow_Condensed({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-display', display: 'swap' })
 
+// Os prints mantêm o nome quando são refeitos, e o navegador guarda a imagem antiga. Mude esta versão sempre que refizer os prints.
+const PRINTS_VERSAO = '20261027'
+
 const shot = (file: string, title: string, caption: string, width = 1600, height = 1000): DocShot => ({
-  src: `/assets/produto/${file}`,
+  src: `/assets/produto/${file}?v=${PRINTS_VERSAO}`,
   title,
   caption,
   width,
