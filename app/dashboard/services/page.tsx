@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
-import { Plus, Scissors, Clock, DollarSign, Pencil, Trash2, MoreVertical } from 'lucide-react'
+import { Plus, Pencil, Trash2, MoreVertical } from 'lucide-react'
 import { toast } from 'sonner'
 import { confirmAction } from '@/lib/confirm-toast'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import {
 import { ServiceFormModal } from '@/components/services/service-form-modal'
 
 import { PageHeader } from '@/components/dashboard/page-header'
+import { AppIcon } from '@/components/shared/app-icon'
 
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
 import { apiFetcher } from '@/lib/http-errors'
@@ -53,6 +54,7 @@ export default function ServicesPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       <PageHeader
         title="Catálogo de Serviços"
+        iconUrl="/assets/icons/servicos-icon.png"
         description="Gerencie os serviços, preços e durações oferecidos"
       >
         <Button
@@ -79,8 +81,8 @@ export default function ServicesPage() {
                 {/* Header (Ícone e Ações) */}
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                      <Scissors className="w-6 h-6 text-primary" />
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/60 p-1.5">
+                      <AppIcon src="/assets/icons/servicos-icon.png" />
                     </div>
                   </div>
                   <DropdownMenu>
@@ -120,15 +122,16 @@ export default function ServicesPage() {
                     <p className="mt-2 text-sm text-muted-foreground italic">Sem descrição</p>
                   )}
                   
-                  <div className="mt-4 flex items-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg border border-border w-fit">
-                    <Clock className="w-4 h-4 text-primary/70" />
+                  <div className="mt-4 flex items-center gap-2 text-sm font-medium text-foreground bg-muted/50 px-3 py-1.5 rounded-lg border border-border w-fit">
+                    <span className="h-6 w-6 shrink-0"><AppIcon src="/assets/icons/pendentes-icon.png" /></span>
                     <span>{svc.durationMins} min</span>
                   </div>
                 </div>
 
                 {/* Rodapé (Preço) */}
                 <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
-                  <span className="text-sm font-bold text-foreground">
+                  <span className="flex items-center gap-2 text-sm font-bold text-foreground">
+                    <span className="h-6 w-6 shrink-0"><AppIcon src="/assets/icons/finaces-icon.png" /></span>
                     Valor
                   </span>
                   <span className="text-base font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20">
@@ -140,8 +143,8 @@ export default function ServicesPage() {
           </div>
         ) : (
           <div className="text-center py-20">
-            <div className="w-20 h-20 bg-primary/10 border border-primary/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <Scissors className="w-10 h-10 text-primary" />
+            <div className="mx-auto mb-6 h-24 w-24">
+              <AppIcon src="/assets/icons/servicos-icon.png" />
             </div>
             <p className="text-lg font-bold text-foreground mb-2">Nenhum serviço ainda</p>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">

@@ -37,6 +37,9 @@ export default function DashboardPage() {
   })
   // Datas e horários no relógio da barbearia, não no do aparelho
   const timeZone = useBarbeariaTimeZone()
+  // Saudação com o nome de quem entrou (mesma chave SWR do menu e da barra do painel, sem requisição extra)
+  const { data: authData } = useSWR('/api/auth/me', fetcher)
+  const userName: string | undefined = authData?.user?.name
 
   if (isLoading) {
     return <DashboardSkeleton />
@@ -62,7 +65,7 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <h2 className="text-balance text-2xl font-bold tracking-tight text-foreground">
-            {getGreeting(timeZone)}, Patrão
+            {userName ? `${getGreeting(timeZone)}, ${userName}` : getGreeting(timeZone)}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {appointmentStats?.total ?? 0} agendamentos para hoje

@@ -20,7 +20,8 @@
     "test": "tsx --test tests/*.test.ts",
     "test:isolation": "tsx tests/integration/isolation.ts",
     "test:uploads": "tsx tests/integration/uploads.ts",
-    "test:fixture": "tsx tests/fixtures/tenant-b.ts"
+    "test:fixture": "tsx tests/fixtures/tenant-b.ts",
+    "test:reminders": "tsx tests/integration/reminders.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -27,6 +27,10 @@ ENV NEXT_TELEMETRY_DISABLED 1
 RUN npx prisma generate
 RUN npm run build
 
+# Robô de lembretes (scripts/cron.ts) num arquivo só, para rodar na imagem final sem tsx: `node cron.js`.
+# O Prisma fica de fora do pacote e vem do node_modules do standalone (o mesmo client do app).
+RUN npx esbuild scripts/cron.ts --bundle --platform=node --target=node20 --format=cjs --external:@prisma/client --outfile=dist/cron.js
+
 # Imagem de produção final
 FROM base AS runner
 WORKDIR /app
@@ -51,6 +55,7 @@ COPY --from=builder /app/prisma ./prisma
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/dist/cron.js ./cron.js
 
 USER nextjs
 

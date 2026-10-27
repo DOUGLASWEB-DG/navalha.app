@@ -3,6 +3,7 @@ import { jwtVerify, SignJWT } from 'jose'
 
 import { getJwtSecretKey } from '@/lib/jwt'
 import { resolveBarbeariaByHost } from '@/lib/tenant'
+import { demoLandingRoute } from '@/lib/demo-landing'
 
 const SESSION_COOKIE = 'barberos_session'
 
@@ -26,6 +27,11 @@ export async function middleware(request: NextRequest) {
   // em páginas e APIs. Os handlers revalidam por conta própria; esta barreira não substitui o filtro deles.
   const barbearia = await resolveBarbeariaByHost(request.headers.get('host'))
   if (!barbearia) return tenantNotFound(pathname)
+
+  // Demo: a raiz mostra a página do produto; /produto não existe nas outras barbearias (lib/demo-landing.ts)
+  const landing = demoLandingRoute(barbearia.subdomain, pathname)
+  if (landing.action === 'notFound') return tenantNotFound(pathname)
+  if (landing.action === 'rewrite') return NextResponse.rewrite(new URL(landing.to, request.url))
 
   const token = request.cookies.get(SESSION_COOKIE)?.value
 
