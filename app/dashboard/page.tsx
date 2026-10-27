@@ -40,6 +40,11 @@ export default function DashboardPage() {
   // Saudação com o nome de quem entrou (mesma chave SWR do menu e da barra do painel, sem requisição extra)
   const { data: authData } = useSWR('/api/auth/me', fetcher)
   const userName: string | undefined = authData?.user?.name
+  // O que o plano da instalação inclui (lib/plan.ts, vindo de /api/auth/me). Enquanto não chega, mostra tudo.
+  const recursos = authData?.plan?.recursos
+  const comFinancas = recursos?.financas !== false
+  const comMetas = recursos?.metas !== false
+  const comLateral = comMetas || comFinancas
 
   if (isLoading) {
     return <DashboardSkeleton />
@@ -79,7 +84,8 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Cards de Estatísticas — carrossel no mobile, grid no desktop */}
+      {/* Cards de Estatísticas — carrossel no mobile, grid no desktop. Receita é de Finanças: fora do plano Essencial */}
+      {comFinancas && (
       <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-visible pb-1 touch-pan-x lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 lg:snap-none">
         <StatCard
           title="Receita de Hoje"
@@ -111,13 +117,16 @@ export default function DashboardPage() {
           accent="gold"
         />
       </div>
+      )}
 
       {/* Status de hoje: uma faixa só, três contadores */}
-      <section aria-label="Situação dos agendamentos de hoje" className="grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-card">
+      <section aria-label="Situação dos agendamentos de hoje" className={`grid ${comFinancas ? 'grid-cols-3' : 'grid-cols-4'} divide-x divide-border rounded-2xl border border-border bg-card`}>
         {[
           { label: 'Pendentes', value: appointmentStats?.pending ?? 0, icon: '/assets/icons/pendentes-icon.png' },
           { label: 'Confirmados', value: appointmentStats?.confirmed ?? 0, icon: '/assets/icons/confirmados-icon.png' },
           { label: 'Concluídos', value: appointmentStats?.completed ?? 0, icon: '/assets/icons/concluidos-icon.png' },
+          // Sem os cards de receita, o total de clientes passa a morar nesta faixa
+          ...(comFinancas ? [] : [{ label: 'Clientes', value: totalClients ?? 0, icon: '/assets/icons/totalclientes-icon.png' }]),
         ].map((item) => (
           <div key={item.label} className="flex flex-col items-center gap-1 px-2 py-3 text-center sm:flex-row sm:justify-center sm:gap-3 sm:px-4 sm:text-left">
             <div className="h-8 w-8 shrink-0 sm:h-10 sm:w-10">
@@ -132,8 +141,8 @@ export default function DashboardPage() {
       </section>
 
       {/* Corpo: agenda e gráfico à esquerda; metas e transações à direita */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-6 lg:col-span-2">
+      <div className={`grid grid-cols-1 gap-6 ${comLateral ? 'lg:grid-cols-3' : ''}`}>
+        <div className={`flex flex-col gap-6 ${comLateral ? 'lg:col-span-2' : ''}`}>
           {/* Agenda de Hoje: lista compacta */}
           <section className="rounded-2xl border border-border bg-card">
             <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
@@ -194,11 +203,13 @@ export default function DashboardPage() {
             )}
           </section>
 
-          <RevenueChart data={chartData ?? []} />
+          {comFinancas && <RevenueChart data={chartData ?? []} />}
         </div>
 
+        {comLateral && (
         <div className="flex flex-col gap-6">
           {/* Metas */}
+          {comMetas && (
           <section className="rounded-2xl border border-border bg-card p-5">
             <div className="mb-4 flex items-center justify-between gap-2">
               <h3 className="text-base font-semibold text-foreground">Metas ativas</h3>
@@ -237,8 +248,10 @@ export default function DashboardPage() {
               </div>
             )}
           </section>
+          )}
 
           {/* Transações recentes */}
+          {comFinancas && (
           <section className="rounded-2xl border border-border bg-card">
             <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
               <h3 className="whitespace-nowrap text-base font-semibold text-foreground">Transações recentes</h3>
@@ -281,7 +294,9 @@ export default function DashboardPage() {
               <p className="px-5 py-8 text-center text-sm text-muted-foreground">Nenhuma transação ainda</p>
             )}
           </section>
+          )}
         </div>
+        )}
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { planoPermite } from '@/lib/plan'
 import { startOfZonedDay, startOfZonedMonth, startOfZonedWeek, zonedDayKey } from '@/lib/time-zone'
 
 export async function GET() {
@@ -20,6 +21,11 @@ export async function GET() {
 
     const earliestTxDate = new Date(Math.min(weekStart.getTime(), chartStart.getTime()))
 
+    // Plano: sem Finanças não se consulta nem se devolve receita, transações e gráfico; sem Metas, nenhuma meta.
+    // O dado continua sendo gravado (concluir um atendimento lança a receita), então ao ampliar o plano nada se perde.
+    const comFinancas = planoPermite('financas')
+    const comMetas = planoPermite('metas')
+
     // --- Otimização: Buscas em Paralelo e Agregações ---
     const [
       totalClients,
@@ -30,9 +36,9 @@ export async function GET() {
       recentTxForCalculations
     ] = await Promise.all([
       prisma.client.count({ where: { barbeariaId, isActive: true } }),
-      prisma.goal.findMany({
-        where: { barbeariaId, startDate: { lte: now }, endDate: { gte: now } },
-      }),
+      comMetas
+        ? prisma.goal.findMany({ where: { barbeariaId, startDate: { lte: now }, endDate: { gte: now } } })
+        : Promise.resolve([]),
       prisma.appointment.findMany({
         where: {
           barbeariaId,
@@ -42,20 +48,26 @@ export async function GET() {
         include: { client: true, service: true, appointmentServices: { include: { service: true } }, barber: true },
         orderBy: { date: 'asc' },
       }),
-      prisma.transaction.aggregate({
-        where: { barbeariaId, date: { gte: monthStart }, type: 'INCOME' },
-        _sum: { amount: true }
-      }),
-      prisma.transaction.findMany({
-        where: { barbeariaId },
-        orderBy: { date: 'desc' },
-        take: 5,
-        select: { id: true, type: true, description: true, date: true, amount: true }
-      }),
-      prisma.transaction.findMany({
-        where: { barbeariaId, date: { gte: earliestTxDate } },
-        select: { date: true, type: true, amount: true }
-      })
+      comFinancas
+        ? prisma.transaction.aggregate({
+            where: { barbeariaId, date: { gte: monthStart }, type: 'INCOME' },
+            _sum: { amount: true }
+          })
+        : Promise.resolve({ _sum: { amount: null as number | null } }),
+      comFinancas
+        ? prisma.transaction.findMany({
+            where: { barbeariaId },
+            orderBy: { date: 'desc' },
+            take: 5,
+            select: { id: true, type: true, description: true, date: true, amount: true }
+          })
+        : Promise.resolve([] as { id: string; type: 'INCOME' | 'EXPENSE'; description: string; date: Date; amount: number }[]),
+      comFinancas
+        ? prisma.transaction.findMany({
+            where: { barbeariaId, date: { gte: earliestTxDate } },
+            select: { date: true, type: true, amount: true }
+          })
+        : Promise.resolve([] as { date: Date; type: 'INCOME' | 'EXPENSE'; amount: number }[])
     ])
 
     // --- Processamento em Memória Otimizado ---
@@ -103,16 +115,14 @@ export async function GET() {
     
     return NextResponse.json({
       todayAppointments,
-      revenue: {
-        daily: dailyRevenue,
-        weekly: weeklyRevenue,
-        monthly: monthlyRevenue,
-      },
+      revenue: comFinancas
+        ? { daily: dailyRevenue, weekly: weeklyRevenue, monthly: monthlyRevenue }
+        : null,
       totalClients,
       appointmentStats,
       recentTransactions,
       goals,
-      chartData,
+      chartData: comFinancas ? chartData : [],
     })
   } catch (error) {
     const handled = tenantErrorResponse(error)

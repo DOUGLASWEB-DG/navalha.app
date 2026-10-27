@@ -4,6 +4,7 @@ import { jwtVerify, SignJWT } from 'jose'
 import { getJwtSecretKey } from '@/lib/jwt'
 import { resolveBarbeariaByHost } from '@/lib/tenant'
 import { demoLandingRoute } from '@/lib/demo-landing'
+import { bloqueioDoCaminho, MENSAGEM_RECURSO_FORA_DO_PLANO } from '@/lib/plan'
 
 const SESSION_COOKIE = 'barberos_session'
 
@@ -32,6 +33,14 @@ export async function middleware(request: NextRequest) {
   const landing = demoLandingRoute(barbearia.subdomain, pathname)
   if (landing.action === 'notFound') return tenantNotFound(pathname)
   if (landing.action === 'rewrite') return NextResponse.rewrite(new URL(landing.to, request.url))
+
+  // Plano da instalação (NAVALHA_PLANO, lib/plan.ts): Finanças, Metas e Produtos só existem no Completo. Barra as páginas
+  // (volta ao painel) e as rotas da API (403) antes de qualquer sessão ou consulta. Sem a variável, nada é barrado.
+  const bloqueio = bloqueioDoCaminho(pathname)
+  if (bloqueio.action === 'forbidden') {
+    return NextResponse.json({ error: MENSAGEM_RECURSO_FORA_DO_PLANO }, { status: 403 })
+  }
+  if (bloqueio.action === 'redirect') return NextResponse.redirect(new URL('/dashboard', request.url))
 
   const token = request.cookies.get(SESSION_COOKIE)?.value
 

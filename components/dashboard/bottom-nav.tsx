@@ -43,6 +43,7 @@ const items = [
     iconUrl: '/assets/icons/finaces-icon.png',
     match: (p: string) => p.startsWith('/dashboard/finances'),
     adminOnly: true,
+    recurso: 'financas' as const,
   },
   {
     href: '/dashboard/services',
@@ -55,12 +56,13 @@ const items = [
 
 export function BottomNav() {
   const pathname = usePathname()
-  const { data: alertData } = useSWR('/api/finances/alerts', fetcher, {
+  const { data: authData } = useSWR('/api/auth/me', fetcher)
+  const user = authData?.user
+  // Alertas são de Finanças: sem o recurso no plano nem se consulta (a rota responde 403)
+  const { data: alertData } = useSWR(authData?.plan?.recursos?.financas ? '/api/finances/alerts' : null, fetcher, {
     refreshInterval: 60000,
   })
   const alertCount = alertData?.unreadCount ?? 0
-  const { data: authData } = useSWR('/api/auth/me', fetcher)
-  const user = authData?.user
 
   return (
     <nav
@@ -77,6 +79,8 @@ export function BottomNav() {
       <div className="flex max-w-lg mx-auto items-stretch justify-between gap-0.5">
         {items
           .filter(item => !('adminOnly' in item && item.adminOnly) || user?.role === 'ADMIN')
+          // O que o plano não inclui some do menu (o servidor também barra: lib/plan.ts)
+          .filter(item => !item.recurso || authData?.plan?.recursos?.[item.recurso] !== false)
           .map((item) => {
           const active = item.match(pathname)
           const showBadge = item.href === '/dashboard/finances' && alertCount > 0

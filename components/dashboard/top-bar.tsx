@@ -49,12 +49,13 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
   const timeZone = useBarbeariaTimeZone()
   const today = format(toZonedWallClock(new Date(), timeZone), "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR })
 
-  const { data: alertData } = useSWR('/api/finances/alerts', fetcher, { refreshInterval: 30000 })
-  const alerts = alertData?.alerts ?? []
-  const unreadCount = alertData?.unreadCount ?? 0
-
   const { data: authData } = useSWR('/api/auth/me', fetcher)
   const isAdmin = authData?.user?.role === 'ADMIN'
+
+  // Alertas são de Finanças: sem o recurso no plano nem se consulta (a rota responde 403)
+  const { data: alertData } = useSWR(authData?.plan?.recursos?.financas ? '/api/finances/alerts' : null, fetcher, { refreshInterval: 30000 })
+  const alerts = alertData?.alerts ?? []
+  const unreadCount = alertData?.unreadCount ?? 0
 
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })

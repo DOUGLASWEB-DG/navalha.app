@@ -29,14 +29,17 @@ interface SidebarProps {
   onToggle: () => void
 }
 
-const navItems = [
+type Recurso = 'financas' | 'metas' | 'produtos'
+type NavItem = { label: string; href: string; iconUrl: string; adminOnly?: boolean; recurso?: Recurso }
+
+const navItems: NavItem[] = [
   { label: 'Painel', href: '/dashboard', iconUrl: '/assets/icons/painel-icon.png', adminOnly: true },
   { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/icons/agendamentos-icon.png' },
   { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/icons/clientes-icon.png', adminOnly: true },
-  { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/icons/finaces-icon.png', adminOnly: true },
-  { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/icons/metas-icon.png', adminOnly: true },
+  { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/icons/finaces-icon.png', adminOnly: true, recurso: 'financas' },
+  { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/icons/metas-icon.png', adminOnly: true, recurso: 'metas' },
   { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/icons/servicos-icon.png', adminOnly: true },
-  { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/icons/produtos-icon.png', adminOnly: true },
+  { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/icons/produtos-icon.png', adminOnly: true, recurso: 'produtos' },
   { label: 'Equipe', href: '/dashboard/users', iconUrl: '/assets/icons/equipe-icon.png', adminOnly: true },
   // Conexão do WhatsApp; a API só aceita o admin da barbearia (requireWhatsappAdmin)
   { label: 'Configurações', href: '/dashboard/settings', iconUrl: '/assets/icons/configuracoes-icon.png', adminOnly: true },
@@ -53,10 +56,11 @@ const bottomItems = [
 
 export function Sidebar({ open, onToggle }: SidebarProps) {
   const pathname = usePathname()
-  const { data: alertData } = useSWR('/api/finances/alerts', fetcher, { refreshInterval: 60000 })
-  const alertCount = alertData?.unreadCount ?? 0
   const { data: authData } = useSWR('/api/auth/me', fetcher)
   const user = authData?.user
+  // Alertas são de Finanças: sem o recurso no plano nem se consulta (a rota responde 403)
+  const { data: alertData } = useSWR(authData?.plan?.recursos?.financas ? '/api/finances/alerts' : null, fetcher, { refreshInterval: 60000 })
+  const alertCount = alertData?.unreadCount ?? 0
 
 
   async function handleLogout() {
@@ -92,6 +96,8 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
       <nav className="flex-1 py-4 px-2 flex flex-col gap-1 overflow-y-auto">
         {navItems
           .filter(item => !item.adminOnly || user?.role === 'ADMIN')
+          // O que o plano não inclui some do menu (o servidor também barra: lib/plan.ts)
+          .filter(item => !item.recurso || authData?.plan?.recursos?.[item.recurso] !== false)
           .map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
           const showBadge = item.href === '/dashboard/finances' && alertCount > 0

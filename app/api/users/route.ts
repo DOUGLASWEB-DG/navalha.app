@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { assertCabeMaisUmBarbeiro } from '@/lib/plan-limits'
 
 const createUserSchema = z.object({
   name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres'),
@@ -43,6 +44,9 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     const parsed = createUserSchema.parse(body)
+
+    // Limite de barbeiros do plano (lib/plan.ts); o proprietário não conta
+    if (parsed.role === 'BARBER') await assertCabeMaisUmBarbeiro(barbearia.id)
 
     // E-mail é único no sistema todo (o login é global), por isso a checagem não filtra por barbearia
     const existingUser = await prisma.user.findUnique({ where: { email: parsed.email } })

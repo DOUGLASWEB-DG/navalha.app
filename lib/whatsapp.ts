@@ -1,3 +1,5 @@
+import { planoPermite } from './plan';
+
 const INSTANCE_NAME = 'barberos_main';
 
 export class EvolutionConfigError extends Error {}
@@ -58,6 +60,9 @@ export async function connectInstance() {
 }
 
 export async function sendTextMessage(number: string, text: string) {
+  // Plano sem WhatsApp (Essencial): não envia nada, nem tenta. Não depender só de faltar a configuração da Evolution,
+  // que bastaria alguém copiar para a instalação para o número da América passar a falar com os clientes dela.
+  if (!planoPermite('whatsapp')) return { skipped: 'plano' as const };
   const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
   const response = await fetch(`${EVO_URL}/message/sendText/${INSTANCE_NAME}`, {
     method: 'POST',

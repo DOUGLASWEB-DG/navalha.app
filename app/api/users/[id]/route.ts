@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { assertCabeMaisUmBarbeiro } from '@/lib/plan-limits'
 import { removeStoredImage } from '@/lib/uploads/route-helpers'
 
 const updateUserSchema = z.object({
@@ -50,6 +51,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         )
       }
     }
+
+    // Limite de barbeiros do plano (lib/plan.ts): vale ao virar barbeiro ativo (novo cargo ou reativação), não a quem já é
+    const seraBarbeiroAtivo = (parsed.role ?? targetUser.role) === 'BARBER' && (parsed.active ?? targetUser.active)
+    const jaEraBarbeiroAtivo = targetUser.role === 'BARBER' && targetUser.active
+    if (seraBarbeiroAtivo && !jaEraBarbeiroAtivo) await assertCabeMaisUmBarbeiro(barbeariaId, targetUserId)
 
     // Se o email está sendo alterado, verificar unicidade
     if (parsed.email && parsed.email !== targetUser.email) {
