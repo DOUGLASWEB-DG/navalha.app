@@ -33,12 +33,12 @@ const shots = {
   agenda: shot('agenda-desktop.webp', 'Agendamentos', 'Os horários do dia, por barbeiro, com o status de cada um.'),
   clientes: shot('clientes-desktop.webp', 'Clientes', 'Cadastro com telefone, total de atendimentos e último atendimento.'),
   servicos: shot('servicos-desktop.webp', 'Serviços', 'Cada serviço com duração, valor e foto.'),
-  equipe: shot('equipe-desktop.webp', 'Equipe', 'Dono e barbeiros, cada um com o seu acesso.', 1600, 600),
+  equipe: shot('equipe-desktop.webp', 'Equipe', 'Proprietário e barbeiros, cada um com o seu acesso.', 1600, 500),
   financas: shot('financas-desktop.webp', 'Finanças', 'Caixa, receitas, despesas, lucro e fluxo de caixa.'),
-  metas: shot('metas-desktop.webp', 'Metas', 'A meta do mês e o quanto já foi alcançado.', 1600, 600),
-  produtos: shot('produtos-desktop.webp', 'Produtos', 'Catálogo com valor e estoque de cada produto.', 1600, 640),
+  metas: shot('metas-desktop.webp', 'Metas', 'A meta do mês e o quanto já foi alcançado.', 1600, 560),
+  produtos: shot('produtos-desktop.webp', 'Produtos', 'Catálogo com valor e estoque de cada produto.', 1600, 540),
   reserva: shot('agendamento-online-celular.webp', 'Agendamento online', 'O que o cliente vê no celular, no passo de escolher o serviço.', 700, 1515),
-  painelCel: shot('painel-celular.webp', 'Painel no celular', 'O dono acompanha a barbearia pelo celular.', 700, 1515),
+  painelCel: shot('painel-celular.webp', 'Painel no celular', 'O proprietário acompanha a barbearia pelo celular.', 700, 1515),
 }
 
 // Menu da documentação: o mesmo no lado esquerdo (computador) e no menu do celular
@@ -46,7 +46,7 @@ const nav: { grupo: string; itens: [id: string, rotulo: string][] }[] = [
   { grupo: 'Começando', itens: [['visao-geral', 'Visão geral'], ['primeiros-passos', 'Primeiros passos']] },
   { grupo: 'Para o cliente', itens: [['agendamento-online', 'Agendamento online']] },
   {
-    grupo: 'Painel do dono',
+    grupo: 'Painel do proprietário',
     itens: [
       ['painel', 'Painel do dia'],
       ['agendamentos', 'Agendamentos'],
@@ -149,7 +149,7 @@ export default function ProdutoPage() {
             Como o Navalha.app funciona, <span className="text-blue-400">tela por tela</span>
           </h1>
           <p className="mt-5 max-w-[60ch] text-base leading-relaxed text-[#9fb0cc] sm:text-lg">
-            Cada parte do sistema, as regras que ele aplica e o que esperar. Para o dono, para o barbeiro e para quem vai implantar. Os prints são desta demonstração, com dados fictícios.
+            Cada parte do sistema, as regras que ele aplica e o que esperar. Para o proprietário, para o barbeiro e para quem vai implantar. Os prints são desta demonstração, com dados fictícios.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Link href="/login" className={botaoPrimario}>
@@ -172,7 +172,7 @@ export default function ProdutoPage() {
               <RuleTable
                 head={['Perfil', 'Acesso']}
                 rows={[
-                  ['Dono (administrador)', 'Todas as telas: painel, agendamentos, clientes, finanças, metas, serviços, produtos, equipe e configurações. Só o dono cria, edita e remove usuários.'],
+                  ['Proprietário (administrador)', 'Todas as telas: painel, agendamentos, clientes, finanças, metas, serviços, produtos, equipe e configurações. Só o proprietário cria, edita e remove usuários.'],
                   ['Barbeiro', <>Só a tela de <strong className="text-white">Agendamentos</strong>, e apenas com os próprios horários. Ao criar um agendamento, ele entra na própria agenda.</>],
                   ['Cliente', <>Não tem login. Agenda pelo link público da barbearia (<Code>/book</Code>).</>],
                 ]}
@@ -226,7 +226,7 @@ export default function ProdutoPage() {
             <DocSection
               id="painel"
               title="Painel do dia"
-              lead="A primeira tela do dono. Mostra como o dia e o mês estão, sem abrir relatório."
+              lead="A primeira tela do proprietário. Mostra como o dia e o mês estão, sem abrir relatório."
             >
               <RuleTable
                 head={['Bloco', 'O que mostra']}
@@ -253,12 +253,12 @@ export default function ProdutoPage() {
                 A lista é organizada por dia e pode ser filtrada por status (todos, pendentes, confirmados, concluídos e cancelados). Cada linha traz horário, cliente, serviços, barbeiro, valor e status, com um menu de ações. O botão <strong className="text-white">Novo Agendamento</strong> cria um horário pelo balcão.
               </P>
               <P>
-                O barbeiro vê somente os agendamentos dele. O dono vê os de toda a equipe. O que pode mudar de um status para outro está em Status do agendamento.
+                O barbeiro vê somente os agendamentos dele. O proprietário vê os de toda a equipe. O que pode mudar de um status para outro está em Status do agendamento.
               </P>
               <DocFigure shot={shots.agenda} />
             </DocSection>
 
-            <DocSection id="clientes" title="Clientes" lead="O cadastro e o histórico de quem frequenta a barbearia. Telas do dono.">
+            <DocSection id="clientes" title="Clientes" lead="O cadastro e o histórico de quem frequenta a barbearia. Telas do proprietário.">
               <P>
                 Cada cliente tem nome, telefone, e-mail (opcional) e observações. A lista mostra o total de atendimentos e a data do último, e tem busca por nome ou telefone. Há um atalho para chamar o cliente no WhatsApp. Ao remover um cliente, ele é arquivado e some da lista, mas o histórico dos atendimentos é preservado.
               </P>
@@ -280,12 +280,12 @@ export default function ProdutoPage() {
 
             <DocSection id="equipe" title="Equipe e permissões" lead="Cada pessoa entra com a própria conta, e cada uma vê só o que precisa.">
               <P>
-                O dono cadastra os barbeiros com nome, e-mail e cargo (administrador ou barbeiro). Só o dono cria, edita e remove usuários. As permissões de cada perfil estão em Visão geral.
+                O proprietário cadastra os barbeiros com nome, e-mail e cargo (administrador ou barbeiro). Só o proprietário cria, edita e remove usuários. As permissões de cada perfil estão em Visão geral.
               </P>
               <DocFigure shot={shots.equipe} />
             </DocSection>
 
-            <DocSection id="financas" title="Finanças" lead="O caixa da barbearia, sem planilha. Telas do dono.">
+            <DocSection id="financas" title="Finanças" lead="O caixa da barbearia, sem planilha. Telas do proprietário.">
               <P>
                 A tela tem quatro áreas: <strong className="text-white">Visão Geral</strong> (caixa, receitas e despesas do mês, lucro líquido, margem e fluxo de caixa), <strong className="text-white">Transações</strong> (os lançamentos), <strong className="text-white">Relatórios</strong> e <strong className="text-white">Alertas</strong>. Cada atendimento concluído gera uma receita automaticamente. Despesas e outras receitas são lançadas à mão, por categoria.
               </P>
@@ -319,7 +319,7 @@ export default function ProdutoPage() {
                   ['Cliente faz um agendamento', 'O cliente recebe a mensagem de agendamento recebido. O barbeiro também é avisado, se tiver telefone cadastrado.'],
                   ['Agendamento é confirmado', 'O cliente recebe a confirmação com serviço, dia e horário.'],
                   ['Falta cerca de 1 hora', 'Um robô verifica a cada 5 minutos os agendamentos confirmados que começam daqui a 30 a 70 minutos e avisa o cliente e, se tiver telefone cadastrado, o barbeiro.'],
-                  ['Atendimento é concluído', 'O cliente recebe o agradecimento, e o dono recebe o aviso da receita lançada.'],
+                  ['Atendimento é concluído', 'O cliente recebe o agradecimento, e o proprietário recebe o aviso da receita lançada.'],
                 ]}
               />
               <Sub>Confiabilidade</Sub>
@@ -339,7 +339,7 @@ export default function ProdutoPage() {
                   ['Horários', 'O início fica entre 08:00 e 19:30, de 30 em 30 minutos.'],
                   ['Fechamento', 'O serviço precisa terminar até as 20:00. Um serviço longo que passaria disso não é aceito naquele horário.'],
                   ['Datas', 'Não é possível agendar no passado.'],
-                  ['Cancelamento', 'O barbeiro só cancela com pelo menos 2 horas de antecedência. O dono pode corrigir um status a qualquer momento.'],
+                  ['Cancelamento', 'O barbeiro só cancela com pelo menos 2 horas de antecedência. O proprietário pode corrigir um status a qualquer momento.'],
                   ['Fuso', 'Todos os horários seguem o fuso da barbearia.'],
                 ]}
               />
@@ -360,7 +360,7 @@ export default function ProdutoPage() {
                 rows={[
                   ['Pendente', 'Confirmado ou Cancelado.'],
                   ['Confirmado', 'Concluído ou Cancelado.'],
-                  ['Concluído e Cancelado', 'São finais para o barbeiro. O dono pode corrigir.'],
+                  ['Concluído e Cancelado', 'São finais para o barbeiro. O proprietário pode corrigir.'],
                 ]}
               />
               <Sub>Travas</Sub>
