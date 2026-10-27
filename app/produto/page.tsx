@@ -234,7 +234,7 @@ export default function ProdutoPage() {
               <RuleTable
                 head={['Bloco', 'O que mostra']}
                 rows={[
-                  ['Receita de hoje, da semana e do mês', 'O faturamento de cada período. A receita de hoje mostra a variação em relação à semana passada.'],
+                  ['Receita de hoje, da semana e do mês', 'O faturamento de cada período, somando os atendimentos concluídos.'],
                   ['Total de clientes', 'Quantos clientes estão cadastrados.'],
                   ['Pendentes, confirmados e concluídos', 'A contagem dos agendamentos do dia por status.'],
                   ['Agenda de hoje', 'Os horários do dia, com cliente, serviço, barbeiro, valor e status.'],
