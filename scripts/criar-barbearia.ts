@@ -67,7 +67,8 @@ async function main() {
     await seedDefaultCategories(prisma, id)
 
     console.log(`OK: barbearia "${nome}" criada (${slug}) no banco ${bancoAtual}, com o proprietário ${adminEmail}.`)
-    console.log('A barbearia padrão (América) desta instalação foi desativada.')
+    console.log(`Nota: a cópia da "América" que a migration cria em todo banco novo foi desativada, só dentro de ${bancoAtual}.`)
+    console.log('A América de verdade fica em outro banco (navalha) e não foi tocada por este script.')
   } finally {
     await prisma.$disconnect()
   }
