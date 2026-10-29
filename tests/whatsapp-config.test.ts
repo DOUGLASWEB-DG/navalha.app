@@ -57,6 +57,36 @@ describe('resolveWhatsapp: falha fechada', () => {
     erro({ EVO_INSTANCE_NAME: 'vitorbarber69', WHATSAPP_BARBEARIA_ID: DEFAULT_BARBEARIA_ID }, /da América/)
   })
 
+  it('instalação de cliente (NAVALHA_PLANO definida) sem as duas variáveis é erro: o padrão seria o número da América', () => {
+    erro({ NAVALHA_PLANO: 'completo' }, /padrão seria o número da América/)
+    erro({ NAVALHA_PLANO: 'essencial' }, /padrão seria o número da América/)
+  })
+
+  it('NAVALHA_PLANO definida COM as duas variáveis funciona', () => {
+    assert.deepEqual(resolveWhatsapp({ NAVALHA_PLANO: 'completo', EVO_INSTANCE_NAME: 'vitorbarber69', WHATSAPP_BARBEARIA_ID: 'barbearia-vitorbarber69' }), {
+      instancia: 'vitorbarber69',
+      barbeariaId: 'barbearia-vitorbarber69',
+    })
+  })
+
+  it('a América e a demo (sem NAVALHA_PLANO) continuam no padrão', () => {
+    assert.deepEqual(resolveWhatsapp({ NAVALHA_PLANO: '  ' }), { instancia: 'barberos_main', barbeariaId: DEFAULT_BARBEARIA_ID })
+  })
+
+  it('maiúsculas não escapam da checagem de coerência', () => {
+    erro({ EVO_INSTANCE_NAME: 'BARBEROS_MAIN', WHATSAPP_BARBEARIA_ID: 'barbearia-vitorbarber69' }, /da América/)
+    erro({ EVO_INSTANCE_NAME: 'vitorbarber69', WHATSAPP_BARBEARIA_ID: 'BARBEARIA-AMERICA' }, /da América/)
+  })
+
+  it('limites do nome: 1 e 63 caracteres valem; 64, "_" no início e aspas literais não', () => {
+    const ok = (nome: string) => resolveWhatsapp({ EVO_INSTANCE_NAME: nome, WHATSAPP_BARBEARIA_ID: 'barbearia-x' }).instancia
+    assert.equal(ok('a'), 'a')
+    assert.equal(ok('a'.repeat(63)), 'a'.repeat(63))
+    erro({ EVO_INSTANCE_NAME: 'a'.repeat(64), WHATSAPP_BARBEARIA_ID: 'barbearia-x' }, /inválido/)
+    erro({ EVO_INSTANCE_NAME: '_abc', WHATSAPP_BARBEARIA_ID: 'barbearia-x' }, /inválido/)
+    erro({ EVO_INSTANCE_NAME: '"vitorbarber69"', WHATSAPP_BARBEARIA_ID: 'barbearia-x' }, /inválido/)
+  })
+
   it('nome de instância que sairia do caminho da URL é erro', () => {
     for (const ruim of ['../barberos_main', 'a/b', 'a b', 'a?x=1', 'a#b', '-comeca-com-hifen', 'x'.repeat(64), 'ação']) {
       erro({ EVO_INSTANCE_NAME: ruim, WHATSAPP_BARBEARIA_ID: 'barbearia-vitorbarber69' }, /inválido/)

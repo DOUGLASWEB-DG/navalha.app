@@ -10,6 +10,7 @@ import { normalizeBrazilPhone } from '../lib/format';
 import { getAppointmentServiceSummary } from '../lib/appointment-services';
 import { resolvePhone } from '../lib/notifications';
 import { dispatchWebhookEvent } from '../lib/events';
+import { planoPermite } from '../lib/plan';
 import { resolveWhatsapp } from '../lib/whatsapp-config';
 
 const prisma = new PrismaClient();
@@ -138,6 +139,13 @@ async function checkReminders() {
   console.log(`[Cron] Ciclo concluído: ${sentCount} lembrete(s) enviado(s).`);
 }
 
-console.log(`[Cron] Robô de lembretes iniciado (verifica a cada ${INTERVAL_MS / 60000} minutos).`);
-checkReminders();
-setInterval(checkReminders, INTERVAL_MS);
+if (!planoPermite('whatsapp')) {
+  // Plano sem WhatsApp (Essencial): o robô não envia nada. Fica em espera em vez de sair, porque o compose o reiniciaria
+  // em loop; para ligar, mude NAVALHA_PLANO para completo e reinicie.
+  console.error('[Cron] O plano desta instalação não inclui WhatsApp: o robô fica em espera e não envia lembretes.');
+  setInterval(() => {}, 60 * 60 * 1000);
+} else {
+  console.log(`[Cron] Robô de lembretes iniciado (verifica a cada ${INTERVAL_MS / 60000} minutos).`);
+  checkReminders();
+  setInterval(checkReminders, INTERVAL_MS);
+}

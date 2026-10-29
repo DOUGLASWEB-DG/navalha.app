@@ -1,5 +1,5 @@
 import { planoPermite } from './plan';
-import { EvolutionConfigError, resolveWhatsapp } from './whatsapp-config';
+import { EvolutionConfigError, INSTANCIA_PADRAO, resolveWhatsapp } from './whatsapp-config';
 
 export { EvolutionConfigError };
 
@@ -17,6 +17,9 @@ export function getEvolutionConfig() {
 
 export async function createInstance() {
   const { url: EVO_URL, apiKey: EVO_API_KEY, instancia: INSTANCE_NAME } = getEvolutionConfig();
+  // Instalação de cliente: a instância é criada na VPS, com token próprio, por quem opera o servidor. Criar exigiria a chave
+  // GERAL do Evolution, que nunca deve ficar no app de um cliente; aqui o botão só segue para "Conectar" (QR).
+  if (INSTANCE_NAME !== INSTANCIA_PADRAO) return { skipped: 'instancia-criada-na-vps' as const };
   const response = await fetch(`${EVO_URL}/instance/create`, {
     method: 'POST',
     headers: {

@@ -58,6 +58,10 @@ Ao passar para o Completo, a tela de Finanças volta com os dados.
   2. no `<slug>.env`: `NEXT_PUBLIC_EVO_URL`, `EVO_API_KEY` (token da instância), `EVO_INSTANCE_NAME=<slug>` e
      `WHATSAPP_BARBEARIA_ID=barbearia-<slug>`, depois `NAVALHA_PLANO=completo`;
   3. acrescentar o serviço `<slug>-cron` ao `compose.<slug>.yml` (mesma imagem, `command: node cron.js`, mesmo `env_file`);
-  4. conectar o QR pelo painel do cliente (Configurações → WhatsApp) e testar com um número de teste antes de liberar.
+  4. conectar o QR pelo painel do cliente (Configurações → WhatsApp, botão **Conectar**: o "Criar" não cria nada no cliente de
+     propósito, a instância já foi criada na VPS) e testar com um número de teste antes de liberar.
+  > **Cuidado:** instalação de cliente (com `NAVALHA_PLANO`) **sem** `EVO_INSTANCE_NAME` e `WHATSAPP_BARBEARIA_ID` é recusada
+  > (erro), porque o padrão seria o número da América. Escreva os valores no `.env` **sem aspas**.
+  > O serviço `<slug>-cron` só envia no plano Completo; no Essencial ele fica em espera.
   Ainda **a confirmar** no Evolution v2.3.7: que o token da instância não alcança outras instâncias.
 - Reset diário (a demo reseta, o cliente real **não**).

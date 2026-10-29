@@ -25,7 +25,16 @@ export function resolveWhatsapp(env: Record<string, string | undefined> = proces
   const instancia = env.EVO_INSTANCE_NAME?.trim() ?? ''
   const barbeariaId = env.WHATSAPP_BARBEARIA_ID?.trim() ?? ''
 
-  if (!instancia && !barbeariaId) return { instancia: INSTANCIA_PADRAO, barbeariaId: DEFAULT_BARBEARIA_ID }
+  if (!instancia && !barbeariaId) {
+    // NAVALHA_PLANO só existe em instalação de cliente (a América e a demo não a definem). Sem as duas variáveis o padrão
+    // seria o número da América: numa instalação de cliente isso é falha aberta, então vira erro.
+    if (env.NAVALHA_PLANO?.trim()) {
+      throw new EvolutionConfigError(
+        '[WhatsApp] Instalação de cliente (NAVALHA_PLANO definida) precisa de EVO_INSTANCE_NAME e WHATSAPP_BARBEARIA_ID: sem elas o padrão seria o número da América.',
+      )
+    }
+    return { instancia: INSTANCIA_PADRAO, barbeariaId: DEFAULT_BARBEARIA_ID }
+  }
 
   if (!instancia || !barbeariaId) {
     throw new EvolutionConfigError('[WhatsApp] Defina EVO_INSTANCE_NAME e WHATSAPP_BARBEARIA_ID juntas (ou nenhuma das duas).')
@@ -33,8 +42,9 @@ export function resolveWhatsapp(env: Record<string, string | undefined> = proces
   if (!NOME_VALIDO.test(instancia)) {
     throw new EvolutionConfigError('[WhatsApp] EVO_INSTANCE_NAME inválido: use só letras, números, "_" e "-" (até 63 caracteres).')
   }
-  const instanciaDaAmerica = instancia === INSTANCIA_PADRAO
-  const barbeariaDaAmerica = barbeariaId === DEFAULT_BARBEARIA_ID
+  // Sem diferenciar maiúsculas: "BARBEROS_MAIN" não pode escapar da checagem.
+  const instanciaDaAmerica = instancia.toLowerCase() === INSTANCIA_PADRAO
+  const barbeariaDaAmerica = barbeariaId.toLowerCase() === DEFAULT_BARBEARIA_ID
   if (instanciaDaAmerica !== barbeariaDaAmerica) {
     throw new EvolutionConfigError(
       instanciaDaAmerica

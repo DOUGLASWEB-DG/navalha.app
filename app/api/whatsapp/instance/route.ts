@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createInstance, EvolutionConfigError, fetchConnectionStatus } from '@/lib/whatsapp';
 import { requireWhatsappAdmin, tenantErrorResponse } from '@/lib/api';
 
-// Instância única para o sistema todo: só a barbearia padrão acessa (requireWhatsappAdmin).
+// A instância pertence a uma barbearia por instalação: só o admin dela acessa (requireWhatsappAdmin, lib/whatsapp-config.ts).
 function errorResponse(error: unknown) {
   const handled = tenantErrorResponse(error);
   if (handled) return handled;
