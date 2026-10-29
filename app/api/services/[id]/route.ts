@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 import { deleteObject, keyFromUrl } from '@/lib/uploads/storage'
 
 const updateSchema = z.object({
-  name: z.string().trim().min(1).optional(),
-  description: z.string().optional(),
+  name: z.string().trim().min(1).max(LIMITES.nome).optional(),
+  description: z.string().max(LIMITES.descricao).optional(),
   price: z.number().positive().optional(),
   durationMins: z.number().int().positive().optional(),
   active: z.boolean().optional(),

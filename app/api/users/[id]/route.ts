@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 import { removeStoredImage } from '@/lib/uploads/route-helpers'
 
 const updateUserSchema = z.object({
-  name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres').optional(),
-  email: z.string().trim().toLowerCase().email('E-mail inválido').optional(),
-  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').optional(),
+  name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres').max(LIMITES.nome).optional(),
+  email: z.string().trim().toLowerCase().max(LIMITES.email).email('E-mail inválido').optional(),
+  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').max(LIMITES.senha).optional(),
   role: z.enum(['ADMIN', 'BARBER']).optional(),
   active: z.boolean().optional(),
 }).strict()
