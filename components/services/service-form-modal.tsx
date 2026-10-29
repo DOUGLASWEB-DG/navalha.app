@@ -1,5 +1,6 @@
 'use client'
 
+import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -121,7 +122,7 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             <div className="relative">
               <Type className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
-                {...register('name')} 
+                {...register('name')} maxLength={LIMITES.nome} 
                 disabled={isSubmitting} 
                 placeholder="Ex: Corte Clássico" 
                 className="pl-9" 
@@ -135,7 +136,7 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             <div className="relative">
               <AlignLeft className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea 
-                {...register('description')} 
+                {...register('description')} maxLength={LIMITES.descricao} 
                 disabled={isSubmitting} 
                 placeholder="Breve descrição do serviço..." 
                 rows={3} 

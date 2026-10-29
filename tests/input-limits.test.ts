@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { describe, it } from 'node:test'
 import { bookingSchema } from '../lib/booking-schema'
+import { friendlyMessage } from '../lib/http-errors'
 import { LIMITES } from '../lib/input-limits'
 
 const valido = { name: 'Fulano', phone: '(69) 99999-1234', serviceIds: ['s1'], date: '2026-11-02', time: '10:00', notes: 'cabelo curto' }
@@ -52,6 +53,31 @@ describe('agendamento público: o formulário gigante é recusado', () => {
     recusa({ ...valido, date: '02/11/2026' })
     recusa({ ...valido, time: '10h' })
     recusa({ ...valido, phone: '123' })
+  })
+})
+
+describe('mensagens para o usuário', () => {
+  it('limite de tamanho vem em português, com o número', () => {
+    const r = bookingSchema.safeParse({ ...valido, notes: 'a'.repeat(LIMITES.notas + 1) })
+    assert.equal(r.success, false)
+    if (!r.success) assert.equal(r.error.issues[0].message, `Texto muito longo: o máximo é ${LIMITES.notas} caracteres.`)
+    const lista = bookingSchema.safeParse({ ...valido, serviceIds: Array.from({ length: LIMITES.ids + 1 }, (_, i) => `s${i}`) })
+    if (!lista.success) assert.equal(lista.error.issues[0].message, `Itens demais: o máximo é ${LIMITES.ids}.`)
+  })
+
+  it('o painel mostra a primeira mensagem da lista de erros do zod (antes mostrava só um aviso genérico)', () => {
+    const corpo = { error: [{ message: 'Texto muito longo: o máximo é 1000 caracteres.', path: ['notes'] }] }
+    assert.equal(friendlyMessage(400, corpo), 'Texto muito longo: o máximo é 1000 caracteres.')
+    assert.equal(friendlyMessage(400, { error: [] }), 'Confira os dados informados e tente novamente.')
+    assert.equal(friendlyMessage(400, { error: 'Invalid input' }), 'Confira os dados informados e tente novamente.')
+    // validação crua em inglês continua escondida (regra de tests/http-errors.test.ts)
+    assert.equal(friendlyMessage(400, { error: [{ message: 'Required', path: ['name'] }] }), 'Confira os dados informados e tente novamente.')
+    assert.equal(friendlyMessage(400, { error: [{ message: 'String must contain at most 1000 character(s)' }] }), 'Confira os dados informados e tente novamente.')
+  })
+
+  it('o tradutor não muda as mensagens de outras regras (nome com link continua com o texto próprio)', () => {
+    const r = bookingSchema.safeParse({ ...valido, name: 'veja www.site.com' })
+    if (!r.success) assert.equal(r.error.issues[0].message, 'Nome inválido.')
   })
 })
 

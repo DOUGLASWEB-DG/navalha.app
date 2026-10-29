@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { LIMITES } from '@/lib/input-limits'
 import bcrypt from 'bcryptjs'
 import prisma from '@/lib/prisma'
 import { createSession } from '@/lib/auth'
@@ -21,6 +22,11 @@ export async function POST(req: NextRequest) {
         { error: 'Email e senha são obrigatórios' },
         { status: 400 }
       )
+    }
+
+    // Tamanho máximo antes de gravar a chave do e-mail no limitador (memória) e de chamar o bcrypt
+    if (email.length > LIMITES.email || password.length > LIMITES.senha) {
+      return NextResponse.json({ error: 'Email ou senha incorretos' }, { status: 400 })
     }
 
     const normalizedEmail = email.toLowerCase().trim()

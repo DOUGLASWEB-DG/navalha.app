@@ -1,5 +1,6 @@
 'use client'
 
+import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -89,7 +90,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
           <div className="flex flex-col gap-1.5">
             <Label className="text-sm text-foreground">Nome Completo *</Label>
             <Input
-              {...register('name')}
+              {...register('name')} maxLength={LIMITES.nome}
               placeholder="João Silva"
               className="bg-input border-border text-foreground placeholder:text-muted-foreground"
             />
@@ -99,7 +100,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
           <div className="flex flex-col gap-1.5">
             <Label className="text-sm text-foreground">Telefone / WhatsApp *</Label>
             <Input
-              {...register('phone')}
+              {...register('phone')} maxLength={LIMITES.telefone}
               placeholder="(69) 99999-9999"
               className="bg-input border-border text-foreground placeholder:text-muted-foreground"
             />
@@ -120,7 +121,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
           <div className="flex flex-col gap-1.5">
             <Label className="text-sm text-foreground">Observações (opcional)</Label>
             <Textarea
-              {...register('notes')}
+              {...register('notes')} maxLength={LIMITES.notas}
               placeholder="Preferências, alergias, anotações..."
               rows={3}
               className="bg-input border-border text-foreground placeholder:text-muted-foreground resize-none"

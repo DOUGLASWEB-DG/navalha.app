@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 // Tamanhos máximos aceitos nas rotas da API. Generosos de propósito: só recusam o que é claramente abusivo (um formulário
 // gigante, uma lista com milhares de ids). Nenhuma tela do sistema chega perto desses valores.
 //
@@ -17,3 +19,11 @@ export const LIMITES = {
   ids: 20, // quantos ids em uma lista (serviços de um agendamento)
   data: 40, // "2026-10-29" ou ISO completo
 } as const
+
+// Mensagens em português para o limite de tamanho (as demais seguem o texto padrão do zod). O primeiro erro volta ao usuário
+// pela API; sem isto, ele veria "String must contain at most 1000 character(s)".
+z.setErrorMap((issue, ctx) => {
+  if (issue.code === 'too_big' && issue.type === 'string') return { message: `Texto muito longo: o máximo é ${issue.maximum} caracteres.` }
+  if (issue.code === 'too_big' && issue.type === 'array') return { message: `Itens demais: o máximo é ${issue.maximum}.` }
+  return { message: ctx.defaultError }
+})
