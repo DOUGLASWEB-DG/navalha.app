@@ -5,8 +5,9 @@ próprio banco Postgres, com segredos próprios, fotos próprias, backup própri
 
 ## Por que uma instalação por cliente
 
-- **WhatsApp:** a instância da Evolution é única e pertence à barbearia padrão (a América). A instalação do cliente não tem
-  nenhuma variável `EVO_*` e, no plano Essencial, o `sendTextMessage` também não envia (`lib/plan.ts`). Duas barreiras.
+- **WhatsApp:** cada instalação usa a própria instância da Evolution (`EVO_INSTANCE_NAME`) e só a barbearia dela a controla
+  (`WHATSAPP_BARBEARIA_ID`); sem as duas variáveis vale a da América (`lib/whatsapp-config.ts`). Combinação incoerente é erro
+  (falha fechada). O cliente novo nasce **sem** `EVO_*` e, no Essencial, o `sendTextMessage` também não envia (`lib/plan.ts`).
 - **Dados:** banco separado. Um erro de isolamento num cliente não alcança os dados de outro.
 - **Plano:** `NAVALHA_PLANO=essencial` esconde e barra Finanças, Metas e Produtos e limita a 2 barbeiros. Sem a variável
   (América e demo) o plano é completo e nada muda.
@@ -51,6 +52,12 @@ Ao passar para o Completo, a tela de Finanças volta com os dados.
 
 ## O que esta instalação NÃO tem (de propósito)
 
-- WhatsApp e robô de lembretes (a instância única é da América). Para dar WhatsApp a um cliente do Completo é preciso a
-  trava D1 e uma instância da Evolution por barbearia (Bloco 6 do vault). Até lá, cliente do Completo com WhatsApp não existe.
+- WhatsApp e robô de lembretes (só no plano Completo, e só depois de combinado). Para ligar:
+  1. na VPS, criar a instância da Evolution do cliente **com token próprio** (o app do cliente usa só esse token em `EVO_API_KEY`,
+     nunca a chave geral);
+  2. no `<slug>.env`: `NEXT_PUBLIC_EVO_URL`, `EVO_API_KEY` (token da instância), `EVO_INSTANCE_NAME=<slug>` e
+     `WHATSAPP_BARBEARIA_ID=barbearia-<slug>`, depois `NAVALHA_PLANO=completo`;
+  3. acrescentar o serviço `<slug>-cron` ao `compose.<slug>.yml` (mesma imagem, `command: node cron.js`, mesmo `env_file`);
+  4. conectar o QR pelo painel do cliente (Configurações → WhatsApp) e testar com um número de teste antes de liberar.
+  Ainda **a confirmar** no Evolution v2.3.7: que o token da instância não alcança outras instâncias.
 - Reset diário (a demo reseta, o cliente real **não**).

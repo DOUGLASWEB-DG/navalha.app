@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { getTenantSession } from '@/lib/auth'
-import { DEFAULT_BARBEARIA_ID, getCurrentBarbearia, TenantNotFoundError } from '@/lib/tenant'
+import { getCurrentBarbearia, TenantNotFoundError } from '@/lib/tenant'
+import { resolveWhatsapp } from '@/lib/whatsapp-config'
 import { ApiError, notFound } from '@/lib/api-error'
 
 export { ApiError, notFound } from '@/lib/api-error'
@@ -26,12 +27,19 @@ export async function requireTenant() {
   return getCurrentBarbearia()
 }
 
-// A instância do WhatsApp (Evolution) ainda é única para o sistema todo: quem a controla controla o
-// número de todas as barbearias. Até existir instância por barbearia, só o admin da barbearia padrão
-// acessa; as demais recebem 404, como se a rota não existisse (a checagem vem antes da sessão).
+// A instância do WhatsApp (Evolution) pertence a UMA barbearia por instalação: quem a controla controla o número dela.
+// Só o admin dessa barbearia acessa (WHATSAPP_BARBEARIA_ID; sem a variável é a da América, como sempre foi). As demais
+// recebem 404, como se a rota não existisse (a checagem vem antes da sessão). Configuração incoerente: falha fechada, também 404.
 export async function requireWhatsappAdmin() {
   const barbearia = await getCurrentBarbearia()
-  if (barbearia.id !== DEFAULT_BARBEARIA_ID) throw notFound()
+  let dona: string
+  try {
+    dona = resolveWhatsapp().barbeariaId
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error)
+    throw notFound()
+  }
+  if (barbearia.id !== dona) throw notFound()
   return requireTenantAdmin()
 }
 

@@ -1,21 +1,22 @@
 import { planoPermite } from './plan';
+import { EvolutionConfigError, resolveWhatsapp } from './whatsapp-config';
 
-const INSTANCE_NAME = 'barberos_main';
-
-export class EvolutionConfigError extends Error {}
+export { EvolutionConfigError };
 
 // Sem valores padrão: chave ou URL ausente deve falhar, nunca cair numa credencial embutida no código.
+// A instância é a desta instalação (EVO_INSTANCE_NAME); sem a variável vale a da América, como sempre foi.
 export function getEvolutionConfig() {
   const url = process.env.NEXT_PUBLIC_EVO_URL;
   const apiKey = process.env.EVO_API_KEY;
   if (!url || !apiKey) {
     throw new EvolutionConfigError('[WhatsApp] NEXT_PUBLIC_EVO_URL e EVO_API_KEY precisam estar configurados.');
   }
-  return { url, apiKey };
+  const { instancia } = resolveWhatsapp();
+  return { url, apiKey, instancia };
 }
 
 export async function createInstance() {
-  const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
+  const { url: EVO_URL, apiKey: EVO_API_KEY, instancia: INSTANCE_NAME } = getEvolutionConfig();
   const response = await fetch(`${EVO_URL}/instance/create`, {
     method: 'POST',
     headers: {
@@ -34,7 +35,7 @@ export async function createInstance() {
 }
 
 export async function fetchConnectionStatus() {
-  const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
+  const { url: EVO_URL, apiKey: EVO_API_KEY, instancia: INSTANCE_NAME } = getEvolutionConfig();
   try {
     const response = await fetch(`${EVO_URL}/instance/connectionState/${INSTANCE_NAME}`, {
       method: 'GET',
@@ -49,7 +50,7 @@ export async function fetchConnectionStatus() {
 }
 
 export async function connectInstance() {
-  const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
+  const { url: EVO_URL, apiKey: EVO_API_KEY, instancia: INSTANCE_NAME } = getEvolutionConfig();
   const response = await fetch(`${EVO_URL}/instance/connect/${INSTANCE_NAME}`, {
     method: 'GET',
     headers: {
@@ -63,7 +64,7 @@ export async function sendTextMessage(number: string, text: string) {
   // Plano sem WhatsApp (Essencial): não envia nada, nem tenta. Não depender só de faltar a configuração da Evolution,
   // que bastaria alguém copiar para a instalação para o número da América passar a falar com os clientes dela.
   if (!planoPermite('whatsapp')) return { skipped: 'plano' as const };
-  const { url: EVO_URL, apiKey: EVO_API_KEY } = getEvolutionConfig();
+  const { url: EVO_URL, apiKey: EVO_API_KEY, instancia: INSTANCE_NAME } = getEvolutionConfig();
   const response = await fetch(`${EVO_URL}/message/sendText/${INSTANCE_NAME}`, {
     method: 'POST',
     headers: {

@@ -10,7 +10,7 @@ import { normalizeBrazilPhone } from '../lib/format';
 import { getAppointmentServiceSummary } from '../lib/appointment-services';
 import { resolvePhone } from '../lib/notifications';
 import { dispatchWebhookEvent } from '../lib/events';
-import { DEFAULT_BARBEARIA_ID } from '../lib/tenant-host';
+import { resolveWhatsapp } from '../lib/whatsapp-config';
 
 const prisma = new PrismaClient();
 const EVO_URL = process.env.NEXT_PUBLIC_EVO_URL ?? '';
@@ -22,7 +22,17 @@ if (!EVO_URL || !EVO_API_KEY) {
   console.error('[Cron] NEXT_PUBLIC_EVO_URL e EVO_API_KEY precisam estar configurados. Encerrando.');
   process.exit(1);
 }
-const INSTANCE_NAME = 'barberos_main';
+
+// Instância e barbearia desta instalação (EVO_INSTANCE_NAME e WHATSAPP_BARBEARIA_ID; sem elas, a América como sempre foi).
+// Configuração incoerente derruba o robô em vez de arriscar uma mensagem pelo número errado.
+let INSTANCE_NAME: string;
+let BARBEARIA_ID: string;
+try {
+  ({ instancia: INSTANCE_NAME, barbeariaId: BARBEARIA_ID } = resolveWhatsapp());
+} catch (error) {
+  console.error(`${(error as Error).message} Encerrando.`);
+  process.exit(1);
+}
 
 // true só quando a Evolution aceitou a mensagem. Falha não marca o lembrete como enviado: ele é tentado de novo
 // na próxima volta enquanto o agendamento ainda estiver na janela.
@@ -57,9 +67,9 @@ async function checkReminders() {
 
     const appointments = await prisma.appointment.findMany({
       where: {
-        // A instância do WhatsApp é única e pertence à barbearia padrão (mesma regra de requireWhatsappAdmin):
+        // A instância do WhatsApp pertence a uma barbearia só (mesma regra de requireWhatsappAdmin):
         // lembretes de outra barbearia sairiam pelo número dela.
-        barbeariaId: DEFAULT_BARBEARIA_ID,
+        barbeariaId: BARBEARIA_ID,
         status: 'CONFIRMED',
         reminderSent: false,
         deletedAt: null,
