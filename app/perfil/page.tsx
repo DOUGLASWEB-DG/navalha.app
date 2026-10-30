@@ -5,7 +5,7 @@ import { Barlow_Condensed } from 'next/font/google'
 import { Camera, Instagram, MapPin, Scissors } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 import { requireTenant } from '@/lib/api'
-import { InstalacaoConfigError, linkWhatsapp, resolvePerfil, type PerfilBarbeiro } from '@/lib/instalacao'
+import { iniciaisDoNome, InstalacaoConfigError, linkWhatsapp, resolvePerfil, type PerfilBarbeiro } from '@/lib/instalacao'
 import { WhatsAppIcon } from '@/components/shared/whatsapp-icon'
 import { cn } from '@/lib/utils'
 import './perfil.css'
@@ -39,9 +39,12 @@ export async function generateMetadata(): Promise<Metadata> {
   const perfil = carregarPerfil()
   if (!perfil || perfil === 'erro') return { title: 'Agende seu horário' }
   const onde = perfil.cidade ? ` em ${perfil.cidade}` : ''
+  const title = `${perfil.nome} | Barbeiro${onde} – Corte e Barba com Hora Marcada`
+  const description = `Agende seu corte e barba com ${perfil.nome}${onde}. Escolha serviço e horário em um minuto e receba a confirmação no WhatsApp.`
   return {
-    title: `${perfil.nome} · Barbeiro${onde}`,
-    description: `Agende seu horário com ${perfil.nome}${onde ? `, barbeiro${onde}` : ''}. Escolha o serviço e o horário online e receba a confirmação no WhatsApp.`,
+    title,
+    description,
+    openGraph: { type: 'website', locale: 'pt_BR', title, description, siteName: perfil.nome },
   }
 }
 
@@ -85,6 +88,7 @@ export default async function PerfilPage() {
   const chamar = linkWhatsapp(perfil.whatsapp, 'Olá! Vim pelo seu site e quero agendar um horário.')
   const numeroTela = formatarTelefone(perfil.whatsapp)
   const primeiroNome = perfil.nome.split(/\s+/)[0]
+  const monograma = iniciaisDoNome(perfil.nome)
 
   return (
     <main className={cn(display.variable, 'perfil min-h-screen bg-[#010a1b] text-white antialiased')}>
@@ -115,7 +119,12 @@ export default async function PerfilPage() {
         <section className="relative overflow-hidden px-4 pb-16 pt-10 sm:px-6 sm:pt-16">
           <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[#2563eb]/25 blur-3xl" />
           <div className="relative mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-[1.1fr_0.9fr]">
-            <div>
+            {monograma && (
+              <span aria-hidden className={cn(titulo, 'p-monograma')}>
+                {monograma}
+              </span>
+            )}
+            <div className="relative">
               <span className="p-selo inline-block rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
                 Barbeiro{perfil.cidade ? ` em ${perfil.cidade}` : ''}
               </span>

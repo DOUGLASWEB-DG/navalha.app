@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { InstalacaoConfigError, linkWhatsapp, raizVaiParaPerfil, resolvePerfil, rotaDoPerfil, whatsappDaInstalacao, whatsappPublico } from '../lib/instalacao'
+import { iniciaisDoNome, InstalacaoConfigError, linkWhatsapp, raizVaiParaPerfil, resolvePerfil, rotaDoPerfil, whatsappDaInstalacao, whatsappPublico } from '../lib/instalacao'
 
 const vitor = {
   INSTALACAO_TIPO: 'barbeiro',
@@ -166,6 +166,21 @@ describe('rotaDoPerfil: o que o middleware faz', () => {
   it('só a raiz exata e /perfil exato são afetados', () => {
     assert.deepEqual(rotaDoPerfil('/perfil/x', {}), { action: 'next' })
     assert.deepEqual(rotaDoPerfil('/perfis', {}), { action: 'next' })
+  })
+})
+
+describe('monograma do nome', () => {
+  it('inicial das duas primeiras palavras que começam com letra', () => {
+    assert.equal(iniciaisDoNome('Vitor Barber'), 'VB')
+    assert.equal(iniciaisDoNome('Vitor Barber 69'), 'VB')
+    assert.equal(iniciaisDoNome('  vitor   barber  '), 'VB')
+  })
+
+  it('uma palavra só, três palavras, acento e número no começo', () => {
+    assert.equal(iniciaisDoNome('Vitor'), 'V')
+    assert.equal(iniciaisDoNome('Ágata Barbearia Premium'), 'ÁB')
+    assert.equal(iniciaisDoNome('69 Barber'), 'B')
+    assert.equal(iniciaisDoNome('69'), '')
   })
 })
 

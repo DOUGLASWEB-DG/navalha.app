@@ -112,3 +112,13 @@ export function whatsappPublico(padraoAmerica: string, env: Env = process.env): 
 export function linkWhatsapp(numero: string, texto: string): string {
   return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`
 }
+
+// Monograma do nome: a inicial das duas primeiras palavras que começam com letra ("Vitor Barber" -> "VB"; números ficam de fora).
+export function iniciaisDoNome(nome: string): string {
+  return nome
+    .split(/\s+/)
+    .filter((palavra) => /^\p{L}/u.test(palavra))
+    .slice(0, 2)
+    .map((palavra) => palavra.charAt(0).toLocaleUpperCase('pt-BR'))
+    .join('')
+}

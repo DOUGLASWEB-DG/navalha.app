@@ -123,6 +123,22 @@
   border-top: 1px solid var(--border);
 }
 
+/* Monograma atrás do título: grande, só o contorno de 1px, quase invisível (decorativo) */
+.perfil .p-monograma {
+  position: absolute;
+  top: 50%;
+  left: -0.04em;
+  transform: translateY(-50%);
+  z-index: 0;
+  font-size: clamp(12rem, 42vw, 30rem);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Rolagem suave para os atalhos da página (o atalho "Ir para o conteúdo") */
 html:has(.perfil) {
   scroll-behavior: smooth;
