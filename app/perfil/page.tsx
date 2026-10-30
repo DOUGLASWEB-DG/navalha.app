@@ -8,6 +8,7 @@ import { requireTenant } from '@/lib/api'
 import { InstalacaoConfigError, linkWhatsapp, resolvePerfil, type PerfilBarbeiro } from '@/lib/instalacao'
 import { WhatsAppIcon } from '@/components/shared/whatsapp-icon'
 import { cn } from '@/lib/utils'
+import './perfil.css'
 
 // Página inicial de uma instalação de PROFISSIONAL (INSTALACAO_TIPO=barbeiro, lib/instalacao.ts): apresenta o barbeiro,
 // em vez da landing de barbearia. O middleware manda a raiz "/" para cá; nas outras instalações esta página responde 404.
@@ -19,9 +20,9 @@ const display = Barlow_Condensed({ subsets: ['latin'], weight: ['600', '700'], v
 const titulo = 'font-[family-name:var(--font-display)] font-bold uppercase tracking-normal'
 
 const botao =
-  'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 text-base font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300'
-const botaoPrimario = cn(botao, 'bg-[#2563eb] text-white hover:bg-[#1d4ed8]')
-const botaoContorno = cn(botao, 'border border-white/25 text-white hover:border-blue-400 hover:bg-blue-500/10')
+  'p-btn inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 text-base font-semibold'
+const botaoPrimario = cn(botao, 'p-btn-primario text-white')
+const botaoContorno = cn(botao, 'p-btn-sec text-white')
 
 function carregarPerfil(): PerfilBarbeiro | 'erro' | null {
   try {
@@ -86,7 +87,7 @@ export default async function PerfilPage() {
   const primeiroNome = perfil.nome.split(/\s+/)[0]
 
   return (
-    <main className={cn(display.variable, 'min-h-screen bg-[#010a1b] text-white antialiased')}>
+    <main className={cn(display.variable, 'perfil min-h-screen bg-[#010a1b] text-white antialiased')}>
       <a
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-[#2563eb] focus:px-4 focus:py-3 focus:text-white"
@@ -94,7 +95,7 @@ export default async function PerfilPage() {
         Ir para o conteúdo
       </a>
 
-      <header className="sticky top-0 z-40 border-b border-white/[0.07] bg-[#010a1b]/90 px-4 backdrop-blur sm:px-6">
+      <header className="p-header sticky top-0 z-40 bg-[#010a1b]/90 px-4 backdrop-blur sm:px-6">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-3">
           <span className="min-w-0">
             <span className={cn(titulo, 'block truncate text-[1.45rem] leading-none')}>{perfil.nome}</span>
@@ -103,10 +104,7 @@ export default async function PerfilPage() {
             </span>
           </span>
           <nav className="flex items-center gap-2" aria-label="Contato">
-            <a href={chamar} target="_blank" rel="noopener noreferrer" className={cn(botaoContorno, 'hidden min-h-11 px-4 text-sm sm:inline-flex')}>
-              <WhatsAppIcon className="h-4 w-4" /> WhatsApp
-            </a>
-            <Link href="/book" className={cn(botaoPrimario, 'min-h-11 px-5 text-sm')}>
+            <Link href="/book" className={cn(botaoPrimario, 'min-h-11 px-4 text-sm sm:px-5')}>
               Agendar
             </Link>
           </nav>
@@ -118,7 +116,7 @@ export default async function PerfilPage() {
           <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[#2563eb]/25 blur-3xl" />
           <div className="relative mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-[1.1fr_0.9fr]">
             <div>
-              <span className="inline-block rounded-full border border-white/15 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-blue-300">
+              <span className="p-selo inline-block rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
                 Barbeiro{perfil.cidade ? ` em ${perfil.cidade}` : ''}
               </span>
               <h1 className={cn(titulo, 'mt-5 text-[clamp(3rem,9vw,5.6rem)] leading-[0.92]')}>
@@ -139,11 +137,11 @@ export default async function PerfilPage() {
               </div>
             </div>
 
-            <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-3xl border border-white/10 bg-[#08142b]">
+            <div className="p-foto relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden bg-[#08142b]">
               {foto ? (
                 <img src={foto} alt={`${perfil.nome}, barbeiro`} className="absolute inset-0 h-full w-full object-cover" />
               ) : (
-                <div className="absolute inset-0 grid place-items-center bg-[repeating-linear-gradient(-45deg,#0a1a3a_0_14px,#08142b_14px_28px)] text-center text-[#9fb0cc]">
+                <div className="p-foto-vazia absolute inset-0 grid place-items-center text-center text-[#9fb0cc]">
                   <div>
                     <Camera className="mx-auto h-8 w-8" aria-hidden />
                     <p className="mt-2 text-sm">Foto do profissional</p>
@@ -151,7 +149,7 @@ export default async function PerfilPage() {
                 </div>
               )}
               <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#010a1b]/90 to-transparent" aria-hidden />
-              <div className="absolute bottom-4 left-4 rounded-xl border border-white/10 bg-[#08142b]/90 px-3.5 py-2">
+              <div className="p-vidro absolute bottom-4 left-4 px-3.5 py-2">
                 <strong className={cn(titulo, 'block text-xl leading-none')}>{primeiroNome}</strong>
                 <span className="text-sm text-[#9fb0cc]">Barbeiro</span>
               </div>
@@ -166,7 +164,7 @@ export default async function PerfilPage() {
               <p className="mt-2 max-w-[56ch] text-[#9fb0cc]">Atendimento com horário marcado, sem fila e sem espera.</p>
               <ul className="mt-7 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
                 {cartoes.map((s) => (
-                  <li key={s.id} className="rounded-2xl border border-white/10 bg-[#08142b] p-5">
+                  <li key={s.id} className="p-card rounded-2xl bg-[#08142b] p-5">
                     <span className="mb-3 grid h-11 w-11 place-items-center rounded-xl bg-blue-500/15 text-blue-300">
                       <Scissors className="h-5 w-5" aria-hidden />
                     </span>
@@ -182,7 +180,7 @@ export default async function PerfilPage() {
                     <li
                       key={s.id}
                       className={cn(
-                        'relative overflow-hidden rounded-2xl border border-white/10 bg-[#08142b]',
+                        'p-card relative overflow-hidden rounded-2xl bg-[#08142b]',
                         fotosTrabalho.length === 1 ? 'aspect-[16/10] sm:col-span-2' : 'aspect-[4/3]',
                       )}
                     >
@@ -195,7 +193,7 @@ export default async function PerfilPage() {
           </section>
         )}
 
-        <section className="border-y border-white/[0.07] bg-[#08142b] px-4 py-14 sm:px-6" aria-labelledby="quem">
+        <section className="p-secao bg-[#08142b] px-4 py-14 sm:px-6" aria-labelledby="quem">
           <div className="mx-auto max-w-3xl">
             <h2 id="quem" className={cn(titulo, 'text-4xl')}>Quem corta</h2>
             <p className="mt-4 text-lg leading-relaxed text-[#9fb0cc]">
@@ -217,7 +215,7 @@ export default async function PerfilPage() {
                 ['Escolha o horário', `Só aparecem os horários livres de ${primeiroNome}.`],
                 ['Receba a confirmação', 'Você recebe a confirmação no WhatsApp.'],
               ].map(([t, d], i) => (
-                <li key={t} className="rounded-2xl border border-white/10 bg-[#08142b] p-5">
+                <li key={t} className="p-card rounded-2xl bg-[#08142b] p-5">
                   <span className={cn(titulo, 'mb-3 grid h-10 w-10 place-items-center rounded-full bg-[#2563eb] text-xl')}>{i + 1}</span>
                   <h3 className="font-semibold">{t}</h3>
                   <p className="mt-1 text-[0.95rem] text-[#9fb0cc]">{d}</p>
@@ -237,7 +235,7 @@ export default async function PerfilPage() {
         </section>
       </div>
 
-      <footer className="border-t border-white/[0.07] px-4 pb-24 pt-7 text-sm text-[#9fb0cc] sm:px-6 sm:pb-7">
+      <footer className="p-footer px-4 pb-24 pt-7 text-sm text-[#9fb0cc] sm:px-6 min-[769px]:pb-7">
         <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p>
             <strong className="text-white">{perfil.nome}</strong>
@@ -254,7 +252,6 @@ export default async function PerfilPage() {
             <a href={chamar} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1.5 font-medium text-white hover:text-blue-300">
               <WhatsAppIcon className="h-4 w-4" /> {numeroTela}
             </a>
-            <Link href="/login" className="inline-flex min-h-11 items-center text-[#9fb0cc] hover:text-white">Área do barbeiro</Link>
           </p>
         </div>
       </footer>
@@ -264,7 +261,7 @@ export default async function PerfilPage() {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chamar no WhatsApp"
-        className="fixed bottom-4 right-4 z-30 grid h-14 w-14 place-items-center rounded-full bg-[#16a34a] text-white shadow-lg transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:hidden"
+        className="p-zap-flutuante fixed bottom-4 right-4 z-30 h-14 w-14 place-items-center rounded-full text-white"
       >
         <WhatsAppIcon className="h-6 w-6" />
       </a>

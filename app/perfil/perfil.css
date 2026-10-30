@@ -1,0 +1,161 @@
+/* Acabamento visual da página de perfil (app/perfil/page.tsx): bordas sutis, vidro e brilho azul, sem mexer em texto nem em layout.
+   Tudo fica dentro de .perfil, para não vazar para as outras páginas. */
+.perfil {
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(96, 165, 250, 0.45);
+  --surface: rgba(255, 255, 255, 0.03);
+  --radius-sm: 12px;
+  --radius-lg: 24px;
+  --ease: 200ms ease;
+}
+
+/* Todo elemento interativo anima do mesmo jeito (200ms ease) */
+.perfil a,
+.perfil button {
+  transition:
+    color var(--ease),
+    background-color var(--ease),
+    border-color var(--ease),
+    box-shadow var(--ease),
+    transform var(--ease),
+    filter var(--ease);
+}
+
+/* Foco visível para teclado: contorno azul com respiro de 2px */
+.perfil :is(a, button):focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+/* Header: sem linha branca; um fio sutil que some nas pontas */
+.perfil .p-header {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, var(--border) 18%, var(--border) 82%, transparent) 1;
+}
+
+/* Botões */
+.perfil .p-btn {
+  border-radius: var(--radius-sm);
+}
+.perfil .p-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Primário: sem borda, degradê azul sutil e brilho que aumenta no hover */
+.perfil .p-btn-primario {
+  border: 0;
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+}
+.perfil .p-btn-primario:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
+}
+
+/* Secundário (WhatsApp): vidro com borda sutil que acende no hover */
+.perfil .p-btn-sec {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.perfil .p-btn-sec:hover {
+  border-color: var(--border-hover);
+}
+
+/* Selo "Barbeiro em ...": azul translúcido, sem borda branca */
+.perfil .p-selo {
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  color: #93c5fd;
+}
+
+/* Card da foto: raio grande, sombra funda com brilho azul atrás e borda em degradê (luz no topo, some na base) */
+.perfil .p-foto {
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    0 0 90px rgba(37, 99, 235, 0.16);
+}
+.perfil .p-foto::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(147, 197, 253, 0.3), rgba(147, 197, 253, 0) 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* Espaço reservado da foto: degradê suave no lugar das listras */
+.perfil .p-foto-vazia {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%),
+    linear-gradient(180deg, #0b1a3a 0%, #08142b 100%);
+}
+
+/* Caixa "Vitor / Barbeiro": vidro */
+.perfil .p-vidro {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* Cartões, seções e rodapé: a mesma borda sutil em todo lugar */
+.perfil .p-card {
+  border: 1px solid var(--border);
+}
+.perfil .p-secao {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.perfil .p-footer {
+  border-top: 1px solid var(--border);
+}
+
+/* Rolagem suave para os atalhos da página (o atalho "Ir para o conteúdo") */
+html:has(.perfil) {
+  scroll-behavior: smooth;
+}
+
+/* WhatsApp flutuante: círculo de 56px, só em tela de até 768px */
+.perfil .p-zap-flutuante {
+  display: none;
+  background: #25d366;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+.perfil .p-zap-flutuante:hover {
+  transform: scale(1.06);
+  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.4);
+}
+@media (max-width: 768px) {
+  .perfil .p-zap-flutuante {
+    display: grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.perfil) {
+    scroll-behavior: auto;
+  }
+  .perfil .p-zap-flutuante:hover {
+    transform: none;
+  }
+  .perfil a,
+  .perfil button {
+    transition: none;
+  }
+  .perfil .p-btn:hover {
+    transform: none;
+  }
+}
