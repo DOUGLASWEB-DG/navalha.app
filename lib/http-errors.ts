@@ -17,10 +17,18 @@ export class HttpError extends Error {
 
 // Mensagens técnicas da API (em inglês ou de infraestrutura) não servem para o usuário final
 const TECHNICAL = /^(invalid|failed|unexpected|not found|unauthorized|forbidden|bad request|internal)/i
+// Mensagens de limite de tamanho escritas em português em lib/input-limits.ts
+const MENSAGEM_DE_LIMITE = /^(Texto muito longo|Itens demais): o máximo é \d+/
 
 function readServerMessage(body: unknown): string | null {
   const error = (body as { error?: unknown } | null)?.error
   if (typeof error === 'string' && error.trim() && !TECHNICAL.test(error.trim())) return error.trim()
+  // Validação do zod: lista de { message }. Só as mensagens de limite de tamanho (lib/input-limits.ts) são mostradas, porque
+  // são as únicas traduzidas. Qualquer outra ('Required', 'Invalid input'...) continua escondida atrás do aviso genérico.
+  if (Array.isArray(error)) {
+    const primeira = (error[0] as { message?: unknown } | undefined)?.message
+    if (typeof primeira === 'string' && MENSAGEM_DE_LIMITE.test(primeira.trim())) return primeira.trim()
+  }
   return null
 }
 

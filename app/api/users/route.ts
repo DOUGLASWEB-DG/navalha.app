@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 import { assertCabeMaisUmBarbeiro } from '@/lib/plan-limits'
 
 const createUserSchema = z.object({
-  name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  email: z.string().trim().toLowerCase().email('E-mail inválido'),
-  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
+  name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres').max(LIMITES.nome),
+  email: z.string().trim().toLowerCase().max(LIMITES.email).email('E-mail inválido'),
+  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').max(LIMITES.senha),
   role: z.enum(['ADMIN', 'BARBER']).default('BARBER'),
 }).strict()
 

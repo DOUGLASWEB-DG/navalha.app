@@ -1,5 +1,6 @@
 'use client'
 
+import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -139,7 +140,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
               <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
               <Input
                 disabled={isSubmitting}
-                {...register('name')}
+                {...register('name')} maxLength={LIMITES.nome}
                 placeholder="Ex: João da Silva"
                 className="pl-9"
               />

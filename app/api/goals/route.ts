@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 import { parseZonedDate } from '@/lib/time-zone'
 
 const createSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().min(1, 'Title is required').max(LIMITES.titulo),
   type: z.enum(['REVENUE', 'CLIENTS', 'APPOINTMENTS']),
   targetAmount: z.number().positive('Target must be positive'),
   period: z.enum(['daily', 'weekly', 'monthly']),
-  startDate: z.string(),
-  endDate: z.string(),
+  startDate: z.string().max(LIMITES.data),
+  endDate: z.string().max(LIMITES.data),
 })
 
 export async function GET() {
