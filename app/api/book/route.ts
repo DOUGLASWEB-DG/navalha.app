@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { bookingSchema } from '@/lib/booking-schema'
-import { whatsappDaInstalacao } from '@/lib/instalacao'
 import { tenantConfig } from '@/config/tenant'
 import { notifyAppointmentCreated } from '@/lib/notifications'
 import { normalizeBrazilPhone } from '@/lib/format'
@@ -205,8 +204,7 @@ export async function GET() {
       orderBy: { name: 'asc' },
     })
 
-    // Número do WhatsApp desta instalação (INSTALACAO_WHATSAPP); sem a variável, o da América, como sempre foi
-    return NextResponse.json({ services, barbers, timezone: barbearia.timezone, whatsapp: whatsappDaInstalacao() ?? tenantConfig.whatsappNumber })
+    return NextResponse.json({ services, barbers, timezone: barbearia.timezone })
   } catch (error) {
     const handled = tenantErrorResponse(error)
     if (handled) return handled

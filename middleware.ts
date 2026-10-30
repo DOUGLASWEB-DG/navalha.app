@@ -4,7 +4,7 @@ import { jwtVerify, SignJWT } from 'jose'
 import { getJwtSecretKey } from '@/lib/jwt'
 import { resolveBarbeariaByHost } from '@/lib/tenant'
 import { demoLandingRoute } from '@/lib/demo-landing'
-import { PERFIL_PATH, raizVaiParaPerfil } from '@/lib/instalacao'
+import { rotaDoPerfil } from '@/lib/instalacao'
 import { bloqueioDoCaminho, MENSAGEM_RECURSO_FORA_DO_PLANO } from '@/lib/plan'
 
 const SESSION_COOKIE = 'barberos_session'
@@ -35,11 +35,11 @@ export async function middleware(request: NextRequest) {
   if (landing.action === 'notFound') return tenantNotFound(pathname)
   if (landing.action === 'rewrite') return NextResponse.rewrite(new URL(landing.to, request.url))
 
-  // Instalação de um profissional (INSTALACAO_TIPO=barbeiro, lib/instalacao.ts): a raiz mostra a página de perfil dele,
-  // e não a landing de barbearia com o contato da América. Sem a variável, nada muda.
-  if (pathname === '/' && raizVaiParaPerfil()) return NextResponse.rewrite(new URL(PERFIL_PATH, request.url))
-  // E /perfil só existe nessas instalações: nas outras (a América inclusive) é 404 de verdade, como /produto fora da demo.
-  if (pathname === PERFIL_PATH && !raizVaiParaPerfil()) return tenantNotFound(pathname)
+  // Instalação de um profissional (INSTALACAO_TIPO=barbeiro, lib/instalacao.ts): a raiz mostra a página de perfil dele, e não a
+  // landing de barbearia com o contato da América; /perfil só existe nessas instalações. Sem a variável, nada muda.
+  const perfil = rotaDoPerfil(pathname)
+  if (perfil.action === 'notFound') return tenantNotFound(pathname)
+  if (perfil.action === 'rewrite') return NextResponse.rewrite(new URL(perfil.to, request.url))
 
   // Plano da instalação (NAVALHA_PLANO, lib/plan.ts): Finanças, Metas e Produtos só existem no Completo. Barra as páginas
   // (volta ao painel) e as rotas da API (403) antes de qualquer sessão ou consulta. Sem a variável, nada é barrado.

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { InstalacaoConfigError, linkWhatsapp, raizVaiParaPerfil, resolvePerfil, whatsappDaInstalacao } from '../lib/instalacao'
+import { InstalacaoConfigError, linkWhatsapp, raizVaiParaPerfil, resolvePerfil, rotaDoPerfil, whatsappDaInstalacao, whatsappPublico } from '../lib/instalacao'
 
 const vitor = {
   INSTALACAO_TIPO: 'barbeiro',
@@ -77,6 +77,95 @@ describe('falha fechada: configuração errada nunca cai no contato da América'
 
   it('erro de configuração ainda manda a raiz para /perfil (onde o erro aparece), e não para a landing', () => {
     assert.equal(raizVaiParaPerfil({ ...vitor, INSTALACAO_TIPO: 'salao' }), true)
+  })
+})
+
+describe('formatos aceitos', () => {
+  it('WhatsApp: celular (9 dígitos) e fixo (8 dígitos) brasileiros, com DDI 55', () => {
+    assert.equal(whatsappDaInstalacao({ INSTALACAO_WHATSAPP: '5569992353661' }), '5569992353661')
+    assert.equal(whatsappDaInstalacao({ INSTALACAO_WHATSAPP: '556932221234' }), '556932221234')
+  })
+
+  it('WhatsApp: sem DDI 55, DDD com zero ou número internacional é recusado', () => {
+    for (const ruim of ['5169992353661', '5509992353661', '4412345678901', '556999235366']) {
+      assert.throws(() => whatsappDaInstalacao({ INSTALACAO_WHATSAPP: ruim }), InstalacaoConfigError, ruim)
+    }
+  })
+
+  it('Instagram: nomes reais passam; ponto no início, no fim ou repetido não (o Instagram também não aceita)', () => {
+    for (const bom of ['vitor.barber69', 'a_b', 'Vitor_69', 'x']) assert.equal(resolvePerfil({ ...vitor, INSTALACAO_INSTAGRAM: bom })?.instagram, bom)
+    for (const ruim of ['.vitor', 'vitor.', 'vi..tor']) erro({ ...vitor, INSTALACAO_INSTAGRAM: ruim }, /INSTALACAO_INSTAGRAM inválido/)
+  })
+
+  it('texto com quebra de linha ou caractere de controle é recusado', () => {
+    erro({ ...vitor, INSTALACAO_SOBRE: 'linha 1\nlinha 2' }, /INSTALACAO_SOBRE com caractere inválido/)
+    erro({ ...vitor, INSTALACAO_CIDADE: 'Porto\tVelho' }, /INSTALACAO_CIDADE com caractere inválido/)
+    erro({ ...vitor, INSTALACAO_NOME: 'Vitor\u0000' }, /INSTALACAO_NOME com caractere inválido/)
+  })
+})
+
+describe('whatsappPublico: nunca o da América para quem não é a América', () => {
+  const AMERICA = '5569999630329'
+  const sink = console.error
+  const calado = <T,>(fn: () => T): T => {
+    console.error = () => {}
+    try {
+      return fn()
+    } finally {
+      console.error = sink
+    }
+  }
+
+  it('sem nenhuma variável (a América e a demo): o padrão da América, como sempre foi', () => {
+    assert.equal(whatsappPublico(AMERICA, {}), AMERICA)
+    assert.equal(whatsappPublico(AMERICA, { INSTALACAO_WHATSAPP: '  ', INSTALACAO_TIPO: '' }), AMERICA)
+  })
+
+  it('com o número da instalação: o dela', () => {
+    assert.equal(whatsappPublico(AMERICA, { INSTALACAO_WHATSAPP: '5569992353661' }), '5569992353661')
+    assert.equal(whatsappPublico(AMERICA, vitor), '5569992353661')
+  })
+
+  it('profissional (TIPO) sem número: SEM número, e não o da América', () => {
+    assert.equal(whatsappPublico(AMERICA, { INSTALACAO_TIPO: 'barbeiro', INSTALACAO_NOME: 'Vitor' }), null)
+  })
+
+  it('número malformado: sem número e sem derrubar nada (a agenda segue), com erro no log', () => {
+    let logou = false
+    console.error = () => {
+      logou = true
+    }
+    try {
+      assert.equal(whatsappPublico(AMERICA, { INSTALACAO_WHATSAPP: '(69) 99235-3661' }), null)
+    } finally {
+      console.error = sink
+    }
+    assert.equal(logou, true)
+    assert.equal(calado(() => whatsappPublico(AMERICA, { INSTALACAO_WHATSAPP: 'abc', INSTALACAO_TIPO: 'barbeiro' })), null)
+  })
+})
+
+describe('rotaDoPerfil: o que o middleware faz', () => {
+  it('sem INSTALACAO_TIPO: a raiz segue para a landing e /perfil não existe (404)', () => {
+    assert.deepEqual(rotaDoPerfil('/', {}), { action: 'next' })
+    assert.deepEqual(rotaDoPerfil('/perfil', {}), { action: 'notFound' })
+    assert.deepEqual(rotaDoPerfil('/book', {}), { action: 'next' })
+  })
+
+  it('com INSTALACAO_TIPO: a raiz vira /perfil; /perfil e as outras rotas seguem', () => {
+    assert.deepEqual(rotaDoPerfil('/', vitor), { action: 'rewrite', to: '/perfil' })
+    assert.deepEqual(rotaDoPerfil('/perfil', vitor), { action: 'next' })
+    assert.deepEqual(rotaDoPerfil('/book', vitor), { action: 'next' })
+    assert.deepEqual(rotaDoPerfil('/dashboard', vitor), { action: 'next' })
+  })
+
+  it('configuração errada também manda a raiz para /perfil (onde o erro aparece), nunca para a landing', () => {
+    assert.deepEqual(rotaDoPerfil('/', { ...vitor, INSTALACAO_TIPO: 'salao' }), { action: 'rewrite', to: '/perfil' })
+  })
+
+  it('só a raiz exata e /perfil exato são afetados', () => {
+    assert.deepEqual(rotaDoPerfil('/perfil/x', {}), { action: 'next' })
+    assert.deepEqual(rotaDoPerfil('/perfis', {}), { action: 'next' })
   })
 })
 

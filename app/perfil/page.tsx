@@ -20,7 +20,7 @@ const titulo = 'font-[family-name:var(--font-display)] font-bold uppercase track
 
 const botao =
   'inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 text-base font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300'
-const botaoPrimario = cn(botao, 'bg-[#2563eb] text-white hover:bg-[#3b82f6]')
+const botaoPrimario = cn(botao, 'bg-[#2563eb] text-white hover:bg-[#1d4ed8]')
 const botaoContorno = cn(botao, 'border border-white/25 text-white hover:border-blue-400 hover:bg-blue-500/10')
 
 function carregarPerfil(): PerfilBarbeiro | 'erro' | null {
@@ -76,7 +76,8 @@ export default async function PerfilPage() {
     }),
   ])
 
-  const dono = equipe.find((u) => u.role === 'ADMIN' && u.avatarUrl) ?? equipe.find((u) => u.avatarUrl)
+  // Só a foto do proprietário (ADMIN): a de outro usuário ficaria com o nome do profissional na legenda
+  const dono = equipe.find((u) => u.role === 'ADMIN' && u.avatarUrl)
   const foto = dono?.avatarUrl ?? null
   const fotosTrabalho = servicos.filter((s) => s.imageUrl).slice(0, 2)
   const cartoes = servicos.slice(0, 6)
@@ -112,7 +113,7 @@ export default async function PerfilPage() {
         </div>
       </header>
 
-      <div id="conteudo">
+      <div id="conteudo" tabIndex={-1}>
         <section className="relative overflow-hidden px-4 pb-16 pt-10 sm:px-6 sm:pt-16">
           <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-[#2563eb]/25 blur-3xl" />
           <div className="relative mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-[1.1fr_0.9fr]">
@@ -197,7 +198,7 @@ export default async function PerfilPage() {
         <section className="border-y border-white/[0.07] bg-[#08142b] px-4 py-14 sm:px-6" aria-labelledby="quem">
           <div className="mx-auto max-w-3xl">
             <h2 id="quem" className={cn(titulo, 'text-4xl')}>Quem corta</h2>
-            <p className="mt-4 whitespace-pre-line text-lg leading-relaxed text-[#9fb0cc]">
+            <p className="mt-4 text-lg leading-relaxed text-[#9fb0cc]">
               {perfil.sobre ?? `Sou o ${primeiroNome}, barbeiro${perfil.cidade ? ` em ${perfil.cidade}` : ''}. Atendo com horário marcado para você não perder tempo.`}
             </p>
             <Link href="/book" className={cn(botaoPrimario, 'mt-7')}>
@@ -236,7 +237,7 @@ export default async function PerfilPage() {
         </section>
       </div>
 
-      <footer className="border-t border-white/[0.07] px-4 py-7 text-sm text-[#9fb0cc] sm:px-6">
+      <footer className="border-t border-white/[0.07] px-4 pb-24 pt-7 text-sm text-[#9fb0cc] sm:px-6 sm:pb-7">
         <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p>
             <strong className="text-white">{perfil.nome}</strong>

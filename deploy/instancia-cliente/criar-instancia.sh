@@ -148,6 +148,7 @@ echo "  3) docker run --rm --network navalha_default --env-file $slug.env navalh
 echo "  4) OBRIGATÓRIO antes de abrir no Caddy: criar a barbearia e o proprietário (scripts/criar-barbearia.ts, com o hash da senha)"
 # Sem "!" no código JS: dentro de aspas, o bash interativo trata "!" como expansão de histórico ("event not found")
 echo "  5) docker run --rm -v navalha_${us}_uploads:/data/uploads navalha-app:$tag node -e \"require('fs').writeFileSync('/data/uploads/.navalha-uploads','Pasta de fotos de $slug.\\n',{flag:'a'})\""
+echo "  OBSERVACAO antes do passo 6 (nao cole esta linha): acrescente ao $slug.env o contato deste cliente (INSTALACAO_WHATSAPP e, se for um profissional, INSTALACAO_TIPO e INSTALACAO_NOME). Sem isso a página dele mostra o contato da América. Veja o README"
 echo "  6) $DC up -d $slug-app"
 echo "  7) bash /root/instancia-cliente/caddy-instancia.sh $slug"
 echo "     (antes disso o DNS A de $slug.navalhaapp.tech precisa existir. Cole só o comando, sem esta observação)"

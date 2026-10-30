@@ -18,8 +18,10 @@ export class InstalacaoConfigError extends Error {}
 
 type Env = Record<string, string | undefined>
 
-const WHATSAPP_RE = /^\d{12,13}$/ // 55 + DDD (2) + número (8 ou 9)
-const INSTAGRAM_RE = /^[A-Za-z0-9._]{1,30}$/
+const WHATSAPP_RE = /^55[1-9]\d(?:[2-5]\d{7}|9\d{8})$/ // 55 + DDD (2, sem zero) + fixo (8 dígitos, começa de 2 a 5) ou celular (9 dígitos, começa com 9)
+const INSTAGRAM_RE = /^(?!\.)(?!.*\.\.)(?!.*\.$)[A-Za-z0-9._]{1,30}$/ // como o Instagram: sem ponto no início, no fim ou repetido
+
+const SEM_CONTROLE = /^[^\u0000-\u001f\u007f]*$/ // nada de quebra de linha, tabulação ou outros caracteres de controle
 
 const vazioParaUndefined = (v: string | undefined) => {
   const t = v?.trim()
@@ -30,7 +32,7 @@ export function whatsappDaInstalacao(env: Env = process.env): string | null {
   const bruto = vazioParaUndefined(env.INSTALACAO_WHATSAPP)
   if (!bruto) return null
   if (!WHATSAPP_RE.test(bruto)) {
-    throw new InstalacaoConfigError('INSTALACAO_WHATSAPP inválido: use só dígitos com DDI e DDD (ex.: 5569992353661).')
+    throw new InstalacaoConfigError('INSTALACAO_WHATSAPP inválido: use só dígitos, com DDI 55 e DDD (ex.: 5569992353661).')
   }
   return bruto
 }
@@ -45,10 +47,10 @@ export interface PerfilBarbeiro {
 }
 
 const perfilSchema = z.object({
-  nome: z.string().min(1, 'INSTALACAO_NOME é obrigatório quando INSTALACAO_TIPO=barbeiro.').max(80, 'INSTALACAO_NOME muito longo (máximo 80).'),
+  nome: z.string().min(1, 'INSTALACAO_NOME é obrigatório quando INSTALACAO_TIPO=barbeiro.').max(80, 'INSTALACAO_NOME muito longo (máximo 80).').regex(SEM_CONTROLE, 'INSTALACAO_NOME com caractere inválido.'),
   instagram: z.string().regex(INSTAGRAM_RE, 'INSTALACAO_INSTAGRAM inválido: use só o usuário, sem @ (letras, números, ponto e _).').optional(),
-  cidade: z.string().max(60, 'INSTALACAO_CIDADE muito longa (máximo 60).').optional(),
-  sobre: z.string().max(600, 'INSTALACAO_SOBRE muito longo (máximo 600).').optional(),
+  cidade: z.string().max(60, 'INSTALACAO_CIDADE muito longa (máximo 60).').regex(SEM_CONTROLE, 'INSTALACAO_CIDADE com caractere inválido.').optional(),
+  sobre: z.string().max(600, 'INSTALACAO_SOBRE muito longo (máximo 600).').regex(SEM_CONTROLE, 'INSTALACAO_SOBRE com caractere inválido.').optional(),
 })
 
 // null quando a instalação usa a landing de barbearia de sempre (a América e a demo).
@@ -74,10 +76,37 @@ export function resolvePerfil(env: Env = process.env): PerfilBarbeiro | null {
 
 export const PERFIL_PATH = '/perfil'
 
-// O middleware pergunta: a raiz "/" desta instalação vai para a página de perfil? Só quando TIPO=barbeiro; qualquer erro de
+export type RotaDoPerfil = { action: 'next' } | { action: 'rewrite'; to: string } | { action: 'notFound' }
+
+// A raiz "/" desta instalação vai para a página de perfil? Só quando TIPO=barbeiro; qualquer erro de
 // configuração também manda para /perfil, onde o erro aparece (em vez de cair na landing e mostrar o contato da América).
 export function raizVaiParaPerfil(env: Env = process.env): boolean {
   return Boolean(vazioParaUndefined(env.INSTALACAO_TIPO))
+}
+
+// O que o middleware faz com "/" e "/perfil" nesta instalação: com INSTALACAO_TIPO a raiz mostra o perfil; sem ela, /perfil não existe.
+export function rotaDoPerfil(pathname: string, env: Env = process.env): RotaDoPerfil {
+  const ativo = raizVaiParaPerfil(env)
+  if (pathname === '/' && ativo) return { action: 'rewrite', to: PERFIL_PATH }
+  if (pathname === PERFIL_PATH && !ativo) return { action: 'notFound' }
+  return { action: 'next' }
+}
+
+// Número de WhatsApp das páginas públicas desta instalação. `padraoAmerica` só vale quando a instalação NÃO declara nada de si
+// (a América e a demo). Instalação de profissional sem número, ou com número malformado, fica SEM número (os botões somem) em
+// vez de mostrar o da América, e o erro vai para o log; a agenda continua funcionando.
+export function whatsappPublico(padraoAmerica: string, env: Env = process.env): string | null {
+  try {
+    const proprio = whatsappDaInstalacao(env)
+    if (proprio) return proprio
+  } catch (error) {
+    if (error instanceof InstalacaoConfigError) {
+      console.error('[Instalacao]', error.message)
+      return null
+    }
+    throw error
+  }
+  return raizVaiParaPerfil(env) ? null : padraoAmerica
 }
 
 export function linkWhatsapp(numero: string, texto: string): string {
