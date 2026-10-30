@@ -65,3 +65,18 @@ Ao passar para o Completo, a tela de Finanças volta com os dados.
   > O serviço `<slug>-cron` só envia no plano Completo; no Essencial ele fica em espera.
   Ainda **a confirmar** no Evolution v2.3.7: que o token da instância não alcança outras instâncias.
 - Reset diário (a demo reseta, o cliente real **não**).
+
+## Página inicial do cliente (não mostrar o contato da América)
+
+Sem configuração, a raiz do cliente mostra a landing de barbearia, **com o telefone, o Instagram e o endereço da América**. Toda instalação
+de cliente precisa definir o contato dela no `<slug>.env` (valores **sem aspas**), conforme `.env.example`:
+
+- `INSTALACAO_WHATSAPP` (sempre): o número do cliente. Vale para os botões de WhatsApp da página de agendamento e da página inicial.
+- Cliente que é **um profissional** (como o Vitor): `INSTALACAO_TIPO=barbeiro`, `INSTALACAO_NOME`, e opcionalmente `INSTALACAO_INSTAGRAM`,
+  `INSTALACAO_CIDADE` e `INSTALACAO_SOBRE`. A raiz passa a mostrar a página de perfil (`/perfil`).
+  A **foto** vem do painel (Equipe, editar o usuário, enviar foto), os **serviços** e as **fotos de trabalho** vêm do painel (Serviços), então o cliente troca sozinho.
+  Preço não aparece na página inicial (aparece no agendamento).
+- Depois de editar o `.env`: `docker compose -f compose.yml -f compose.<slug>.yml up -d <slug>-app`.
+- Conferir: abrir `/` e `/book` do cliente e procurar o número da América (`5569999630329`); não pode aparecer.
+- A landing de barbearia (cliente que **não** é um profissional) ainda lê os dados da América em `config/tenant.ts`: a página inicial dela
+  por cliente fica para uma próxima etapa.

@@ -52,8 +52,6 @@ const fetcher = async <T,>(url: string) => {
   return body as T
 }
 
-const WHATSAPP_NUMBER = '5569999630329'
-
 const TIME_SLOTS = [
   '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
   '11:00', '11:30', '12:00', '12:30', '13:00', '13:30',
@@ -146,6 +144,7 @@ interface BookingApiData {
   services: Service[]
   barbers: Barber[]
   timezone: string // fuso IANA da barbearia: horários exibidos e comparados no relógio dela
+  whatsapp?: string // WhatsApp desta instalação (vem do servidor; cada cliente tem o dele)
 }
 
 interface DetailsStepProps {
@@ -159,12 +158,12 @@ interface ApiErrorResponse {
   error?: string | Array<{ message?: string }>
 }
 
-function buildWhatsAppLink(data: Partial<BookingData>) {
+function buildWhatsAppLink(data: Partial<BookingData>, whatsappNumber: string) {
   const serviceLabel = data.serviceNames?.length ? data.serviceNames.join(', ') : data.serviceName
   const msg = serviceLabel
     ? `Olá! Gostaria de agendar *${serviceLabel}*${data.date ? ` no dia *${format(new Date(data.date + 'T12:00:00'), "d 'de' MMMM", { locale: ptBR })}*` : ''}${data.time ? ` às *${data.time}*` : ''}. Esse horário está disponível?`
     : `Olá! Gostaria de agendar um horário. Quais horários estão disponíveis?`
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`
+  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`
 }
 
 function getServiceImage(serviceName: string) {
@@ -284,6 +283,8 @@ function BookingContent() {
   } = useSWR<BookingApiData>('/api/book', fetcher)
   const services = apiData?.services ?? []
   const barbers = apiData?.barbers ?? []
+  // Sem o número (ainda carregando) os botões de WhatsApp não aparecem: nunca mostram o de outra barbearia
+  const whatsappNumber = apiData?.whatsapp ?? null
   const firstBarberId = barbers[0]?.id
 
   const {
@@ -435,8 +436,9 @@ function BookingContent() {
             className="h-8 sm:h-9 w-auto object-contain"
           />
         </Link>
+        {whatsappNumber && (
         <a
-          href={buildWhatsAppLink(booking)}
+          href={buildWhatsAppLink(booking, whatsappNumber)}
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0"
@@ -447,6 +449,7 @@ function BookingContent() {
             <span className="text-sm font-medium sm:inline hidden">Dúvidas?</span>
           </Button>
         </a>
+        )}
       </header>
 
       <main className="flex-1 w-full max-w-xl mx-auto px-4 py-6 sm:py-12 flex flex-col">
@@ -852,8 +855,9 @@ function BookingContent() {
             </div>
 
             <div className="flex flex-col gap-4 max-w-xs mx-auto">
+              {whatsappNumber && (
               <a
-                href={buildWhatsAppLink(booking)}
+                href={buildWhatsAppLink(booking, whatsappNumber)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full block"
@@ -863,6 +867,7 @@ function BookingContent() {
                   Abrir WhatsApp
                 </Button>
               </a>
+              )}
               <Button 
                 variant="ghost" 
                 onClick={() => window.location.reload()} 
