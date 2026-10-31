@@ -1,129 +1,89 @@
-/* Acabamento visual da página de perfil (app/perfil/page.tsx): bordas sutis, vidro e brilho azul, sem mexer em texto nem em layout.
-   Tudo fica dentro de .perfil, para não vazar para as outras páginas. */
+/* Visual da página de perfil (app/perfil/page.tsx). Tudo dentro de .perfil, para não vazar para as outras páginas.
+   Ideia: o degradê do corte. Cores foscas (tinta, aço, giz), nada de brilho; a foto se dissolve em retícula; uma linha de
+   navalha varre o título na abertura (o único movimento sozinho da página). O poste de barbeiro aparece uma vez, fino. */
 .perfil {
-  --border: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(96, 165, 250, 0.45);
-  --surface: rgba(255, 255, 255, 0.03);
-  --radius-sm: 12px;
-  --radius-lg: 24px;
-  --ease: 200ms ease;
+  --tinta: #0a0e14;
+  --grafite: #10161e;
+  --linha: rgba(237, 241, 244, 0.1);
+  --linha-forte: rgba(237, 241, 244, 0.24);
+  --giz: #edf1f4;
+  --aco: #8fa1b3;
+  --azul: #2f55a0;
+  --azul-alto: #3a66bc;
+  --vermelho: #b8322a;
+  --ease: 180ms ease;
+  --curva: cubic-bezier(0.7, 0, 0.2, 1);
+  background: var(--tinta);
+  color: var(--giz);
+}
+html:has(.perfil) {
+  background: #0a0e14;
+  scroll-behavior: smooth;
 }
 
-/* Todo elemento interativo anima do mesmo jeito (200ms ease) */
+.perfil .p-mudo {
+  color: var(--aco);
+}
+
+/* Todo elemento interativo anima do mesmo jeito; só as propriedades listadas */
 .perfil a,
 .perfil button {
   transition:
     color var(--ease),
     background-color var(--ease),
     border-color var(--ease),
-    box-shadow var(--ease),
-    transform var(--ease),
-    filter var(--ease);
+    transform var(--ease);
 }
-
-/* Foco visível para teclado: contorno azul com respiro de 2px */
 .perfil :is(a, button):focus-visible {
-  outline: 2px solid #60a5fa;
-  outline-offset: 2px;
+  outline: 2px solid var(--giz);
+  outline-offset: 3px;
 }
 
-/* Header: sem linha branca; um fio sutil que some nas pontas */
+/* Cabeçalho: tinta sólida (sem vidro) e o poste de barbeiro como fio, uma vez só */
 .perfil .p-header {
-  border-bottom: 1px solid transparent;
-  border-image: linear-gradient(90deg, transparent, var(--border) 18%, var(--border) 82%, transparent) 1;
+  background: rgba(10, 14, 20, 0.97);
+}
+.perfil .p-poste {
+  height: 5px;
+  background: repeating-linear-gradient(-45deg, var(--vermelho) 0 7px, var(--giz) 7px 14px, var(--azul) 14px 21px, var(--giz) 21px 28px);
+  opacity: 0.9;
 }
 
-/* Botões */
+/* Botões: cantos de navalha, azul sólido fosco, sem brilho */
 .perfil .p-btn {
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
 }
-.perfil .p-btn:hover {
-  transform: translateY(-1px);
+.perfil .p-btn:active {
+  transform: translateY(1px);
 }
-
-/* Primário: sem borda, degradê azul sutil e brilho que aumenta no hover */
 .perfil .p-btn-primario {
-  border: 0;
-  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+  background: var(--azul);
+  color: #fff;
 }
 .perfil .p-btn-primario:hover {
-  filter: brightness(1.1);
-  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
+  background: var(--azul-alto);
 }
-
-/* Secundário (WhatsApp): vidro com borda sutil que acende no hover */
 .perfil .p-btn-sec {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  background: transparent;
+  border: 1px solid var(--linha-forte);
+  color: var(--giz);
 }
 .perfil .p-btn-sec:hover {
-  border-color: var(--border-hover);
+  border-color: var(--giz);
+  background: rgba(237, 241, 244, 0.05);
 }
 
-/* Selo "Barbeiro em ...": azul translúcido, sem borda branca */
-.perfil .p-selo {
-  background: rgba(37, 99, 235, 0.12);
-  border: 1px solid rgba(96, 165, 250, 0.25);
-  color: #93c5fd;
-}
-
-/* Card da foto: raio grande, sombra funda com brilho azul atrás e borda em degradê (luz no topo, some na base) */
-.perfil .p-foto {
-  border-radius: var(--radius-lg);
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.5),
-    0 0 90px rgba(37, 99, 235, 0.16);
-}
-.perfil .p-foto::before {
+/* Abertura: grão fino só no hero, para a tinta não parecer tela lisa */
+.perfil .p-hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 3;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(147, 197, 253, 0.3), rgba(147, 197, 253, 0) 70%);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
   pointer-events: none;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-/* Espaço reservado da foto: degradê suave no lugar das listras */
-.perfil .p-foto-vazia {
-  background:
-    radial-gradient(120% 90% at 50% 0%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%),
-    linear-gradient(180deg, #0b1a3a 0%, #08142b 100%);
-}
-
-/* Caixa "Vitor / Barbeiro": vidro */
-.perfil .p-vidro {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-}
-
-/* Cartões, seções e rodapé: a mesma borda sutil em todo lugar */
-.perfil .p-card {
-  border: 1px solid var(--border);
-}
-.perfil .p-secao {
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.perfil .p-footer {
-  border-top: 1px solid var(--border);
-}
-
-/* Monograma atrás do título: grande, só o contorno de 1px, quase invisível (decorativo) */
+/* Monograma atrás do título: só o contorno de 1px, quase invisível (decorativo) */
 .perfil .p-monograma {
   position: absolute;
   top: 50%;
@@ -134,25 +94,228 @@
   line-height: 0.8;
   letter-spacing: -0.02em;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
+  -webkit-text-stroke: 1px rgba(237, 241, 244, 0.07);
   pointer-events: none;
   user-select: none;
 }
 
-/* Rolagem suave para os atalhos da página (o atalho "Ir para o conteúdo") */
-html:has(.perfil) {
-  scroll-behavior: smooth;
+/* A linha de navalha: o título aparece da esquerda para a direita e um fio de giz marca a borda do corte */
+.perfil .p-corte {
+  display: inline-block;
+  position: relative;
+  animation: p-corte 950ms var(--curva) 150ms both;
+}
+.perfil .p-corte::after {
+  content: '';
+  position: absolute;
+  inset: -0.1em 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent calc(100% - 3px), var(--giz) calc(100% - 3px));
+  animation: p-fio 950ms var(--curva) 150ms both;
+}
+@keyframes p-corte {
+  from {
+    clip-path: inset(-0.1em 100% -0.1em -0.1em);
+  }
+  to {
+    clip-path: inset(-0.1em -0.1em -0.1em -0.1em);
+  }
+}
+@keyframes p-fio {
+  0% {
+    transform: translateX(-100%);
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}
+@keyframes p-revela {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes p-sobe {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.perfil .p-entra {
+  animation: p-sobe 600ms ease 800ms both;
+}
+.perfil .p-foto > img,
+.perfil .p-foto-vazia {
+  animation: p-revela 1000ms var(--curva) 450ms both;
 }
 
-/* WhatsApp flutuante: círculo de 56px, só em tela de até 768px */
+/* Foto: moldura deslocada (como um espelho de barbearia) e a borda esquerda dissolvendo em retícula */
+.perfil .p-moldura {
+  padding: 0 14px 14px 0;
+}
+.perfil .p-moldura::before {
+  content: '';
+  position: absolute;
+  inset: 14px 0 0 14px;
+  border: 1px solid var(--linha-forte);
+}
+.perfil .p-foto {
+  z-index: 1;
+  background: var(--grafite);
+}
+.perfil .p-foto::before,
+.perfil .p-foto::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.perfil .p-foto::before {
+  background-image: radial-gradient(circle, var(--tinta) 0 2.6px, transparent 3px);
+  background-size: 6px 6px;
+  -webkit-mask-image: linear-gradient(90deg, #000 0, transparent 60%);
+  mask-image: linear-gradient(90deg, #000 0, transparent 60%);
+}
+.perfil .p-foto::after {
+  background-image: radial-gradient(circle, var(--tinta) 0 4.4px, transparent 4.8px);
+  background-size: 9px 9px;
+  -webkit-mask-image: linear-gradient(90deg, #000 0, transparent 28%);
+  mask-image: linear-gradient(90deg, #000 0, transparent 28%);
+}
+.perfil .p-foto-vazia {
+  background: linear-gradient(180deg, #161e28 0%, var(--grafite) 100%);
+}
+.perfil .p-legenda {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+.perfil .p-mini-poste {
+  width: 28px;
+  height: 4px;
+  flex: none;
+  background: repeating-linear-gradient(-45deg, var(--vermelho) 0 4px, var(--giz) 4px 8px, var(--azul) 8px 12px, var(--giz) 12px 16px);
+}
+
+/* Serviços como placa de barbearia: nome, pontilhado e ação. O pontilhado vira linha no hover */
+.perfil .p-placa {
+  border-top: 1px solid var(--linha);
+}
+.perfil .p-linha {
+  display: block;
+  min-height: 56px;
+  padding: 18px 4px;
+  border-bottom: 1px solid var(--linha);
+}
+.perfil .p-linha-topo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.perfil .p-linha-nome {
+  font-size: 1.9rem;
+  line-height: 1.1;
+  transition: transform var(--ease);
+}
+.perfil .p-pontilhado {
+  flex: 1;
+  min-width: 24px;
+  border-bottom: 2px dotted var(--linha-forte);
+  transform: translateY(-4px);
+  transition: border-color var(--ease);
+}
+.perfil .p-linha-acao {
+  font-size: 0.9rem;
+  color: var(--aco);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.perfil .p-linha-desc {
+  display: block;
+  max-width: 60ch;
+  margin-top: 6px;
+  color: var(--aco);
+}
+.perfil .p-linha:hover .p-linha-nome {
+  transform: translateX(6px);
+}
+.perfil .p-linha:hover .p-pontilhado {
+  border-bottom-style: solid;
+  border-color: var(--giz);
+}
+.perfil .p-linha:hover .p-linha-acao {
+  color: var(--giz);
+}
+.perfil .p-trabalho {
+  border: 1px solid var(--linha);
+  border-radius: 2px;
+  background: var(--grafite);
+}
+
+/* Seções e passos */
+.perfil .p-secao {
+  background: var(--grafite);
+  border-top: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha);
+}
+.perfil .p-passo {
+  position: relative;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha-forte);
+}
+.perfil .p-passo::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  background: var(--giz);
+}
+.perfil .p-num {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 4.5rem;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--aco);
+}
+
+/* Rodapé */
+.perfil .p-footer {
+  border-top: 1px solid var(--linha);
+}
+.perfil .p-link {
+  color: var(--giz);
+}
+.perfil .p-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* WhatsApp flutuante: círculo de 56px, só em tela de até 768px, sem brilho */
 .perfil .p-zap-flutuante {
   display: none;
   background: #25d366;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 .perfil .p-zap-flutuante:hover {
   transform: scale(1.06);
-  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.4);
 }
 @media (max-width: 768px) {
   .perfil .p-zap-flutuante {
@@ -164,14 +327,22 @@ html:has(.perfil) {
   html:has(.perfil) {
     scroll-behavior: auto;
   }
-  .perfil .p-zap-flutuante:hover {
-    transform: none;
+  .perfil .p-corte,
+  .perfil .p-corte::after,
+  .perfil .p-entra,
+  .perfil .p-foto > img,
+  .perfil .p-foto-vazia {
+    animation: none;
   }
   .perfil a,
-  .perfil button {
+  .perfil button,
+  .perfil .p-linha-nome,
+  .perfil .p-pontilhado {
     transition: none;
   }
-  .perfil .p-btn:hover {
+  .perfil .p-btn:active,
+  .perfil .p-linha:hover .p-linha-nome,
+  .perfil .p-zap-flutuante:hover {
     transform: none;
   }
 }

@@ -5,7 +5,7 @@ import { iniciaisDoNome, InstalacaoConfigError, linkWhatsapp, raizVaiParaPerfil,
 const vitor = {
   INSTALACAO_TIPO: 'barbeiro',
   INSTALACAO_NOME: 'Vitor Barber 69',
-  INSTALACAO_WHATSAPP: '5569992353661',
+  INSTALACAO_WHATSAPP: '5569992353561',
   INSTALACAO_INSTAGRAM: 'vitor.barber69',
   INSTALACAO_CIDADE: 'Porto Velho',
   INSTALACAO_SOBRE: 'Barbeiro em Porto Velho.',
@@ -33,7 +33,7 @@ describe('perfil de barbeiro', () => {
     assert.deepEqual(resolvePerfil(vitor), {
       tipo: 'barbeiro',
       nome: 'Vitor Barber 69',
-      whatsapp: '5569992353661',
+      whatsapp: '5569992353561',
       instagram: 'vitor.barber69',
       cidade: 'Porto Velho',
       sobre: 'Barbeiro em Porto Velho.',
@@ -62,7 +62,7 @@ describe('falha fechada: configuração errada nunca cai no contato da América'
   })
 
   it('WhatsApp com formato inválido é erro (inclusive com símbolos, letras ou curto demais)', () => {
-    for (const ruim of ['(69) 99235-3661', '69992353661', '+5569992353661', '5569992353661abc', '55699923536611234']) {
+    for (const ruim of ['(69) 99235-3561', '69992353561', '+5569992353561', '5569992353561abc', '55699923535611234']) {
       assert.throws(() => whatsappDaInstalacao({ INSTALACAO_WHATSAPP: ruim }), InstalacaoConfigError, ruim)
     }
   })
@@ -82,12 +82,12 @@ describe('falha fechada: configuração errada nunca cai no contato da América'
 
 describe('formatos aceitos', () => {
   it('WhatsApp: celular (9 dígitos) e fixo (8 dígitos) brasileiros, com DDI 55', () => {
-    assert.equal(whatsappDaInstalacao({ INSTALACAO_WHATSAPP: '5569992353661' }), '5569992353661')
+    assert.equal(whatsappDaInstalacao({ INSTALACAO_WHATSAPP: '5569992353561' }), '5569992353561')
     assert.equal(whatsappDaInstalacao({ INSTALACAO_WHATSAPP: '556932221234' }), '556932221234')
   })
 
   it('WhatsApp: sem DDI 55, DDD com zero ou número internacional é recusado', () => {
-    for (const ruim of ['5169992353661', '5509992353661', '4412345678901', '556999235366']) {
+    for (const ruim of ['5169992353561', '5509992353661', '4412345678901', '556999235366']) {
       assert.throws(() => whatsappDaInstalacao({ INSTALACAO_WHATSAPP: ruim }), InstalacaoConfigError, ruim)
     }
   })
@@ -122,8 +122,8 @@ describe('whatsappPublico: nunca o da América para quem não é a América', ()
   })
 
   it('com o número da instalação: o dela', () => {
-    assert.equal(whatsappPublico(AMERICA, { INSTALACAO_WHATSAPP: '5569992353661' }), '5569992353661')
-    assert.equal(whatsappPublico(AMERICA, vitor), '5569992353661')
+    assert.equal(whatsappPublico(AMERICA, { INSTALACAO_WHATSAPP: '5569992353561' }), '5569992353561')
+    assert.equal(whatsappPublico(AMERICA, vitor), '5569992353561')
   })
 
   it('profissional (TIPO) sem número: SEM número, e não o da América', () => {
@@ -136,7 +136,7 @@ describe('whatsappPublico: nunca o da América para quem não é a América', ()
       logou = true
     }
     try {
-      assert.equal(whatsappPublico(AMERICA, { INSTALACAO_WHATSAPP: '(69) 99235-3661' }), null)
+      assert.equal(whatsappPublico(AMERICA, { INSTALACAO_WHATSAPP: '(69) 99235-3561' }), null)
     } finally {
       console.error = sink
     }
@@ -186,6 +186,6 @@ describe('monograma do nome', () => {
 
 describe('link do WhatsApp', () => {
   it('usa o número da instalação e codifica o texto', () => {
-    assert.equal(linkWhatsapp('5569992353661', 'Olá! Quero agendar.'), 'https://wa.me/5569992353661?text=Ol%C3%A1!%20Quero%20agendar.')
+    assert.equal(linkWhatsapp('5569992353561', 'Olá! Quero agendar.'), 'https://wa.me/5569992353561?text=Ol%C3%A1!%20Quero%20agendar.')
   })
 })

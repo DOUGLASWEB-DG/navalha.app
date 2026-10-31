@@ -4,7 +4,7 @@
 // Por que existe: o config/tenant.ts é o da América (telefone, Instagram, endereço, mapa). Sem isto, a página de qualquer
 // outro cliente mostraria o contato dela. Cada instalação define o que é dela no .env (SEM aspas: o env_file as levaria literais):
 //
-//   INSTALACAO_WHATSAPP   número com DDI e DDD, só dígitos (ex.: 5569992353661). Ausente: vale o da América (padrão antigo).
+//   INSTALACAO_WHATSAPP   número com DDI e DDD, só dígitos (ex.: 5569992353561). Ausente: vale o da América (padrão antigo).
 //   INSTALACAO_TIPO       "barbeiro" troca a página inicial por uma página de perfil do profissional. Ausente: landing de barbearia.
 //   INSTALACAO_NOME       nome que aparece na página de perfil (obrigatório quando TIPO=barbeiro)
 //   INSTALACAO_INSTAGRAM  usuário sem @ (opcional)
@@ -32,7 +32,7 @@ export function whatsappDaInstalacao(env: Env = process.env): string | null {
   const bruto = vazioParaUndefined(env.INSTALACAO_WHATSAPP)
   if (!bruto) return null
   if (!WHATSAPP_RE.test(bruto)) {
-    throw new InstalacaoConfigError('INSTALACAO_WHATSAPP inválido: use só dígitos, com DDI 55 e DDD (ex.: 5569992353661).')
+    throw new InstalacaoConfigError('INSTALACAO_WHATSAPP inválido: use só dígitos, com DDI 55 e DDD (ex.: 5569992353561).')
   }
   return bruto
 }
