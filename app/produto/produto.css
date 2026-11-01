@@ -1,0 +1,224 @@
+/* Documentação do produto (/produto): tipografia, numeração e impressão.
+   Tudo dentro de .doc, para não vazar para as outras páginas.
+
+   Fontes: as originais do Instagram (Strong, Deco e Squeeze) são do próprio Instagram e não podem ser embutidas em um site.
+   Usamos parecidas, abertas (Google Fonts), e cada papel tem uma variável para trocar em um só lugar:
+   --doc-strong  títulos e subtítulos          (Archivo, pesado)
+   --doc-deco    textos, descrições, explicações (Josefin Sans, geométrica art déco)
+   --doc-squeeze tabelas, legendas, menu, sumário e rótulos (Archivo Narrow, condensada)
+
+   Normas (ABNT): numeração progressiva das seções (NBR 6024), sumário (NBR 6027), tabelas e figuras com a identificação em
+   cima e a "Fonte" embaixo (NBR 14724) e, na impressão, A4 com margens de 3 cm (esquerda e topo) e 2 cm (direita e base),
+   texto de 12 pt com espaçamento 1,5 e numeração de página no canto superior direito. */
+.doc {
+  --doc-strong: var(--font-strong), 'Arial Black', 'Segoe UI', system-ui, sans-serif;
+  --doc-deco: var(--font-deco), 'Segoe UI', system-ui, sans-serif;
+  --doc-squeeze: var(--font-squeeze), 'Arial Narrow', 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--doc-deco);
+  font-size: 1.0625rem;
+  counter-reset: tabela figura;
+}
+.doc .doc-strong {
+  font-family: var(--doc-strong);
+  font-weight: 800;
+  letter-spacing: -0.012em;
+}
+.doc .doc-squeeze {
+  font-family: var(--doc-squeeze);
+  font-weight: 500;
+}
+
+/* Tabelas: "Tabela N – título" em cima (caption) e "Fonte: ..." embaixo. O número é automático. */
+.doc .doc-tabela caption {
+  caption-side: top;
+  padding: 0 0 0.6rem 2px;
+  text-align: left;
+  font-family: var(--doc-squeeze);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #c7d3e6;
+}
+.doc .doc-tabela caption::before {
+  counter-increment: tabela;
+  content: 'Tabela ' counter(tabela) ' – ';
+  font-weight: 700;
+  color: #fff;
+}
+.doc .doc-tabela :is(th, td) {
+  font-family: var(--doc-squeeze);
+  font-size: 0.97rem;
+}
+.doc .doc-fonte {
+  margin-top: 0.45rem;
+  font-family: var(--doc-squeeze);
+  font-size: 0.82rem;
+  color: #8ea1c2;
+}
+
+/* Figuras: "Figura N – título" em cima e "Fonte: ..." embaixo */
+.doc .doc-legenda {
+  margin-bottom: 0.55rem;
+  font-family: var(--doc-squeeze);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #c7d3e6;
+}
+.doc .doc-legenda::before {
+  counter-increment: figura;
+  content: 'Figura ' counter(figura) ' – ';
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Sumário */
+.doc .doc-sumario a {
+  font-family: var(--doc-squeeze);
+}
+
+/* Capa: só aparece na impressão */
+.doc .doc-capa {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.doc) {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------- Impressão (A4, normas ABNT) ---------- */
+@page {
+  size: A4;
+  margin: 3cm 2cm 2cm 3cm;
+  @top-right {
+    content: counter(page);
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    font-size: 10pt;
+  }
+}
+@media print {
+  html:has(.doc),
+  html:has(.doc) body {
+    background: #fff !important;
+  }
+  .doc,
+  .doc * {
+    color: #000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-color: #777 !important;
+  }
+  .doc {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    min-height: 0;
+  }
+  .doc .no-print {
+    display: none !important;
+  }
+  .doc .doc-capa {
+    display: flex;
+    min-height: 23cm;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    break-after: page;
+  }
+  /* O texto gerado por CSS (o "Tabela N –" e o "Figura N –") não é alcançado pelo "*" acima: sem isto, sairia branco no papel */
+  .doc .doc-tabela caption::before,
+  .doc .doc-legenda::before {
+    color: #000 !important;
+  }
+  .doc .doc-capa p {
+    text-align: center;
+  }
+  .doc .doc-capa h1 {
+    font-size: 20pt;
+    font-weight: 700;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+  .doc .doc-sumario-bloco {
+    break-after: page;
+    max-width: none;
+    margin-top: 0;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 0;
+  }
+  .doc .doc-strong,
+  .doc .doc-squeeze,
+  .doc .doc-tabela :is(th, td),
+  .doc .doc-tabela caption,
+  .doc .doc-fonte,
+  .doc .doc-legenda,
+  .doc .doc-sumario a {
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: 0;
+  }
+  .doc h2.doc-strong {
+    break-before: page;
+    margin: 0 0 1.5em;
+    font-size: 12pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.5;
+  }
+  .doc h3.doc-strong {
+    margin: 1.5em 0 0.75em;
+    font-size: 12pt;
+    font-weight: 700;
+    line-height: 1.5;
+  }
+  .doc h4 {
+    font-size: 12pt;
+    font-weight: 700;
+    font-style: italic;
+  }
+  .doc :is(h2, h3, h4) {
+    break-after: avoid;
+  }
+  .doc p,
+  .doc li {
+    text-align: justify;
+    hyphens: auto;
+    orphans: 3;
+    widows: 3;
+  }
+  .doc a {
+    text-decoration: none;
+  }
+  .doc .doc-tabela {
+    font-size: 10pt;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .doc .doc-tabela :is(th, td) {
+    font-size: 10pt;
+    line-height: 1.3;
+    border: 0.5pt solid #777;
+    padding: 4pt 6pt;
+  }
+  .doc .doc-tabela caption,
+  .doc .doc-legenda {
+    font-size: 10pt;
+    font-weight: 700;
+    text-align: left;
+  }
+  .doc .doc-fonte {
+    font-size: 10pt;
+  }
+  .doc figure,
+  .doc table,
+  .doc aside {
+    break-inside: avoid;
+  }
+  .doc img {
+    max-width: 100%;
+    height: auto;
+    border: 0.5pt solid #777;
+  }
+}

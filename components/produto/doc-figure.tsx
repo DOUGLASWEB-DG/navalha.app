@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { FONTE_PRINTS } from '@/components/produto/doc-parts'
 
 export type DocShot = {
   src: string
@@ -12,7 +13,8 @@ export type DocShot = {
   height: number
 }
 
-// Print de uma tela do sistema na documentação. Clique amplia; Esc, clique fora ou o botão fechar volta.
+// Print de uma tela do sistema na documentação, no padrão da ABNT: "Figura N – título" em cima (número automático, em
+// produto.css), a imagem, a descrição e a "Fonte:" embaixo. Clique amplia; Esc, clique fora ou o botão fechar volta.
 // Escura de propósito: a página do produto é marinho, como a vitrine.
 export function DocFigure({ shot, phone = false, className }: { shot: DocShot; phone?: boolean; className?: string }) {
   const [open, setOpen] = useState(false)
@@ -31,6 +33,7 @@ export function DocFigure({ shot, phone = false, className }: { shot: DocShot; p
   return (
     <>
       <figure className={cn('mt-6', phone ? 'w-[46%] max-w-[240px]' : 'max-w-3xl', className)}>
+        <figcaption className="doc-legenda">{shot.title}</figcaption>
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -47,14 +50,13 @@ export function DocFigure({ shot, phone = false, className }: { shot: DocShot; p
             className="h-auto w-full"
           />
         </button>
-        <figcaption className="mt-2.5 text-sm leading-relaxed text-[#9fb0cc]">
-          <span className="font-semibold text-white">{shot.title}.</span> {shot.caption}
-        </figcaption>
+        <p className="mt-2.5 leading-relaxed text-[#b4c2da]">{shot.caption}</p>
+        <p className="doc-fonte">Fonte: {FONTE_PRINTS}</p>
       </figure>
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#010a1b]/95 p-4"
+          className="no-print fixed inset-0 z-50 flex items-center justify-center bg-[#010a1b]/95 p-4"
           role="dialog"
           aria-modal="true"
           aria-label={shot.title}
