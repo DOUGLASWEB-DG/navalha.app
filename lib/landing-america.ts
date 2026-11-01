@@ -129,3 +129,14 @@ export function linkWhatsapp(numero: string, texto: string): string {
   const digitos = numero.replace(/\D/g, '')
   return `https://wa.me/${digitos}?text=${encodeURIComponent(texto)}`
 }
+
+// O endereço do config traz um CEP com um dígito a mais ("768873-762"). A página mostra e busca só rua, bairro e cidade
+// até o dono confirmar o CEP; assim ninguém vê um número errado e a busca do mapa não depende dele.
+export function enderecoSemCep(endereco: string): string {
+  return endereco.replace(/,?\s*\d{5,6}-?\d{3}\s*$/, '').trim()
+}
+
+// Busca no Google Maps pelo endereço (o link antigo do config abria só a página inicial do Maps).
+export function linkDoMapa(endereco: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(enderecoSemCep(endereco))}`
+}

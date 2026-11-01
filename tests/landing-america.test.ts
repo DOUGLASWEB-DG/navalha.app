@@ -4,6 +4,8 @@ import {
   CURSOS,
   ORDEM_DOS_CURSOS,
   PERGUNTAS_DO_QUIZ,
+  enderecoSemCep,
+  linkDoMapa,
   linkWhatsapp,
   mensagemDoCurso,
   mensagemDoQuiz,
@@ -68,6 +70,22 @@ test('mensagens: levam a marca "Vim pelo site da América" e o nome do curso', (
   assert.match(mensagemGeral(), /Vim pelo site da América/)
   assert.match(mensagemSobreOsCursos(), /Vim pelo site da América/)
   assert.match(mensagemDoServico('Corte'), /Corte/)
+})
+
+test('endereço sem o CEP (o do config tem um dígito a mais)', () => {
+  assert.equal(
+    enderecoSemCep('Rua Casemiro de Abreu, 3140 - Colonial, Ariquemes - RO, 768873-762'),
+    'Rua Casemiro de Abreu, 3140 - Colonial, Ariquemes - RO',
+  )
+  assert.equal(enderecoSemCep('Rua A, 10 - Centro, 76873-762'), 'Rua A, 10 - Centro')
+  assert.equal(enderecoSemCep('Rua A, 10 - Centro'), 'Rua A, 10 - Centro')
+})
+
+test('link do mapa: busca pelo endereço, sem o CEP, codificada', () => {
+  const link = linkDoMapa('Rua Casemiro de Abreu, 3140 - Colonial, Ariquemes - RO, 768873-762')
+  assert.ok(link.startsWith('https://www.google.com/maps/search/?api=1&query='))
+  assert.ok(link.includes(encodeURIComponent('Rua Casemiro de Abreu, 3140')))
+  assert.ok(!link.includes('768873'), 'o CEP errado não pode ir na busca')
 })
 
 test('link do WhatsApp: só dígitos no número e texto codificado', () => {

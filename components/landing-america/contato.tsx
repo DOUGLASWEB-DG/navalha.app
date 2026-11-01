@@ -1,11 +1,11 @@
 import { Clock, Instagram, MapPin, Phone } from 'lucide-react'
 import { tenantConfig } from '@/config/tenant'
-import { linkWhatsapp, mensagemGeral } from '@/lib/landing-america'
+import { enderecoSemCep, linkDoMapa, linkWhatsapp, mensagemGeral } from '@/lib/landing-america'
 
 // Horário, endereço, Instagram, WhatsApp e mapa: tudo vem do tenantConfig (uma fonte só, a mesma do resto do sistema).
 export function Contato() {
   const itens = [
-    { icone: MapPin, rotulo: 'Endereço', valor: tenantConfig.address, link: tenantConfig.googleMapsLink },
+    { icone: MapPin, rotulo: 'Endereço', valor: enderecoSemCep(tenantConfig.address), link: linkDoMapa(tenantConfig.address) },
     { icone: Phone, rotulo: 'WhatsApp', valor: tenantConfig.phoneDisplay, link: linkWhatsapp(tenantConfig.whatsappNumber, mensagemGeral()) },
     { icone: Instagram, rotulo: 'Instagram', valor: tenantConfig.instagram, link: tenantConfig.instagramLink },
   ]
