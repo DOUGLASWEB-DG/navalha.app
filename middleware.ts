@@ -4,6 +4,7 @@ import { jwtVerify, SignJWT } from 'jose'
 import { getJwtSecretKey } from '@/lib/jwt'
 import { resolveBarbeariaByHost } from '@/lib/tenant'
 import { demoLandingRoute } from '@/lib/demo-landing'
+import { landingDaCasaRoute } from '@/lib/landing-casa'
 
 const SESSION_COOKIE = 'barberos_session'
 
@@ -32,6 +33,11 @@ export async function middleware(request: NextRequest) {
   const landing = demoLandingRoute(barbearia.subdomain, pathname)
   if (landing.action === 'notFound') return tenantNotFound(pathname)
   if (landing.action === 'rewrite') return NextResponse.rewrite(new URL(landing.to, request.url))
+
+  // América: a raiz mostra a página própria da casa; /america não existe nas outras barbearias (lib/landing-casa.ts)
+  const casa = landingDaCasaRoute(barbearia.subdomain, pathname)
+  if (casa.action === 'notFound') return tenantNotFound(pathname)
+  if (casa.action === 'rewrite') return NextResponse.rewrite(new URL(casa.to, request.url))
 
   const token = request.cookies.get(SESSION_COOKIE)?.value
 
