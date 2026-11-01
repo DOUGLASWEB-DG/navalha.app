@@ -474,9 +474,12 @@ html:has(.america) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 30% 40%;
-  opacity: 0.3;
-  filter: blur(1.5px) saturate(1.05);
+  object-position: 20% 35%;
+  opacity: 0.27;
+  /* borrado de propósito: vira luz ambiente (verde e amarelo do Brasil, vermelho e branco dos EUA) e o telefone e as letras da
+     placa não ficam legíveis atrás do texto */
+  filter: blur(4px) saturate(1.15);
+  transform: scale(1.06);
   animation: am-aparece 1400ms ease both;
 }
 .america .hero-fundo::after {
@@ -486,6 +489,19 @@ html:has(.america) {
   background:
     linear-gradient(90deg, rgb(20 23 26 / 0.94) 0%, rgb(20 23 26 / 0.7) 48%, rgb(20 23 26 / 0.35) 100%),
     linear-gradient(180deg, rgb(20 23 26 / 0.55) 0%, transparent 28%, transparent 62%, var(--bg) 100%);
+}
+/* No celular o texto fica por cima da arte: camada mais forte para o texto prateado pequeno continuar nítido */
+@media (max-width: 767px) {
+  .america .hero-fundo img {
+    opacity: 0.2;
+  }
+  .america .hero-fundo::after {
+    background: linear-gradient(180deg, rgb(20 23 26 / 0.84) 0%, rgb(20 23 26 / 0.74) 55%, var(--bg) 100%);
+  }
+}
+/* A foto do Mateus tem parede branca: um pouco menos de brilho para não ofuscar sobre o carvão */
+.america .hero-photo .am-moldura__foto {
+  filter: brightness(0.93) contrast(1.03);
 }
 /* Moldura e legenda da foto do Mateus */
 .america .am-legenda {
