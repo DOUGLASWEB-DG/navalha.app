@@ -1,27 +1,32 @@
-// Selo da casa: o nome e as duas raízes em volta de uma estrela. É um selo próprio, desenhado aqui; quando o dono mandar o
-// emblema da porta, ele entra no lugar do miolo. O texto em círculo usa textLength para fechar a volta sem sobrar nem faltar.
-export function Selo({ className }: { className?: string }) {
+// Selo da casa, em linha fina: o nome e a cidade em volta de uma estrela vazada. É a assinatura visual da página (a "americana"
+// mora na estrela). Quando o dono mandar o emblema da porta, ele entra no lugar do miolo. O texto em círculo usa textLength para
+// fechar a volta sem sobrar nem faltar. O fundo preenchido deixa o selo legível quando fica por cima da foto.
+export function Selo({ className, id = 'am-selo-volta' }: { className?: string; id?: string }) {
   return (
-    <svg
-      viewBox="0 0 200 200"
-      role="img"
-      aria-label="Selo da América Barbearia: técnica americana, raiz brasileira"
-      className={className}
-    >
+    <svg viewBox="0 0 200 200" role="img" aria-label="Selo da América Barbearia, Ariquemes, Rondônia" className={className}>
       <defs>
-        <path id="am-selo-volta" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0" />
+        <path id={id} d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0" />
       </defs>
-      <circle cx="100" cy="100" r="96" fill="none" stroke="var(--a-dourado)" strokeWidth="3" />
-      <circle cx="100" cy="100" r="88" fill="none" stroke="var(--a-dourado)" strokeWidth="1" strokeDasharray="2 4" />
-      <circle cx="100" cy="100" r="56" fill="var(--a-azul-fundo)" stroke="var(--a-dourado)" strokeWidth="2" />
-      <text fill="var(--a-dourado)" fontSize="13" textLength="455" lengthAdjust="spacing" style={{ fontFamily: 'var(--font-slab), Georgia, serif' }}>
-        <textPath href="#am-selo-volta">AMÉRICA BARBEARIA ★ TÉCNICA AMERICANA ★ RAIZ BRASILEIRA ★</textPath>
+      <circle cx="100" cy="100" r="98" fill="#0c0c0d" fillOpacity="0.94" />
+      <circle cx="100" cy="100" r="95" fill="none" stroke="#b8975a" strokeWidth="1.2" />
+      <circle cx="100" cy="100" r="58" fill="none" stroke="#b8975a" strokeWidth="1" />
+      <text
+        fill="#b8975a"
+        fontSize="14.5"
+        textLength="470"
+        lengthAdjust="spacing"
+        style={{ fontFamily: 'var(--font-display), Georgia, serif', fontWeight: 600 }}
+      >
+        <textPath href={`#${id}`}>AMÉRICA BARBEARIA · ARIQUEMES · RONDÔNIA ·</textPath>
       </text>
-      {/* estrela de cinco pontas, 48 px, centrada no miolo (a mesma da faixa do hero) */}
+      {/* estrela de cinco pontas, só o contorno, centrada no miolo */}
       <path
         d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7L12 17.3 5.7 21l1.7-7L2 9.2l7.1-.6L12 2z"
-        fill="var(--a-dourado)"
-        transform="translate(76 76) scale(2)"
+        fill="none"
+        stroke="#b8975a"
+        strokeWidth="0.7"
+        strokeLinejoin="round"
+        transform="translate(70 70) scale(2.5)"
       />
     </svg>
   )

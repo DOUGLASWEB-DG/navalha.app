@@ -1,17 +1,19 @@
 import Link from 'next/link'
 
+// O único vermelho da página é o filete de poste no alto do rodapé (parado, fino, decorativo).
 export function Rodape() {
   return (
-    <footer className="am-rodape border-t border-[rgb(242_239_233/0.14)] bg-[#0b0b0c] px-4 py-8 sm:px-6">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 text-sm">
-        <p className="am-t-suave">
+    <footer className="am-rodape bg-[#0c0c0d]">
+      <div aria-hidden="true" className="am-filete" />
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-sm sm:px-6">
+        <p className="am-muted">
           &copy; {new Date().getFullYear()} América Barbearia. Agendamento online por{' '}
-          <a href="https://navalhaapp.tech" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-white">
+          <a href="https://navalhaapp.tech" target="_blank" rel="noopener noreferrer" className="am-link">
             Navalha.app
           </a>
           .
         </p>
-        <Link href="/login" className="am-t-suave inline-flex min-h-11 items-center underline underline-offset-4 hover:text-white">
+        <Link href="/login" className="am-link inline-flex min-h-11 items-center">
           Entrar (equipe)
         </Link>
       </div>

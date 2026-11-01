@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { WhatsAppIcon } from '@/components/shared/whatsapp-icon'
 
-// WhatsApp flutuante (só no celular): aparece depois da abertura e sai da frente das áreas marcadas com data-sem-zap
-// (cursos e contato), que já têm botão próprio e seriam cobertas.
+// WhatsApp flutuante (só no celular), no dourado da página: aparece depois da abertura e sai da frente das áreas marcadas com
+// data-sem-zap (cursos e contato), que já têm botão próprio e seriam cobertas.
 export function ZapFlutuante({ href }: { href: string }) {
   const [rolou, setRolou] = useState(false)
   const [recuado, setRecuado] = useState(false)

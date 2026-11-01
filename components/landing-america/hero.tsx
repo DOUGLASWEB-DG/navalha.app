@@ -1,41 +1,52 @@
 import Link from 'next/link'
 import { tenantConfig } from '@/config/tenant'
-import { Estrela } from './estrela'
+import { FOTOS } from '@/config/landing-america'
+import { Selo } from './selo'
 
-// Abertura: a faixa do Brasil (verde e amarelo) e dos Estados Unidos (vermelho e branco) se encontra no nome da casa.
-// O movimento sozinho é só um: a faixa abre do centro para fora, uma vez.
+// Abertura: o que a casa é, dito em uma frase (a frase é o gancho da página), e UMA foto grande, inteira, com o selo na quina.
+// O único movimento sozinho é a foto se revelando.
 export function Hero() {
   const horario = tenantConfig.businessHours[0]
+  const foto = FOTOS.combo
   return (
-    <section id="inicio" className="am-folhas relative overflow-hidden">
-      <div className="am-faixa" aria-hidden="true">
-        <span className="am-faixa__br" />
-        <span className="am-faixa__us" />
-        <Estrela className="am-faixa__estrela" />
-      </div>
+    <section id="inicio">
+      <div className="mx-auto grid max-w-6xl items-center gap-14 px-4 pb-24 pt-12 sm:px-6 md:grid-cols-[1.05fr_0.95fr] md:gap-20 md:pb-32 md:pt-20">
+        <div>
+          <span className="am-regua am-sobe" aria-hidden="true" />
+          <h1 className="am-serif am-sobe text-[clamp(2.7rem,5.7vw,4.8rem)] leading-[1.04]">
+            <span className="sr-only">América Barbearia. </span>
+            Aqui se corta.
+            <br />
+            E aqui se ensina.
+          </h1>
+          <p className="am-sobe am-muted mt-6 max-w-md text-lg">Técnica americana. Raiz brasileira.</p>
 
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-14 text-center sm:px-6 sm:pt-20 md:pb-28">
-        <h1 className="am-hero-titulo am-slab text-[clamp(3.6rem,15vw,8.5rem)]">
-          AMÉRICA
-          <span className="am-script">Barbearia</span>
-        </h1>
+          <div className="am-sobe mt-9 flex flex-col gap-3 sm:flex-row">
+            <Link href="/book" className="am-btn am-btn--ouro">
+              Agendar horário
+            </Link>
+            <a href="#cursos" className="am-btn am-btn--linha">
+              Conhecer os cursos
+            </a>
+          </div>
 
-        <p className="am-entra mx-auto mt-20 max-w-xl text-lg font-semibold sm:mt-24 sm:text-xl">Técnica americana. Raiz brasileira.</p>
-        <p className="am-entra am-script mt-2 text-3xl sm:text-4xl">Aqui se corta. E aqui se ensina.</p>
-
-        <div className="am-entra mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link href="/book" className="am-btn am-btn--vermelho w-full sm:w-auto">
-            Agendar horário
-          </Link>
-          <a href="#cursos" className="am-btn am-btn--contorno w-full sm:w-auto">
-            Conhecer os cursos
-          </a>
+          <p className="am-sobe am-muted mt-8 text-sm">
+            {tenantConfig.city}
+            {horario ? ` · ${horario.day}, ${horario.time}` : ''}
+          </p>
         </div>
 
-        <p className="am-entra am-t-suave mt-8 text-sm">
-          {tenantConfig.city}
-          {horario ? ` · ${horario.day}, ${horario.time}` : ''}
-        </p>
+        <div className="am-moldura mx-auto w-full max-w-md md:max-w-none">
+          <img
+            src={foto.src}
+            width={foto.width}
+            height={foto.height}
+            alt="Corte degradê com barba feito na América, visto de perfil"
+            className="am-moldura__foto"
+            fetchPriority="high"
+          />
+          <Selo className="am-selo-hero" id="am-selo-hero" />
+        </div>
       </div>
     </section>
   )

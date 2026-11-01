@@ -1,28 +1,24 @@
 /* Página própria da América (/america). Tudo dentro de .america, para não vazar para o painel nem para as outras páginas.
-   Ideia: "Técnica americana. Raiz brasileira." Preto e off-white de base (a porta), vermelho e azul-marinho da bandeira americana,
-   verde e amarelo do Brasil só na faixa do topo, dourado no script, nos números e nos selos, folhagem discreta em alguns blocos. */
+   Princípio: a ousadia fica em UM lugar (a foto do hero e o selo); o resto é quieto e disciplinado.
+   Paleta com um destaque só (dourado fosco), serifa elegante nos títulos e sans limpa no texto, sem cursiva.
+   O vermelho aparece uma única vez, num filete de poste no rodapé. "Americana" mora na estrela do selo e nas linhas finas. */
 .america {
-  --a-preto: #0b0b0c;
-  --a-grafite: #151517;
-  --a-off: #f2efe9;
-  --a-tinta: #17181b;
-  --a-vermelho: #b31942; /* vermelho da bandeira americana (branco sobre ele: contraste 6,6:1) */
-  --a-vermelho-vivo: #d4254d;
-  --a-azul: #0a3161; /* azul da bandeira americana */
-  --a-azul-fundo: #082651;
-  --a-dourado: #c9a227;
-  --a-dourado-escuro: #8a6d12; /* dourado legível sobre o off-white */
-  --a-verde: #009c3b; /* verde e amarelo do Brasil: só na faixa e na folhagem */
-  --a-amarelo: #ffdf00;
-  --a-linha: rgb(242 239 233 / 0.16);
-  --a-suave: #c8c4bb; /* texto secundário sobre fundo escuro */
-  --a-suave-claro: #55524b; /* texto secundário sobre o off-white */
-  font-family: var(--font-corpo), system-ui, sans-serif;
-  background: var(--a-preto);
-  color: var(--a-off);
+  --bg: #0c0c0d;
+  --surf: #16161a;
+  --txt: #ede8df;
+  --muted: #a9a397; /* texto secundário: 7,5:1 sobre o grafite */
+  --ouro: #b8975a;
+  --ouro-claro: #cfb27a;
+  --linha: rgb(237 232 223 / 0.12);
+  --linha-ouro: rgb(184 151 90 / 0.5);
+  --vermelho: #b31942;
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  line-height: 1.6;
 }
 html:has(.america) {
-  background: #0b0b0c;
+  background: #0c0c0d;
   scroll-padding-top: 76px;
   scroll-behavior: smooth;
 }
@@ -36,172 +32,171 @@ html:has(.america) {
 .america summary {
   touch-action: manipulation;
 }
-.america :is(a, button, input, summary):focus-visible {
-  outline: 3px solid var(--a-dourado);
+.america :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--ouro-claro);
   outline-offset: 3px;
 }
-.america .am-slab {
-  font-family: var(--font-slab), 'Rockwell', Georgia, serif;
-  font-weight: 400;
-  letter-spacing: 0.01em;
+.america .am-serif {
+  font-family: var(--font-display), 'Cormorant Garamond', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.005em;
 }
-.america .am-script {
-  font-family: var(--font-script), 'Brush Script MT', cursive;
-  font-weight: 400;
-  color: var(--a-dourado);
+.america .am-ouro {
+  color: var(--ouro);
+}
+.america .am-ouro-claro {
+  color: var(--ouro-claro);
+}
+.america .am-muted {
+  color: var(--muted);
 }
 .america .am-num {
   font-variant-numeric: tabular-nums;
 }
+.america .am-sec {
+  border-top: 1px solid var(--linha);
+}
+/* Régua dourada curta acima dos títulos: é estrutura, não enfeite (marca onde começa cada seção) */
+.america .am-regua {
+  display: block;
+  width: 44px;
+  height: 1px;
+  margin-bottom: 20px;
+  background: var(--ouro);
+}
 
-/* Botões */
+/* Cabeçalho */
+.america .am-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--linha);
+  background: rgb(12 12 13 / 0.92);
+  backdrop-filter: blur(8px);
+}
+.america .am-marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1;
+}
+.america .am-marca__nome {
+  font-size: 1.55rem;
+  letter-spacing: 0.1em;
+}
+.america .am-marca__estrela {
+  width: 18px;
+  height: 18px;
+  color: var(--ouro);
+}
+
+/* Botões: cantos quase retos, sóbrios. O dourado cheio é só do chamado principal. */
 .america .am-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   min-height: 48px;
-  padding: 0 24px;
-  border-radius: 6px;
-  border: 2px solid transparent;
-  font-weight: 700;
-  font-size: 1rem;
+  padding: 0 26px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-decoration: none;
   transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
 }
 .america .am-btn:active {
   transform: translateY(1px);
 }
-.america .am-btn--vermelho {
-  background: var(--a-vermelho);
-  color: #fff;
-}
-.america .am-btn--vermelho:hover {
-  background: var(--a-vermelho-vivo);
-}
-.america .am-btn--contorno {
-  border-color: var(--a-linha);
-  color: var(--a-off);
-  background: transparent;
-}
-.america .am-btn--contorno:hover {
-  border-color: var(--a-dourado);
-  color: var(--a-dourado);
-}
 .america .am-btn--ouro {
-  background: var(--a-dourado);
-  color: #1a1405;
+  background: var(--ouro);
+  color: #14110a;
 }
 .america .am-btn--ouro:hover {
-  background: #dbb43a;
+  background: var(--ouro-claro);
 }
-.america .am-link-ouro {
-  color: var(--a-dourado);
-  font-weight: 600;
+.america .am-btn--linha {
+  border-color: var(--linha-ouro);
+  color: var(--ouro-claro);
+  background: transparent;
+}
+.america .am-btn--linha:hover {
+  border-color: var(--ouro);
+  background: rgb(184 151 90 / 0.1);
+}
+.america .am-btn--sm {
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: 0.9rem;
+}
+.america .am-link {
+  color: var(--muted);
   text-decoration: underline;
   text-underline-offset: 4px;
   text-decoration-thickness: 1px;
 }
-.america .am-link-ouro:hover {
-  color: #e6c453;
+.america .am-link:hover {
+  color: var(--ouro-claro);
 }
 
-/* Faixa do topo: o Brasil à esquerda, os Estados Unidos à direita, juntos no AMÉRICA. Entra uma vez, do centro para fora. */
-.america .am-faixa {
+/* Hero: a foto inteira (proporção original) com uma moldura fina deslocada e o selo na quina. Único momento de movimento: a foto se revela. */
+.america .am-moldura {
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  height: 18px;
 }
-.america .am-faixa__br,
-.america .am-faixa__us {
-  display: block;
-  animation: am-abre 900ms cubic-bezier(0.7, 0, 0.2, 1) 150ms both;
-}
-.america .am-faixa__br {
-  background: repeating-linear-gradient(-45deg, var(--a-verde) 0 14px, var(--a-amarelo) 14px 28px);
-  transform-origin: right center;
-}
-.america .am-faixa__us {
-  background: repeating-linear-gradient(-45deg, var(--a-vermelho) 0 14px, #fff 14px 28px);
-  transform-origin: left center;
-}
-.america .am-faixa__estrela {
+.america .am-moldura::before {
+  content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 34px;
-  height: 34px;
-  translate: -50% -50%;
-  color: var(--a-dourado);
-  filter: drop-shadow(0 0 0 var(--a-preto));
-  animation: am-aparece 400ms ease 800ms both;
+  inset: 16px -16px -16px 16px;
+  border: 1px solid var(--linha-ouro);
+  animation: am-aparece 800ms ease 700ms both;
 }
-@keyframes am-abre {
+.america .am-moldura__foto {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
+  animation: am-revela 1000ms cubic-bezier(0.7, 0, 0.2, 1) 200ms both;
+}
+.america .am-selo-hero {
+  position: absolute;
+  z-index: 2;
+  left: -10px;
+  bottom: -26px;
+  width: 104px;
+  animation: am-aparece 800ms ease 900ms both;
+}
+@media (min-width: 768px) {
+  .america .am-selo-hero {
+    left: -34px;
+    bottom: -34px;
+    width: 128px;
+  }
+}
+.america .am-sobe {
+  animation: am-sobe 700ms ease 150ms both;
+}
+@keyframes am-revela {
   from {
-    transform: scaleX(0);
+    clip-path: inset(0 0 100% 0);
   }
   to {
-    transform: scaleX(1);
+    clip-path: inset(0 0 0 0);
   }
 }
 @keyframes am-aparece {
   from {
     opacity: 0;
-    scale: 0.4;
   }
   to {
     opacity: 1;
-    scale: 1;
   }
-}
-
-/* Campo de estrelas: textura azul discreta (as estrelas da bandeira), em blocos azul-marinho */
-.america .am-estrelas {
-  background-color: var(--a-azul-fundo);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='%23ffffff' fill-opacity='.07'%3E%3Cpath d='m16 8 1.9 5.8h6.1l-4.9 3.6 1.9 5.8-5-3.6-5 3.6 1.9-5.8-4.9-3.6h6.1z'/%3E%3Cpath d='m48 40 1.9 5.8h6.1l-4.9 3.6 1.9 5.8-5-3.6-5 3.6 1.9-5.8-4.9-3.6h6.1z'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-/* Folhagem discreta (o lado Brasil): folhas verdes bem apagadas sobre o preto */
-.america .am-folhas {
-  background-color: var(--a-preto);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23009c3b' fill-opacity='.07'%3E%3Cpath d='M30 12c-14 10-20 26-12 44 15-4 26-20 12-44z'/%3E%3Cpath d='M92 70c-14 10-20 26-12 44 15-4 26-20 12-44z' transform='rotate(40 92 92)'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-/* Poste de barbeiro girando: separa as seções. O deslocamento é exatamente um período do desenho, então o laço não dá salto. */
-.america .am-poste {
-  height: 14px;
-  background: repeating-linear-gradient(-45deg, var(--a-vermelho) 0 10px, #fff 10px 20px, var(--a-azul) 20px 30px, #fff 30px 40px);
-  background-size: 56.5685px 100%;
-  animation: am-gira 2.4s linear infinite;
-}
-@keyframes am-gira {
-  to {
-    background-position-x: 56.5685px;
-  }
-}
-
-/* Hero */
-.america .am-hero-titulo {
-  position: relative;
-  display: inline-block;
-  line-height: 0.9;
-}
-.america .am-hero-titulo .am-script {
-  position: absolute;
-  right: -0.05em;
-  bottom: -0.55em;
-  font-size: 0.62em;
-  transform: rotate(-6deg);
-  text-shadow: 0 2px 0 var(--a-preto);
-}
-.america .am-entra {
-  animation: am-sobe 700ms ease 500ms both;
 }
 @keyframes am-sobe {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -209,60 +204,73 @@ html:has(.america) {
   }
 }
 
-/* Cartões dos cursos */
-.america .am-curso {
-  position: relative;
+/* Cartões (cursos e contato) */
+.america .am-card {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 26px;
-  border: 1px solid var(--a-linha);
-  border-radius: 10px;
-  background: rgb(11 11 12 / 0.55);
+  padding: 28px;
+  border: 1px solid var(--linha);
+  border-top-color: var(--ouro);
+  border-radius: 2px;
+  background: var(--surf);
+  transition: border-color 0.2s;
 }
-.america .am-curso::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 4px;
-  border-radius: 10px 10px 0 0;
-  background: linear-gradient(90deg, var(--a-vermelho), var(--a-dourado));
+.america .am-card:hover {
+  border-color: var(--linha-ouro);
+  border-top-color: var(--ouro);
 }
 
-/* Quiz */
+/* Quiz: linhas separadas por fio fino (não botões gordos); o dourado só acompanha o que está sob o dedo */
+.america .am-painel {
+  padding: 28px;
+  border: 1px solid var(--linha);
+  border-radius: 2px;
+  background: var(--surf);
+}
+@media (min-width: 640px) {
+  .america .am-painel {
+    padding: 40px;
+  }
+}
 .america .am-opcao {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   width: 100%;
-  min-height: 56px;
-  padding: 12px 16px;
+  min-height: 60px;
+  padding: 12px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--linha);
+  background: transparent;
+  color: inherit;
   text-align: left;
-  border: 1px solid var(--a-linha);
-  border-radius: 8px;
-  background: rgb(255 255 255 / 0.04);
-  color: var(--a-off);
-  transition: border-color 0.2s, background-color 0.2s;
+  transition: padding-left 0.2s, border-color 0.2s, background-color 0.2s;
+}
+.america .am-opcao::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  background: var(--ouro);
 }
 .america .am-opcao:hover {
-  border-color: var(--a-dourado);
-  background: rgb(201 162 39 / 0.1);
+  padding-left: 14px;
+  border-bottom-color: var(--ouro);
+  background: rgb(184 151 90 / 0.06);
 }
 
-/* Serviços e galeria (fundo claro): cada foto aparece inteira, na proporção original, sem recorte e sem zoom */
-.america .am-claro {
-  background: var(--a-off);
-  color: var(--a-tinta);
-}
-.america .am-claro .am-suave {
-  color: var(--a-suave-claro);
-}
+/* Fotos de trabalho: cada uma inteira, na proporção original, sem recorte e sem zoom */
 .america .am-foto {
   display: block;
   overflow: hidden;
-  border-radius: 8px;
-  background: #e4e0d8;
-  border: 1px solid rgb(23 24 27 / 0.12);
+  border: 1px solid var(--linha);
+  border-radius: 2px;
+  background: var(--surf);
+  transition: border-color 0.2s;
+}
+.america .am-foto:hover {
+  border-color: var(--linha-ouro);
 }
 .america .am-foto img {
   display: block;
@@ -271,23 +279,26 @@ html:has(.america) {
 }
 .america .am-galeria {
   columns: 2;
-  column-gap: 14px;
+  column-gap: 16px;
 }
 .america .am-galeria > * {
   break-inside: avoid;
-  margin-bottom: 14px;
+  margin-bottom: 32px;
 }
 @media (min-width: 900px) {
   .america .am-galeria {
     columns: 3;
-    column-gap: 20px;
-  }
-  .america .am-galeria > * {
-    margin-bottom: 20px;
+    column-gap: 28px;
   }
 }
 
-/* WhatsApp flutuante (celular) */
+/* O único vermelho da página: um filete de poste, parado, no alto do rodapé */
+.america .am-filete {
+  height: 6px;
+  background: repeating-linear-gradient(-45deg, var(--vermelho) 0 8px, var(--txt) 8px 16px);
+}
+
+/* WhatsApp flutuante (celular), no dourado da página */
 .america .am-zap {
   position: fixed;
   right: 16px;
@@ -298,8 +309,8 @@ html:has(.america) {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #25d366;
-  color: #fff;
+  background: var(--ouro);
+  color: #14110a;
   box-shadow: 0 6px 18px rgb(0 0 0 / 0.5);
   visibility: hidden;
   opacity: 0;
@@ -330,19 +341,14 @@ html:has(.america) {
   html:has(.america) {
     scroll-behavior: auto;
   }
-  .america .am-faixa__br,
-  .america .am-faixa__us,
-  .america .am-faixa__estrela,
-  .america .am-entra,
-  .america .am-poste {
+  .america .am-moldura::before,
+  .america .am-moldura__foto,
+  .america .am-selo-hero,
+  .america .am-sobe {
     animation: none;
   }
-  .america .am-zap {
+  .america .am-zap,
+  .america .am-opcao {
     transition: none;
   }
 }
-
-/* Utilitários de cor e tamanho (evita adivinhação do Tailwind com variáveis CSS) */
-.america .am-t-suave { color: var(--a-suave); }
-.america .am-t-ouro { color: var(--a-dourado); }
-.america .am-btn--sm { min-height: 44px; padding: 0 16px; font-size: 0.9rem; }
