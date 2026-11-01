@@ -41,9 +41,10 @@ export function Trabalhos() {
                   <img src={foto.src} width={foto.width} height={foto.height} alt={`Trabalho: ${nome}`} loading="lazy" decoding="async" />
                 </a>
                 <div className="mt-4">
-                  <div className="flex items-baseline justify-between gap-3">
+                  {/* flex-wrap + nowrap no preço: se o nome for longo para a coluna estreita, o preço desce INTEIRO (nunca "R$" numa linha e "50" na outra). */}
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                     <h3 className="am-serif text-2xl">{nome}</h3>
-                    {valor && <p className="am-ouro am-num font-semibold">{valor}</p>}
+                    {valor && <p className="am-ouro am-num whitespace-nowrap font-semibold">{valor}</p>}
                   </div>
                   {duracao && <p className="am-muted am-num text-sm">{duracao}</p>}
                   <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1">
