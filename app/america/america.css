@@ -109,8 +109,26 @@ html:has(.america) {
   transform: translateY(1px);
 }
 .america .am-btn--ouro {
+  position: relative;
+  overflow: hidden;
   background: var(--ouro);
   color: #14110a;
+}
+/* Brilho que atravessa o botão dourado, só no hover */
+.america .am-btn--ouro::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.38), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.7s ease;
+  pointer-events: none;
+}
+.america .am-btn--ouro:hover::after {
+  left: 130%;
 }
 .america .am-btn--ouro:hover {
   background: var(--ouro-claro);
@@ -148,7 +166,7 @@ html:has(.america) {
   position: absolute;
   inset: 16px -16px -16px 16px;
   border: 1px solid var(--linha-ouro);
-  animation: am-aparece 800ms ease 700ms both;
+  animation: am-desliza 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 650ms both;
 }
 .america .am-moldura__foto {
   position: relative;
@@ -221,7 +239,7 @@ html:has(.america) {
   border-top-color: var(--ouro);
 }
 
-/* Quiz: linhas separadas por fio fino (não botões gordos); o dourado só acompanha o que está sob o dedo */
+/* Quiz: um cartão de duas colunas. À esquerda título, frase, progresso e contador; à direita a pergunta e as opções numeradas. */
 .america .am-painel {
   padding: 28px;
   border: 1px solid var(--linha);
@@ -233,31 +251,129 @@ html:has(.america) {
     padding: 40px;
   }
 }
-.america .am-opcao {
+.america .am-quiz {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 32px;
+}
+.america .am-quiz > * {
+  position: relative; /* o conteúdo fica acima da luz do cursor */
+}
+@media (min-width: 820px) {
+  .america .am-quiz {
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 56px;
+  }
+  .america .am-quiz__lado {
+    padding-right: 40px;
+    border-right: 1px solid var(--linha);
+  }
+}
+/* Luz dourada discreta que segue o cursor (só com mouse; o JavaScript atualiza --mx e --my) */
+.america .am-quiz::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(184 151 90 / 0.09), transparent 62%);
+  transition: opacity 0.3s;
+}
+@media (hover: hover) and (pointer: fine) {
+  .america .am-quiz:hover::before {
+    opacity: 1;
+  }
+}
+.america .am-quiz__progresso {
   display: flex;
+  gap: 6px;
+  margin-top: 28px;
+}
+.america .am-quiz__progresso > span {
+  flex: 1;
+  height: 3px;
+  background: var(--linha);
+  transition: background-color 0.3s;
+}
+.america .am-quiz__progresso > .is-feito {
+  background: var(--ouro);
+}
+.america .am-quiz__progresso > .is-atual {
+  background: rgb(184 151 90 / 0.45);
+}
+.america .am-quiz__contador {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  color: var(--ouro-claro);
+}
+.america .am-quiz__passo {
+  animation: am-entra 380ms ease both;
+}
+/* Opções: cartões numerados. No hover: barra dourada na lateral e a seta desliza. No clique: o cartão fica dourado. */
+.america .am-opcao {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 16px;
   width: 100%;
   min-height: 60px;
-  padding: 12px 4px;
-  border: 0;
-  border-bottom: 1px solid var(--linha);
-  background: transparent;
+  margin-bottom: 10px;
+  padding: 14px 18px;
+  border: 1px solid var(--linha);
+  border-radius: 2px;
+  background: rgb(237 232 223 / 0.015);
   color: inherit;
   text-align: left;
-  transition: padding-left 0.2s, border-color 0.2s, background-color 0.2s;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
 }
 .america .am-opcao::before {
   content: '';
-  flex: none;
-  width: 6px;
-  height: 6px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
   background: var(--ouro);
+  transform: scaleY(0);
+  transition: transform 0.25s ease;
 }
-.america .am-opcao:hover {
-  padding-left: 14px;
-  border-bottom-color: var(--ouro);
+.america .am-opcao__n {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: var(--ouro);
+}
+.america .am-opcao__seta {
+  color: var(--ouro-claro);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.america .am-opcao:hover,
+.america .am-opcao:focus-visible {
+  border-color: var(--linha-ouro);
   background: rgb(184 151 90 / 0.06);
+}
+.america .am-opcao:hover::before,
+.america .am-opcao:focus-visible::before {
+  transform: scaleY(1);
+}
+.america .am-opcao:hover .am-opcao__seta,
+.america .am-opcao:focus-visible .am-opcao__seta {
+  opacity: 1;
+  transform: none;
+}
+.america .am-opcao:active {
+  border-color: var(--ouro);
+  background: var(--ouro);
+  color: #14110a;
+}
+.america .am-opcao:active .am-opcao__n,
+.america .am-opcao:active .am-opcao__seta {
+  color: #14110a;
 }
 
 /* Fotos de trabalho: cada uma inteira, na proporção original, sem recorte e sem zoom */
@@ -337,6 +453,104 @@ html:has(.america) {
   }
 }
 
+/* Hero: entrada que acontece UMA vez, em sequência. O texto sobe um item de cada vez, a linha dourada se desenha, a foto se
+   revela de cima para baixo (am-revela) e a moldura desliza para o lugar. O selo gira devagar e acelera no hover. */
+.america .hero-texto > * {
+  animation: am-sobe 700ms ease both;
+}
+.america .hero-texto > :nth-child(1) {
+  animation: am-desenha 800ms cubic-bezier(0.6, 0, 0.2, 1) 100ms both; /* a linha dourada (hero-rule) */
+}
+.america .hero-texto > :nth-child(2) {
+  animation-delay: 220ms;
+}
+.america .hero-texto > :nth-child(3) {
+  animation-delay: 340ms;
+}
+.america .hero-texto > :nth-child(4) {
+  animation-delay: 480ms;
+}
+.america .hero-texto > :nth-child(5) {
+  animation-delay: 620ms;
+}
+.america .hero-rule {
+  transform-origin: left center;
+}
+.america .hero-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.america .hero-cta__rotulo {
+  font-family: var(--font-display), 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--ouro-claro);
+}
+.america .hero-cta__nota {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.america .hero-seal .selo-anel {
+  transform-box: view-box;
+  transform-origin: center;
+  animation: am-gira 60s linear infinite;
+}
+.america .hero-seal:hover .selo-anel {
+  animation-duration: 12s;
+}
+
+/* "Agendar" dourado do cabeçalho: escondido enquanto o botão do hero está na tela (escondido de verdade: sem foco nem leitura) */
+.america .am-agendar-cab {
+  transition: opacity 0.3s, transform 0.3s, visibility 0s;
+}
+.america .am-agendar-cab.is-oculto {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s, visibility 0s 0.3s;
+}
+
+@keyframes am-desenha {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes am-desliza {
+  from {
+    opacity: 0;
+    transform: translate(-16px, -16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes am-gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes am-entra {
+  from {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html:has(.america) {
     scroll-behavior: auto;
@@ -344,11 +558,20 @@ html:has(.america) {
   .america .am-moldura::before,
   .america .am-moldura__foto,
   .america .am-selo-hero,
-  .america .am-sobe {
+  .america .am-sobe,
+  .america .hero-texto > *,
+  .america .hero-seal .selo-anel,
+  .america .am-quiz__passo {
     animation: none;
   }
   .america .am-zap,
-  .america .am-opcao {
+  .america .am-opcao,
+  .america .am-opcao::before,
+  .america .am-opcao__seta,
+  .america .am-btn--ouro::after,
+  .america .am-agendar-cab,
+  .america .am-quiz__progresso > span,
+  .america .am-quiz::before {
     transition: none;
   }
 }

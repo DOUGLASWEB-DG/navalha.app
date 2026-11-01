@@ -10,15 +10,18 @@ export function Selo({ className, id = 'am-selo-volta' }: { className?: string; 
       <circle cx="100" cy="100" r="98" fill="#0c0c0d" fillOpacity="0.94" />
       <circle cx="100" cy="100" r="95" fill="none" stroke="#b8975a" strokeWidth="1.2" />
       <circle cx="100" cy="100" r="58" fill="none" stroke="#b8975a" strokeWidth="1" />
-      <text
-        fill="#b8975a"
-        fontSize="14.5"
-        textLength="470"
-        lengthAdjust="spacing"
-        style={{ fontFamily: 'var(--font-display), Georgia, serif', fontWeight: 600 }}
-      >
-        <textPath href={`#${id}`}>AMÉRICA BARBEARIA · ARIQUEMES · RONDÔNIA ·</textPath>
-      </text>
+      {/* só o anel de texto pode girar (classe selo-anel, ligada no hero); a estrela e os círculos ficam parados */}
+      <g className="selo-anel">
+        <text
+          fill="#b8975a"
+          fontSize="14.5"
+          textLength="470"
+          lengthAdjust="spacing"
+          style={{ fontFamily: 'var(--font-display), Georgia, serif', fontWeight: 600 }}
+        >
+          <textPath href={`#${id}`}>AMÉRICA BARBEARIA · ARIQUEMES · RONDÔNIA ·</textPath>
+        </text>
+      </g>
       {/* estrela de cinco pontas, só o contorno, centrada no miolo */}
       <path
         d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7L12 17.3 5.7 21l1.7-7L2 9.2l7.1-.6L12 2z"

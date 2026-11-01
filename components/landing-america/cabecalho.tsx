@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { AgendarCabecalho } from './agendar-cabecalho'
 
 // Cabeçalho fixo e discreto: o nome da casa com a estrela à esquerda, as seções (no computador) e o chamado de agendar.
 // "Entrar" fica pequeno, só para a equipe.
@@ -21,9 +22,7 @@ export function Cabecalho() {
           <a href="#contato" className="am-muted hover:text-[#ede8df]">Contato</a>
         </nav>
         <div className="flex items-center gap-1">
-          <Link href="/book" className="am-btn am-btn--ouro am-btn--sm">
-            Agendar
-          </Link>
+          <AgendarCabecalho />
           <Link href="/login" className="am-muted inline-flex min-h-11 items-center px-3 text-xs hover:text-[#ede8df]" title="Entrar no sistema (equipe)">
             Entrar
           </Link>
