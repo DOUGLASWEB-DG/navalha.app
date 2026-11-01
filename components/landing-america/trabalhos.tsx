@@ -3,18 +3,20 @@ import { tenantConfig } from '@/config/tenant'
 import { CURSO_DA_FOTO, FOTOS, fotoDoServico, type FotoId } from '@/config/landing-america'
 import { CURSOS, linkWhatsapp, mensagemDoCurso } from '@/lib/landing-america'
 
-const preco = (valor: number) => `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: Number.isInteger(valor) ? 0 : 2 })}`
-
-// Cada card mostra a foto INTEIRA, na proporção original (sem recorte e sem zoom), com o nome, a duração e o preço do serviço.
+// Cada card mostra a foto INTEIRA, na proporção original (sem recorte e sem zoom), com o nome do serviço.
 // A foto do hero (combo) também está aqui: é o serviço Combo. O toque na foto abre o arquivo em tamanho grande.
 // Os dois chamados: agendar, ou aprender a fazer.
+//
+// SEM PREÇO NEM DURAÇÃO de propósito: o config/tenant.ts é um arquivo estático antigo e divergiu do banco (achado do QA++ de
+// 01/11/2026: Pigmentação R$ 45 no config contra R$ 30 no banco, Selagem 60 min contra 120 min, etc.). O valor certo é o que o
+// /book mostra, lido do banco. Quando a página passar a ler os serviços do banco, os valores podem voltar aqui.
 export function Trabalhos() {
-  const cards: { fotoId: FotoId; nome: string; duracao: string | null; valor: string | null; agendar: boolean }[] = tenantConfig.services.flatMap((svc) => {
+  const cards: { fotoId: FotoId; nome: string; agendar: boolean }[] = tenantConfig.services.flatMap((svc) => {
     const fotoId = fotoDoServico(svc.image)
-    return fotoId ? [{ fotoId, nome: svc.name, duracao: svc.duration, valor: preco(svc.price), agendar: true }] : []
+    return fotoId ? [{ fotoId, nome: svc.name, agendar: true }] : []
   })
   // Foto que já existia nos arquivos da casa, mas fora da lista de serviços: entra só com o convite para aprender
-  cards.push({ fotoId: 'coloracao', nome: 'Coloração', duracao: null, valor: null, agendar: false })
+  cards.push({ fotoId: 'coloracao', nome: 'Coloração', agendar: false })
 
   return (
     <section id="servicos" aria-labelledby="servicos-titulo" className="am-sec">
@@ -23,10 +25,12 @@ export function Trabalhos() {
         <h2 id="servicos-titulo" className="am-serif text-4xl sm:text-5xl">
           Serviços da casa
         </h2>
-        <p className="am-muted mt-5 max-w-xl text-lg">Toque na foto para ver inteira. Agende pelo site ou chame para aprender a fazer.</p>
+        <p className="am-muted mt-5 max-w-xl text-lg">
+          Toque na foto para ver inteira. Valores e horários aparecem na hora de agendar, sempre atualizados. Ou chame para aprender a fazer.
+        </p>
 
         <div className="am-galeria mt-14">
-          {cards.map(({ fotoId, nome, duracao, valor, agendar }) => {
+          {cards.map(({ fotoId, nome, agendar }) => {
             const foto = FOTOS[fotoId]
             const curso = CURSOS[CURSO_DA_FOTO[fotoId]]
             return (
@@ -41,12 +45,7 @@ export function Trabalhos() {
                   <img src={foto.src} width={foto.width} height={foto.height} alt={`Trabalho: ${nome}`} loading="lazy" decoding="async" />
                 </a>
                 <div className="mt-4">
-                  {/* flex-wrap + nowrap no preço: se o nome for longo para a coluna estreita, o preço desce INTEIRO (nunca "R$" numa linha e "50" na outra). */}
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                    <h3 className="am-serif text-2xl">{nome}</h3>
-                    {valor && <p className="am-ouro am-num whitespace-nowrap font-semibold">{valor}</p>}
-                  </div>
-                  {duracao && <p className="am-muted am-num text-sm">{duracao}</p>}
+                  <h3 className="am-serif text-2xl">{nome}</h3>
                   <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1">
                     {agendar && (
                       <Link href="/book" className="am-btn am-btn--linha am-btn--sm">
