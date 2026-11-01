@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { tenantConfig } from '@/config/tenant'
 import { CURSO_DA_FOTO, FOTOS, fotoDoServico, type FotoId } from '@/config/landing-america'
 import { CURSOS, linkWhatsapp, mensagemDoCurso } from '@/lib/landing-america'
+import { Kicker } from './kicker'
 
 // Cada card mostra a foto INTEIRA, na proporção original (sem recorte e sem zoom), com o nome do serviço.
 // A foto do hero (combo) também está aqui: é o serviço Combo. O toque na foto abre o arquivo em tamanho grande.
@@ -21,7 +22,7 @@ export function Trabalhos() {
   return (
     <section id="servicos" aria-labelledby="servicos-titulo" className="am-sec">
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 md:py-28">
-        <span className="am-regua" aria-hidden="true" />
+        <Kicker>Quero cortar</Kicker>
         <h2 id="servicos-titulo" className="am-serif text-4xl sm:text-5xl">
           Serviços da casa
         </h2>
@@ -34,7 +35,7 @@ export function Trabalhos() {
             const foto = FOTOS[fotoId]
             const curso = CURSOS[CURSO_DA_FOTO[fotoId]]
             return (
-              <article key={fotoId}>
+              <article key={fotoId} className="am-revela">
                 <a
                   href={foto.src}
                   target="_blank"

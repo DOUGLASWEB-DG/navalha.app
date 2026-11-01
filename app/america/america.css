@@ -168,7 +168,7 @@ html:has(.america) {
   position: absolute;
   inset: 16px -16px -16px 16px;
   border: 1px solid var(--linha-ouro);
-  animation: am-desliza 900ms cubic-bezier(0.2, 0.7, 0.2, 1) 650ms both;
+  animation: am-desliza 800ms cubic-bezier(0.2, 0.7, 0.2, 1) 380ms both;
 }
 .america .am-moldura__foto {
   position: relative;
@@ -177,7 +177,8 @@ html:has(.america) {
   width: 100%;
   height: auto;
   border-radius: 2px;
-  animation: am-revela 1000ms cubic-bezier(0.7, 0, 0.2, 1) 200ms both;
+  /* revelação curta: o Chrome só conta a foto como "pintada" (LCP) conforme a área aparece, então quanto mais longa, pior o LCP */
+  animation: am-revela 650ms cubic-bezier(0.7, 0, 0.2, 1) 80ms both;
 }
 .america .am-selo-hero {
   position: absolute;
@@ -475,11 +476,9 @@ html:has(.america) {
   height: 100%;
   object-fit: cover;
   object-position: 20% 35%;
-  opacity: 0.27;
-  /* borrado de propósito: vira luz ambiente (verde e amarelo do Brasil, vermelho e branco dos EUA) e o telefone e as letras da
-     placa não ficam legíveis atrás do texto */
-  filter: blur(4px) saturate(1.15);
-  transform: scale(1.06);
+  opacity: 0.32;
+  /* O arquivo já vem desfocado (scripts/gerar-hero-america.mjs): vira luz ambiente (verde e amarelo do Brasil, vermelho e branco
+     dos EUA) e o telefone e as letras da placa não ficam legíveis. Sem filtro em tempo real: ele atrasou o primeiro desenho. */
   animation: am-aparece 1400ms ease both;
 }
 .america .hero-fundo::after {
@@ -530,6 +529,118 @@ html:has(.america) {
   color: var(--ouro);
   transform: translateY(3px);
 }
+/* ===== Cor com função =====
+   dourado = cortar e agendar · verde = aprender (cursos, quiz, bordas e brilhos da seção) · vermelho = só a estrela do letreiro ·
+   prata = texto de apoio. O verde nunca é texto pequeno (3,6:1): só linha, borda e brilho. */
+.america {
+  --fundo2: #101316; /* um degrau abaixo do carvão: as seções alternam para a página ter profundidade */
+}
+.america .am-sec--fundo {
+  background: var(--fundo2);
+}
+.america .am-sec--verde.am-sec--fundo {
+  background: radial-gradient(900px circle at 18% 45%, rgb(63 122 79 / 0.12), transparent 62%), var(--fundo2);
+}
+/* Rótulo de seção: letreiro da porta (estrela vermelha, caixa-alta condensada, fio) */
+.america .am-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+  font-family: var(--font-rotulo), 'Arial Narrow', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.america .am-kicker__estrela {
+  font-size: 0.8rem;
+  color: var(--vermelho);
+}
+.america .am-kicker::after {
+  content: '';
+  width: 44px;
+  height: 1px;
+  background: var(--ouro);
+}
+.america .am-sec--verde .am-kicker::after {
+  background: var(--verde);
+}
+/* Títulos mais firmes, no peso da letra pesada da placa */
+.america h1.am-serif,
+.america h2.am-serif {
+  font-weight: 700;
+}
+/* Cartões: no hover sobem um pouco e ganham sombra tingida da cor da seção (dourado nos serviços e contato, verde nos cursos) */
+.america .am-card {
+  transition: border-color 0.2s, transform 0.25s, box-shadow 0.25s;
+}
+.america .am-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 38px -20px rgb(201 176 74 / 0.5);
+}
+.america .am-sec--verde .am-card {
+  border-top-color: var(--verde);
+}
+.america .am-sec--verde .am-card:hover {
+  border-color: rgb(63 122 79 / 0.7);
+  border-top-color: var(--verde);
+  box-shadow: 0 16px 38px -20px rgb(63 122 79 / 0.65);
+}
+/* Fotos de serviço: sem zoom (a foto aparece inteira); só a borda e uma sombra dourada */
+.america .am-foto {
+  transition: border-color 0.2s, box-shadow 0.25s;
+}
+.america .am-foto:hover {
+  box-shadow: 0 16px 38px -20px rgb(201 176 74 / 0.5);
+}
+/* Quiz dentro da seção dos cursos: o verde do "aprender" */
+.america .am-sec--verde .am-quiz .am-regua {
+  background: var(--verde);
+}
+.america .am-sec--verde .am-quiz__progresso > .is-feito {
+  background: var(--verde);
+}
+.america .am-sec--verde .am-quiz__progresso > .is-atual {
+  background: rgb(63 122 79 / 0.55);
+}
+.america .am-sec--verde .am-opcao::before {
+  background: var(--verde);
+}
+.america .am-sec--verde .am-opcao:hover,
+.america .am-sec--verde .am-opcao:focus-visible {
+  border-color: rgb(63 122 79 / 0.75);
+  background: rgb(63 122 79 / 0.1);
+}
+.america .am-sec--verde .am-quiz::before {
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(63 122 79 / 0.18), transparent 62%);
+}
+.america .am-quiz__contador {
+  font-family: var(--font-rotulo), 'Arial Narrow', sans-serif;
+  font-size: 1.05rem;
+}
+/* Entrada ao rolar, só CSS (sem JavaScript de rolagem): cartões e fotos sobem e aparecem ao entrar na tela.
+   "backwards": depois da entrada o elemento volta ao estilo normal (o hover continua funcionando). */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .america .am-revela {
+      animation: am-revela-rolar linear backwards;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+@keyframes am-revela-rolar {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* A frase da porta, com as estrelas vermelhas de cada lado */
 .america .am-faixa {
   display: flex;
@@ -542,8 +653,9 @@ html:has(.america) {
   background: var(--surf);
 }
 .america .am-faixa p {
-  font-size: 0.82rem;
-  letter-spacing: 0.22em;
+  font-family: var(--font-rotulo), 'Arial Narrow', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -665,6 +777,8 @@ html:has(.america) {
     animation: none;
   }
   .america .am-zap,
+  .america .am-card,
+  .america .am-foto,
   .america .am-opcao,
   .america .am-opcao::before,
   .america .am-opcao__seta,

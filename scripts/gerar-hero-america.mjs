@@ -36,9 +36,12 @@ const caixa = POLIGONO.split(' ').map((p) => p.split(',').map(Number))
 const xs = caixa.map((p) => p[0])
 const ys = caixa.map((p) => p[1])
 const [x0, y0, x1, y1] = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]
+// O desfoque vai EMBUTIDO no arquivo (e a imagem fica menor): um filtro blur() do CSS sobre uma imagem grande custa pintura
+// a cada quadro e atrasou o primeiro desenho da página (medido no Lighthouse). Assim o fundo é só uma imagem leve e já suave.
 const f = await sharp(recortada)
   .extract({ left: x0, top: y0, width: x1 - x0, height: y1 - y0 })
-  .resize({ width: 1280, kernel: 'lanczos3' })
-  .webp({ quality: 78, alphaQuality: 90 })
+  .resize({ width: 960, kernel: 'lanczos3' })
+  .blur(5)
+  .webp({ quality: 66, alphaQuality: 80 })
   .toFile(path.join(saida, 'fundo-placa.webp'))
 console.log('fundo-placa.webp', f.width + 'x' + f.height, Math.round(f.size / 1024) + ' KB')

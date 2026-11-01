@@ -1,6 +1,7 @@
 import { Clock, Instagram, MapPin, Phone } from 'lucide-react'
 import { tenantConfig } from '@/config/tenant'
 import { enderecoSemCep, linkDoMapa, linkWhatsapp, mensagemGeral } from '@/lib/landing-america'
+import { Kicker } from './kicker'
 
 // Horário, endereço, Instagram, WhatsApp e mapa: tudo vem do tenantConfig (uma fonte só, a mesma do resto do sistema).
 export function Contato() {
@@ -10,9 +11,9 @@ export function Contato() {
     { icone: Instagram, rotulo: 'Instagram', valor: tenantConfig.instagram, link: tenantConfig.instagramLink },
   ]
   return (
-    <section id="contato" aria-labelledby="contato-titulo" data-sem-zap className="am-sec">
+    <section id="contato" aria-labelledby="contato-titulo" data-sem-zap className="am-sec am-sec--fundo">
       <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6 md:py-28">
-        <span className="am-regua" aria-hidden="true" />
+        <Kicker>Visite a casa</Kicker>
         <h2 id="contato-titulo" className="am-serif text-4xl sm:text-5xl">
           Venha à América
         </h2>

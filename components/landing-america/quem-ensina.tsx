@@ -1,15 +1,16 @@
 import { tenantConfig } from '@/config/tenant'
 import { linkWhatsapp, mensagemSobreOsCursos } from '@/lib/landing-america'
 import { Selo } from './selo'
+import { Kicker } from './kicker'
 
 // Só o que o dono confirmou: o Mateus Cremas é barbeiro, dono da América e quem ensina os cursos.
 export function QuemEnsina() {
   return (
-    <section id="quem-ensina" aria-labelledby="quem-titulo" className="am-sec">
+    <section id="quem-ensina" aria-labelledby="quem-titulo" className="am-sec am-sec--fundo am-sec--verde">
       <div className="mx-auto grid max-w-5xl items-center gap-12 px-4 py-20 sm:px-6 md:grid-cols-[minmax(0,220px)_1fr] md:gap-20 md:py-28">
         <Selo className="mx-auto w-44 md:w-full" id="am-selo-ensina" />
-        <div>
-          <span className="am-regua" aria-hidden="true" />
+        <div className="am-revela">
+          <Kicker>Quem ensina</Kicker>
           <h2 id="quem-titulo" className="am-serif text-4xl sm:text-5xl">
             Mateus Cremas
           </h2>

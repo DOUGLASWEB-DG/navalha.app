@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, Pinyon_Script } from 'next/font/google'
+import { Barlow_Condensed, Cormorant_Garamond, Pinyon_Script } from 'next/font/google'
 import { tenantConfig } from '@/config/tenant'
 import { cn } from '@/lib/utils'
 import { linkWhatsapp, mensagemGeral } from '@/lib/landing-america'
@@ -27,6 +27,15 @@ const display = Cormorant_Garamond({
   display: 'swap',
 })
 
+// O letreiro da porta ("BARBA - CABELO - BIGODE") é em caixa-alta condensada: Barlow Condensed nos rótulos de seção, na faixa e
+// no contador do quiz. Um só peso (600), um só arquivo, para não pesar no LCP.
+const rotulo = Barlow_Condensed({
+  subsets: ['latin'],
+  weight: '600',
+  variable: '--font-rotulo',
+  display: 'swap',
+})
+
 // A palavra "Barbearia" do logotipo é manuscrita na placa da fachada; é o único uso de letra manuscrita da página.
 const script = Pinyon_Script({
   subsets: ['latin'],
@@ -46,7 +55,7 @@ export const metadata: Metadata = {
 
 export default function AmericaPage() {
   return (
-    <main data-tema="america" className={cn(display.variable, script.variable, 'america min-h-screen antialiased')}>
+    <main data-tema="america" className={cn(display.variable, script.variable, rotulo.variable, 'america min-h-screen antialiased')}>
       <a
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:bg-[#c9b04a] focus:px-4 focus:py-3 focus:text-[#14171a]"

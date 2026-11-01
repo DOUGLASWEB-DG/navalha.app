@@ -14,7 +14,7 @@ export function Hero() {
   return (
     <section id="inicio" className="hero-secao">
       <div className="hero-fundo" aria-hidden="true">
-        <img src={FUNDO_PLACA.src} width={FUNDO_PLACA.width} height={FUNDO_PLACA.height} alt="" decoding="async" />
+        <img src={FUNDO_PLACA.src} width={FUNDO_PLACA.width} height={FUNDO_PLACA.height} alt="" decoding="async" fetchPriority="low" />
       </div>
       <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pb-24 pt-12 sm:px-6 md:grid-cols-[1fr_1fr] md:gap-16 md:pb-32 md:pt-20">
         <div className="hero-texto">
