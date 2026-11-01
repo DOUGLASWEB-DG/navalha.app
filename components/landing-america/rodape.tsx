@@ -1,10 +1,10 @@
 import Link from 'next/link'
 
-// O único vermelho da página é o filete de poste no alto do rodapé (parado, fino, decorativo).
+// Rodapé limpo: só um fio fino no alto. O filete listrado de branco e vermelho (poste de barbeiro) saiu a pedido do dono ("isso é
+// passado"); o vermelho da página agora é só a estrela do letreiro.
 export function Rodape() {
   return (
     <footer className="am-rodape bg-[#14171a]">
-      <div aria-hidden="true" className="am-filete" />
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-sm sm:px-6">
         <p className="am-muted">
           &copy; {new Date().getFullYear()} América Barbearia. Agendamento online por{' '}

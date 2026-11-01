@@ -1,6 +1,6 @@
 /* Página própria da América (/america). Tudo dentro de .america, para não vazar para o painel nem para as outras páginas.
    Paleta pedida pelo dono, tirada da fachada (placa e porta): carvão no fundo, creme nos títulos, amarelo-dourado como destaque,
-   prata nos textos secundários, verde tropical e vermelho só em pontos pequenos (bordas, estrelas, filete). Sem o azul da parede.
+   prata nos textos secundários, verde tropical (linhas e bordas) e vermelho só nas estrelas do letreiro. Sem o azul da parede.
    Princípio: a ousadia fica no hero (a arte da placa ao fundo, a foto do Mateus e o selo); o resto é quieto e disciplinado.
    Serifa elegante nos títulos e sans limpa no texto; letra manuscrita só na palavra "Barbearia" do logotipo, como na placa. */
 .america {
@@ -12,7 +12,7 @@
   --ouro-claro: #ddc66d;
   --linha: rgb(241 237 224 / 0.12);
   --linha-ouro: rgb(201 176 74 / 0.5);
-  --vermelho: #b5342f; /* só em pontos pequenos: estrelas e filete */
+  --vermelho: #b5342f; /* só em pontos pequenos: a estrela do letreiro (o filete listrado do rodapé saiu) */
   --verde: #3f7a4f; /* só em linhas e bordas (3,6:1 sobre o carvão): nunca em texto pequeno */
   background: var(--bg);
   color: var(--txt);
@@ -411,11 +411,9 @@ html:has(.america) {
   }
 }
 
-/* O único vermelho da página: um filete de poste, parado, no alto do rodapé */
-.america .am-filete {
-  height: 8px;
-  border-top: 2px solid var(--verde); /* o fio verde da folhagem da placa */
-  background: repeating-linear-gradient(-45deg, var(--vermelho) 0 8px, var(--txt) 8px 16px);
+/* Rodapé: só um fio fino no alto. O filete listrado (poste de barbeiro) saiu a pedido do dono. */
+.america .am-rodape {
+  border-top: 1px solid var(--linha);
 }
 
 /* WhatsApp flutuante (celular), no dourado da página */
