@@ -6,12 +6,14 @@ export function Cabecalho() {
   return (
     <header className="am-header">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-        <a href="#inicio" className="am-marca" aria-label="América Barbearia, voltar ao início">
+        {/* Sem aria-label: o nome acessível é o texto visível (WCAG 2.5.3, "rótulo no nome") mais um complemento só para leitor de tela. */}
+        <a href="#inicio" className="am-marca">
           <svg viewBox="0 0 24 24" aria-hidden="true" className="am-marca__estrela" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round">
             <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7L12 17.3 5.7 21l1.7-7L2 9.2l7.1-.6L12 2z" />
           </svg>
-          <span className="am-serif am-marca__nome">AMÉRICA</span>
+          <span className="am-serif am-marca__nome">AMÉRICA</span>{' '}
           <span className="am-muted hidden text-xs sm:inline">Barbearia</span>
+          <span className="sr-only">, voltar ao início</span>
         </a>
         <nav className="hidden items-center gap-8 text-sm md:flex" aria-label="Seções">
           <a href="#cursos" className="am-muted hover:text-[#ede8df]">Cursos</a>
