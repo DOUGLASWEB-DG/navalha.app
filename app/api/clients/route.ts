@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { normalizeBrazilPhone } from '@/lib/format'
 import { requireTenantUser, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required'),
-  phone: z.string().refine((value) => normalizeBrazilPhone(value) !== null, 'Telefone inválido. Use DDD + número.'),
-  email: z.string().email().optional().or(z.literal('')),
-  notes: z.string().optional(),
+  name: z.string().trim().min(1, 'Name is required').max(LIMITES.nome),
+  phone: z.string().max(LIMITES.telefone).refine((value) => normalizeBrazilPhone(value) !== null, 'Telefone inválido. Use DDD + número.'),
+  email: z.string().max(LIMITES.email).email().optional().or(z.literal('')),
+  notes: z.string().max(LIMITES.notas).optional(),
 })
 
 export async function GET(req: NextRequest) {

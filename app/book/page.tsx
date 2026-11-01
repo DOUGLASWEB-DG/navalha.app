@@ -1,5 +1,6 @@
 'use client'
 
+import { LIMITES } from '@/lib/input-limits'
 import { useState, Suspense, useEffect } from 'react'
 import useSWR from 'swr'
 import Link from 'next/link'
@@ -925,6 +926,7 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
             <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               value={name}
+              maxLength={60}
               onChange={(e) => setName(e.target.value)}
               disabled={isSubmitting}
               placeholder="Digite seu nome"
@@ -940,6 +942,7 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               value={phone}
+              maxLength={LIMITES.telefone}
               onChange={(e) => setPhone(e.target.value)}
               disabled={isSubmitting}
               type="tel"
@@ -956,6 +959,7 @@ function DetailsStep({ booking, onBack, onSubmit, isSubmitting }: DetailsStepPro
             <FileText className="absolute left-4 top-4 h-5 w-5 text-muted-foreground" />
             <Textarea
               value={notes}
+              maxLength={LIMITES.notas}
               onChange={(e) => setNotes(e.target.value)}
               disabled={isSubmitting}
               placeholder="Deseja deixar algum aviso?"

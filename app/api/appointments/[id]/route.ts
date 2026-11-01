@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { sendTextMessage } from '@/lib/whatsapp'
 import { normalizeBrazilPhone } from '@/lib/format'
 import { Prisma } from '@prisma/client'
@@ -21,12 +22,12 @@ import {
 } from '@/lib/appointment-services'
 
 const updateSchema = z.object({
-  clientId: z.string().optional(),
-  serviceIds: z.array(z.string().min(1)).min(1).optional(),
-  serviceId: z.string().min(1).optional(),
-  barberId: z.string().nullable().optional(),
-  date: z.string().optional(),
-  notes: z.string().optional(),
+  clientId: z.string().max(LIMITES.id).optional(),
+  serviceIds: z.array(z.string().min(1).max(LIMITES.id)).min(1).max(LIMITES.ids).optional(),
+  serviceId: z.string().min(1).max(LIMITES.id).optional(),
+  barberId: z.string().max(LIMITES.id).nullable().optional(),
+  date: z.string().max(LIMITES.data).optional(),
+  notes: z.string().max(LIMITES.notas).optional(),
   status: z.enum(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED']).optional(),
 })
 

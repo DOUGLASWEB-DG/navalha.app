@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
+import { bookingSchema } from '@/lib/booking-schema'
 import { tenantConfig } from '@/config/tenant'
 import { notifyAppointmentCreated } from '@/lib/notifications'
 import { normalizeBrazilPhone } from '@/lib/format'
@@ -22,20 +23,6 @@ import { notFound, requireTenant, tenantErrorResponse } from '@/lib/api'
 
 const HOUR_MS = 60 * 60 * 1000
 const MAX_ACTIVE_APPOINTMENTS_PER_PHONE = 3
-
-const bookingSchema = z.object({
-  // O nome entra no texto do WhatsApp: tamanho limitado, sem quebras de linha nem links.
-  name: z.string().trim().min(1, 'Name is required').max(60, 'Nome muito longo.')
-    .refine((value) => !/[\r\n]/.test(value), 'Nome inválido.')
-    .refine((value) => !/(https?:|www\.|:\/\/)/i.test(value), 'Nome inválido.'),
-  phone: z.string().refine((value) => normalizeBrazilPhone(value) !== null, 'Telefone inválido. Use DDD + número.'),
-  serviceIds: z.array(z.string().min(1)).min(1).optional(),
-  serviceId: z.string().min(1).optional(),
-  barberId: z.string().optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data inválida.'),
-  time: z.string().regex(/^\d{2}:\d{2}$/, 'Horário inválido.'),
-  notes: z.string().optional(),
-})
 
 function parseBookingDate(date: string, time: string, timeZone: string) {
   const [year, month, day] = date.split('-').map(Number)

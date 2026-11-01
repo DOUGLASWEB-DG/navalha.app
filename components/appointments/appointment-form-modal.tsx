@@ -1,5 +1,6 @@
 'use client'
 
+import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -295,7 +296,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
             <div className="relative">
               <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea
-                {...register('notes')}
+                {...register('notes')} maxLength={LIMITES.notas}
                 disabled={isSubmitting}
                 placeholder="Preferências, solicitações..."
                 rows={2}

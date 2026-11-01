@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { requireTenantAdmin, requireTenantUser, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required'),
-  description: z.string().optional(),
+  name: z.string().trim().min(1, 'Name is required').max(LIMITES.nome),
+  description: z.string().max(LIMITES.descricao).optional(),
   price: z.number().positive('Price must be positive'),
   durationMins: z.number().int().positive().default(30),
   active: z.boolean().default(true),
