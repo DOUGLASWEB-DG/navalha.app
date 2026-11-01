@@ -73,14 +73,9 @@ export function QuizCurso({ numero }: { numero: string }) {
             </h4>
             <div className="mt-6">
               {pergunta.opcoes.map((opcao, i) => (
+                // o índice (i) é a resposta escolhida; não aparece na tela
                 <button key={opcao.texto} type="button" className="am-opcao" onClick={() => setRespostas((r) => [...r, i])}>
-                  <span className="am-opcao__n am-num" aria-hidden="true">
-                    {dois(i + 1)}
-                  </span>
-                  <span className="am-opcao__t">{opcao.texto}</span>
-                  <span className="am-opcao__seta" aria-hidden="true">
-                    →
-                  </span>
+                  {opcao.texto}
                 </button>
               ))}
             </div>

@@ -1,6 +1,6 @@
 /* Página própria da América (/america). Tudo dentro de .america, para não vazar para o painel nem para as outras páginas.
    Paleta pedida pelo dono, tirada da fachada (placa e porta): carvão no fundo, creme nos títulos, amarelo-dourado como destaque,
-   prata nos textos secundários, verde tropical (linhas e bordas) e vermelho só nas estrelas do letreiro. Sem o azul da parede.
+   prata nos textos secundários, vermelho só nas estrelas do letreiro e na sombra do logotipo (o verde saiu: o dono achou genérico). Sem o azul da parede.
    Princípio: a ousadia fica no hero (a arte da placa ao fundo, a foto do Mateus e o selo); o resto é quieto e disciplinado.
    Serifa elegante nos títulos e sans limpa no texto; letra manuscrita só na palavra "Barbearia" do logotipo, como na placa. */
 .america {
@@ -13,7 +13,6 @@
   --linha: rgb(241 237 224 / 0.12);
   --linha-ouro: rgb(201 176 74 / 0.5);
   --vermelho: #b5342f; /* só em pontos pequenos: a estrela do letreiro (o filete listrado do rodapé saiu) */
-  --verde: #3f7a4f; /* só em linhas e bordas (3,6:1 sobre o carvão): nunca em texto pequeno */
   background: var(--bg);
   color: var(--txt);
   font-family: var(--font-inter), system-ui, sans-serif;
@@ -78,18 +77,17 @@ html:has(.america) {
 }
 .america .am-marca {
   display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
   line-height: 1;
 }
+/* AMÉRICA em letra pesada de letreiro, com uma sombra vermelha fininha (a "dose pequena" de vermelho), como na placa */
 .america .am-marca__nome {
-  font-size: 1.55rem;
-  letter-spacing: 0.1em;
-}
-.america .am-marca__estrela {
-  width: 18px;
-  height: 18px;
-  color: var(--ouro);
+  font-family: var(--font-marca), Rockwell, Georgia, serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  color: var(--txt);
+  text-shadow: 1.5px 1.5px 0 var(--vermelho);
 }
 
 /* Botões: cantos quase retos, sóbrios. O dourado cheio é só do chamado principal. */
@@ -160,43 +158,94 @@ html:has(.america) {
 }
 
 /* Hero: a foto inteira (proporção original) com uma moldura fina deslocada e o selo na quina. Único momento de movimento: a foto se revela. */
-.america .am-moldura {
+/* Hero: o palco do Mateus recortado. A luz dourada acende atrás dele, ele sobe, e o selo aparece na quina. O contorno de luz
+   fina já está dentro do arquivo (scripts/gerar-hero-america.mjs); o brilho amplo é CSS (gradiente, sem filtro em tempo real). */
+.america .hero-palco {
   position: relative;
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
 }
-.america .am-moldura::before {
+@media (min-width: 768px) {
+  .america .hero-palco {
+    max-width: none;
+  }
+}
+.america .hero-palco__luz {
+  position: absolute;
+  inset: -6% -8% 10% -8%;
+  background: radial-gradient(52% 50% at 52% 38%, rgb(201 176 74 / 0.34), rgb(201 176 74 / 0.1) 55%, transparent 74%);
+  animation: am-aparece 1200ms ease 150ms both;
+}
+/* aro fino atrás da cabeça */
+.america .hero-palco__luz::after {
   content: '';
   position: absolute;
-  inset: 16px -16px -16px 16px;
-  border: 1px solid var(--linha-ouro);
-  animation: am-desliza 800ms cubic-bezier(0.2, 0.7, 0.2, 1) 380ms both;
+  left: 50%;
+  top: 2%;
+  width: 62%;
+  aspect-ratio: 1;
+  transform: translateX(-44%);
+  border: 1px solid rgb(201 176 74 / 0.3);
+  border-radius: 50%;
 }
-.america .am-moldura__foto {
+.america .hero-mateus {
   position: relative;
   z-index: 1;
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 2px;
-  /* revelação curta: o Chrome só conta a foto como "pintada" (LCP) conforme a área aparece, então quanto mais longa, pior o LCP */
-  animation: am-revela 650ms cubic-bezier(0.7, 0, 0.2, 1) 80ms both;
+  animation: am-sobe-pessoa 800ms cubic-bezier(0.2, 0.7, 0.2, 1) 120ms both;
+}
+.america .hero-nome {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: -2.4rem;
+  padding: 0 4px 22px;
+}
+.america .hero-nome__nome {
+  font-size: 2rem;
+  line-height: 1.05;
+  font-weight: 700;
+  color: var(--txt);
+}
+.america .hero-nome__cargo {
+  font-family: var(--font-rotulo), 'Arial Narrow', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ouro-claro);
 }
 .america .am-selo-hero {
   position: absolute;
-  z-index: 2;
-  left: -10px;
-  bottom: -26px;
-  width: 104px;
+  z-index: 3;
+  right: 0;
+  bottom: 1.6rem;
+  width: 96px;
   animation: am-aparece 800ms ease 900ms both;
 }
 @media (min-width: 768px) {
   .america .am-selo-hero {
-    left: -34px;
-    bottom: -34px;
-    width: 128px;
+    right: -6px;
+    bottom: 2rem;
+    width: 124px;
   }
 }
 .america .am-sobe {
   animation: am-sobe 700ms ease 150ms both;
+}
+@keyframes am-sobe-pessoa {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 @keyframes am-revela {
   from {
@@ -314,18 +363,16 @@ html:has(.america) {
 .america .am-quiz__passo {
   animation: am-entra 380ms ease both;
 }
-/* Opções: cartões numerados. No hover: barra dourada na lateral e a seta desliza. No clique: o cartão fica dourado. */
+/* Opções: linhas limpas (sem número nem seta, a pedido do dono). No hover: barra dourada na lateral. No clique: o cartão fica dourado. */
 .america .am-opcao {
   position: relative;
   overflow: hidden;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
-  gap: 16px;
   width: 100%;
   min-height: 60px;
   margin-bottom: 10px;
-  padding: 14px 18px;
+  padding: 14px 20px;
   border: 1px solid var(--linha);
   border-radius: 2px;
   background: rgb(241 237 224 / 0.015);
@@ -344,17 +391,6 @@ html:has(.america) {
   transform: scaleY(0);
   transition: transform 0.25s ease;
 }
-.america .am-opcao__n {
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  color: var(--ouro);
-}
-.america .am-opcao__seta {
-  color: var(--ouro-claro);
-  opacity: 0;
-  transform: translateX(-8px);
-  transition: opacity 0.25s, transform 0.25s;
-}
 .america .am-opcao:hover,
 .america .am-opcao:focus-visible {
   border-color: var(--linha-ouro);
@@ -364,19 +400,101 @@ html:has(.america) {
 .america .am-opcao:focus-visible::before {
   transform: scaleY(1);
 }
-.america .am-opcao:hover .am-opcao__seta,
-.america .am-opcao:focus-visible .am-opcao__seta {
-  opacity: 1;
-  transform: none;
-}
 .america .am-opcao:active {
   border-color: var(--ouro);
   background: var(--ouro);
   color: #14171a;
 }
-.america .am-opcao:active .am-opcao__n,
-.america .am-opcao:active .am-opcao__seta {
-  color: #14171a;
+
+/* Cursos: três cartões de tamanhos diferentes (o primeiro, o Barbeiro Profissional, é o maior), com numeral em contorno dourado,
+   borda em degradê e um brilho que atravessa no hover. */
+.america .am-cursos {
+  display: grid;
+  gap: 20px;
+  counter-reset: curso;
+}
+@media (min-width: 900px) {
+  .america .am-cursos {
+    grid-template-columns: 1.25fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .america .am-curso--destaque {
+    grid-row: span 2;
+  }
+}
+.america .am-curso {
+  counter-increment: curso;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 30px 28px 28px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background:
+    linear-gradient(160deg, #21272b 0%, #181c1f 100%) padding-box,
+    linear-gradient(135deg, rgb(201 176 74 / 0.62), rgb(201 176 74 / 0.1) 42%, rgb(201 176 74 / 0.4)) border-box;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.america .am-curso::before {
+  content: counter(curso, decimal-leading-zero);
+  position: absolute;
+  right: 20px;
+  top: 6px;
+  font-family: var(--font-marca), Georgia, serif;
+  font-size: 4.6rem;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(201 176 74 / 0.3);
+  pointer-events: none;
+}
+.america .am-curso::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgb(255 255 255 / 0.05) 50%, transparent 60%);
+  transform: translateX(-120%);
+  transition: transform 0.9s ease;
+  pointer-events: none;
+}
+.america .am-curso > * {
+  position: relative;
+  z-index: 1;
+}
+.america .am-curso h3 {
+  max-width: calc(100% - 4.4rem);
+}
+.america .am-curso:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 44px -22px rgb(201 176 74 / 0.55);
+}
+.america .am-curso:hover::after {
+  transform: translateX(120%);
+}
+.america .am-curso--destaque {
+  justify-content: flex-end;
+  padding: 40px 34px 34px;
+  min-height: 22rem;
+}
+.america .am-curso--destaque::before {
+  font-size: 8.5rem;
+  right: 26px;
+  top: 10px;
+}
+.america .am-curso--destaque h3 {
+  font-size: clamp(2.3rem, 4.6vw, 3.4rem);
+  max-width: 100%;
+}
+.america .am-curso__ouro {
+  color: var(--ouro-claro);
+}
+/* Ícones de marca do contato */
+.america .am-icone {
+  width: 26px;
+  height: 26px;
+  flex: none;
 }
 
 /* Fotos de trabalho: cada uma inteira, na proporção original, sem recorte e sem zoom */
@@ -496,48 +614,27 @@ html:has(.america) {
     background: linear-gradient(180deg, rgb(20 23 26 / 0.84) 0%, rgb(20 23 26 / 0.74) 55%, var(--bg) 100%);
   }
 }
-/* A foto do Mateus tem parede branca: um pouco menos de brilho para não ofuscar sobre o carvão */
-.america .hero-photo .am-moldura__foto {
-  filter: brightness(0.93) contrast(1.03);
-}
-/* Moldura e legenda da foto do Mateus */
-.america .am-legenda {
-  margin-top: 28px;
-  font-size: 0.95rem;
-  color: var(--muted);
-  text-align: right;
-}
-.america .am-legenda .am-serif {
-  font-size: 1.3rem;
-  color: var(--txt);
-}
-/* "Quero aprender" ganha um fio verde: o caminho de quem vai estudar (borda, nunca texto) */
-.america .am-btn--linha.hero-aprender {
-  border-color: rgb(63 122 79 / 0.85);
-}
-.america .am-btn--linha.hero-aprender:hover {
-  border-color: var(--verde);
-  background: rgb(63 122 79 / 0.16);
-}
-/* "Barbearia" manuscrito do logotipo (como na placa) */
+/* "Barbearia" manuscrito do logotipo (como na placa), cruzando a base das letras */
 .america .am-script {
   font-family: var(--font-script), 'Brush Script MT', cursive;
-  font-size: 1.7rem;
+  font-size: 1.55rem;
   line-height: 1;
   color: var(--ouro);
-  transform: translateY(3px);
+  margin: -7px 0 0 34%;
+  transform: rotate(-2deg);
+  text-shadow: 0 1px 0 var(--bg);
 }
 /* ===== Cor com função =====
-   dourado = cortar e agendar · verde = aprender (cursos, quiz, bordas e brilhos da seção) · vermelho = só a estrela do letreiro ·
-   prata = texto de apoio. O verde nunca é texto pequeno (3,6:1): só linha, borda e brilho. */
+   dourado = ação e destaque (agendar, falar no WhatsApp, números, fios) · creme = títulos e leitura · prata = texto de apoio ·
+   vermelho = só a estrela do letreiro e a sombra do logotipo. Sem verde (o dono achou genérico). */
 .america {
   --fundo2: #101316; /* um degrau abaixo do carvão: as seções alternam para a página ter profundidade */
 }
 .america .am-sec--fundo {
   background: var(--fundo2);
 }
-.america .am-sec--verde.am-sec--fundo {
-  background: radial-gradient(900px circle at 18% 45%, rgb(63 122 79 / 0.12), transparent 62%), var(--fundo2);
+.america #quem-ensina.am-sec--fundo {
+  background: radial-gradient(900px circle at 18% 45%, rgb(201 176 74 / 0.07), transparent 62%), var(--fundo2);
 }
 /* Rótulo de seção: letreiro da porta (estrela vermelha, caixa-alta condensada, fio) */
 .america .am-kicker {
@@ -561,15 +658,12 @@ html:has(.america) {
   height: 1px;
   background: var(--ouro);
 }
-.america .am-sec--verde .am-kicker::after {
-  background: var(--verde);
-}
 /* Títulos mais firmes, no peso da letra pesada da placa */
 .america h1.am-serif,
 .america h2.am-serif {
   font-weight: 700;
 }
-/* Cartões: no hover sobem um pouco e ganham sombra tingida da cor da seção (dourado nos serviços e contato, verde nos cursos) */
+/* Cartões do contato: no hover sobem um pouco e ganham uma sombra dourada tingida */
 .america .am-card {
   transition: border-color 0.2s, transform 0.25s, box-shadow 0.25s;
 }
@@ -577,41 +671,12 @@ html:has(.america) {
   transform: translateY(-3px);
   box-shadow: 0 16px 38px -20px rgb(201 176 74 / 0.5);
 }
-.america .am-sec--verde .am-card {
-  border-top-color: var(--verde);
-}
-.america .am-sec--verde .am-card:hover {
-  border-color: rgb(63 122 79 / 0.7);
-  border-top-color: var(--verde);
-  box-shadow: 0 16px 38px -20px rgb(63 122 79 / 0.65);
-}
 /* Fotos de serviço: sem zoom (a foto aparece inteira); só a borda e uma sombra dourada */
 .america .am-foto {
   transition: border-color 0.2s, box-shadow 0.25s;
 }
 .america .am-foto:hover {
   box-shadow: 0 16px 38px -20px rgb(201 176 74 / 0.5);
-}
-/* Quiz dentro da seção dos cursos: o verde do "aprender" */
-.america .am-sec--verde .am-quiz .am-regua {
-  background: var(--verde);
-}
-.america .am-sec--verde .am-quiz__progresso > .is-feito {
-  background: var(--verde);
-}
-.america .am-sec--verde .am-quiz__progresso > .is-atual {
-  background: rgb(63 122 79 / 0.55);
-}
-.america .am-sec--verde .am-opcao::before {
-  background: var(--verde);
-}
-.america .am-sec--verde .am-opcao:hover,
-.america .am-sec--verde .am-opcao:focus-visible {
-  border-color: rgb(63 122 79 / 0.75);
-  background: rgb(63 122 79 / 0.1);
-}
-.america .am-sec--verde .am-quiz::before {
-  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(63 122 79 / 0.18), transparent 62%);
 }
 .america .am-quiz__contador {
   font-family: var(--font-rotulo), 'Arial Narrow', sans-serif;
@@ -764,8 +829,8 @@ html:has(.america) {
   html:has(.america) {
     scroll-behavior: auto;
   }
-  .america .am-moldura::before,
-  .america .am-moldura__foto,
+  .america .hero-palco__luz,
+  .america .hero-mateus,
   .america .am-selo-hero,
   .america .am-sobe,
   .america .hero-texto > *,

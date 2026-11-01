@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Barlow_Condensed, Cormorant_Garamond, Pinyon_Script } from 'next/font/google'
+import { Barlow_Condensed, Bevan, Cormorant_Garamond, Pinyon_Script } from 'next/font/google'
 import { tenantConfig } from '@/config/tenant'
 import { cn } from '@/lib/utils'
 import { linkWhatsapp, mensagemGeral } from '@/lib/landing-america'
@@ -36,6 +36,14 @@ const rotulo = Barlow_Condensed({
   display: 'swap',
 })
 
+// O nome AMÉRICA do logotipo e os numerais dos cursos usam uma letra pesada de letreiro (Bevan), perto das letras grossas da placa.
+const marca = Bevan({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-marca',
+  display: 'swap',
+})
+
 // A palavra "Barbearia" do logotipo é manuscrita na placa da fachada; é o único uso de letra manuscrita da página.
 const script = Pinyon_Script({
   subsets: ['latin'],
@@ -55,7 +63,7 @@ export const metadata: Metadata = {
 
 export default function AmericaPage() {
   return (
-    <main data-tema="america" className={cn(display.variable, script.variable, rotulo.variable, 'america min-h-screen antialiased')}>
+    <main data-tema="america" className={cn(display.variable, script.variable, rotulo.variable, marca.variable, 'america min-h-screen antialiased')}>
       <a
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:bg-[#c9b04a] focus:px-4 focus:py-3 focus:text-[#14171a]"

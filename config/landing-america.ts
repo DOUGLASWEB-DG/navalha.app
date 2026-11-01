@@ -22,8 +22,9 @@ export type FotoId = keyof typeof FOTOS
 
 // Hero (gerados por scripts/gerar-hero-america.mjs a partir das fotos que o dono mandou). Ficam FORA de FOTOS de propósito:
 // FOTOS é a lista de fotos de serviço (cada uma convida para um curso); estas duas não são serviço.
-// A foto do Mateus Cremas (barbeiro e dono) aparece inteira, na proporção original.
-export const FOTO_MATEUS: Foto = { src: '/assets/america/mateus.webp', width: 1007, height: 646 }
+// O Mateus Cremas (CEO e fundador) recortado do fundo (sem a parede branca), com um contorno fino de luz dourada e a base
+// esmaecendo, a pedido do dono. O recorte vem de scripts/recortar-fundo.py; a imagem tem transparência.
+export const FOTO_MATEUS: Foto = { src: '/assets/america/mateus.webp', width: 1055, height: 670 }
 // Miolo da placa da fachada (bandeiras do Brasil e dos EUA), sem a parede azul; só textura de fundo, bem escurecida pelo CSS.
 // (já desfocada no arquivo, 960x612: o CSS não usa filtro em tempo real)
 export const FUNDO_PLACA: Foto = { src: '/assets/america/fundo-placa.webp', width: 960, height: 612 }

@@ -1,14 +1,16 @@
-import { Clock, Instagram, MapPin, Phone } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { tenantConfig } from '@/config/tenant'
 import { enderecoSemCep, linkDoMapa, linkWhatsapp, mensagemGeral } from '@/lib/landing-america'
 import { Kicker } from './kicker'
+import { IconeInstagram, IconeMapa, IconeWhatsapp } from './icones'
 
 // Horário, endereço, Instagram, WhatsApp e mapa: tudo vem do tenantConfig (uma fonte só, a mesma do resto do sistema).
 export function Contato() {
   const itens = [
-    { icone: MapPin, rotulo: 'Endereço', valor: enderecoSemCep(tenantConfig.address), link: linkDoMapa(tenantConfig.address) },
-    { icone: Phone, rotulo: 'WhatsApp', valor: tenantConfig.phoneDisplay, link: linkWhatsapp(tenantConfig.whatsappNumber, mensagemGeral()) },
-    { icone: Instagram, rotulo: 'Instagram', valor: tenantConfig.instagram, link: tenantConfig.instagramLink },
+    // Logos de marca de verdade (WhatsApp, Instagram em degradê, pino do Google Maps), não ícones genéricos de biblioteca
+    { icone: IconeMapa, rotulo: 'Endereço', valor: enderecoSemCep(tenantConfig.address), link: linkDoMapa(tenantConfig.address) },
+    { icone: IconeWhatsapp, rotulo: 'WhatsApp', valor: tenantConfig.phoneDisplay, link: linkWhatsapp(tenantConfig.whatsappNumber, mensagemGeral()) },
+    { icone: IconeInstagram, rotulo: 'Instagram', valor: tenantConfig.instagram, link: tenantConfig.instagramLink },
   ]
   return (
     <section id="contato" aria-labelledby="contato-titulo" data-sem-zap className="am-sec am-sec--fundo">
@@ -43,7 +45,7 @@ export function Contato() {
                   rel="noopener noreferrer"
                   className="am-card !flex-row !items-center !gap-4 !p-5 hover:no-underline"
                 >
-                  <Icone className="am-ouro h-5 w-5 shrink-0" strokeWidth={1.5} aria-hidden="true" />
+                  <Icone className="am-icone" />
                   <span>
                     <span className="am-muted block text-sm">{rotulo}</span>
                     <span className="font-semibold">{valor}</span>
