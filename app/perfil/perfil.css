@@ -261,10 +261,14 @@ html:has(.perfil) {
 .perfil .p-linha:hover .p-linha-acao {
   color: var(--giz);
 }
+/* Fotos de trabalho: proporção original, sem recorte; a borda acende no toque/hover e o foco fica visível */
 .perfil .p-trabalho {
   border: 1px solid var(--linha);
   border-radius: 2px;
   background: var(--grafite);
+}
+.perfil .p-trabalho:hover {
+  border-color: var(--linha-forte);
 }
 
 /* Seções e passos */

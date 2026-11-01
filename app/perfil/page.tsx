@@ -188,13 +188,20 @@ export default async function PerfilPage() {
               </ul>
 
               {fotosTrabalho.length > 0 && (
-                <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+                <ul className={cn('mt-10 grid items-start gap-8', fotosTrabalho.length > 1 ? 'sm:grid-cols-2' : 'max-w-xl')}>
                   {fotosTrabalho.map((s) => (
-                    <li
-                      key={s.id}
-                      className={cn('p-trabalho relative overflow-hidden', fotosTrabalho.length === 1 ? 'aspect-[16/10] sm:col-span-2' : 'aspect-[4/3]')}
-                    >
-                      <img src={s.imageUrl!} alt={`Trabalho: ${s.name}`} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                    <li key={s.id}>
+                      {/* A foto aparece inteira, na proporção original (sem recorte): o detalhe do corte é o que vende. Toque abre em tamanho grande. */}
+                      <a
+                        href={s.imageUrl!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Abrir a foto de ${s.name} em tamanho grande`}
+                        className="p-trabalho block"
+                      >
+                        <img src={s.imageUrl!} alt={`Trabalho: ${s.name}`} loading="lazy" decoding="async" className="block h-auto w-full" />
+                      </a>
+                      <p className="p-mudo mt-3 text-sm">{s.name}</p>
                     </li>
                   ))}
                 </ul>
