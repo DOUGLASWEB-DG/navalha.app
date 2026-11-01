@@ -20,6 +20,13 @@ export const FOTOS = {
 
 export type FotoId = keyof typeof FOTOS
 
+// Hero (gerados por scripts/gerar-hero-america.mjs a partir das fotos que o dono mandou). Ficam FORA de FOTOS de propósito:
+// FOTOS é a lista de fotos de serviço (cada uma convida para um curso); estas duas não são serviço.
+// A foto do Mateus Cremas (barbeiro e dono) aparece inteira, na proporção original.
+export const FOTO_MATEUS: Foto = { src: '/assets/america/mateus.webp', width: 1007, height: 646 }
+// Miolo da placa da fachada (bandeiras do Brasil e dos EUA), sem a parede azul; só textura de fundo, bem escurecida pelo CSS.
+export const FUNDO_PLACA: Foto = { src: '/assets/america/fundo-placa.webp', width: 1280, height: 816 }
+
 // O serviço do tenantConfig aponta para o arquivo original (/assets/corte.jpeg): daqui sai a foto otimizada.
 export const FOTO_DO_ARQUIVO: Record<string, FotoId> = {
   'corte.jpeg': 'corte',

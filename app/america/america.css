@@ -1,24 +1,26 @@
 /* Página própria da América (/america). Tudo dentro de .america, para não vazar para o painel nem para as outras páginas.
-   Princípio: a ousadia fica em UM lugar (a foto do hero e o selo); o resto é quieto e disciplinado.
-   Paleta com um destaque só (dourado fosco), serifa elegante nos títulos e sans limpa no texto, sem cursiva.
-   O vermelho aparece uma única vez, num filete de poste no rodapé. "Americana" mora na estrela do selo e nas linhas finas. */
+   Paleta pedida pelo dono, tirada da fachada (placa e porta): carvão no fundo, creme nos títulos, amarelo-dourado como destaque,
+   prata nos textos secundários, verde tropical e vermelho só em pontos pequenos (bordas, estrelas, filete). Sem o azul da parede.
+   Princípio: a ousadia fica no hero (a arte da placa ao fundo, a foto do Mateus e o selo); o resto é quieto e disciplinado.
+   Serifa elegante nos títulos e sans limpa no texto; letra manuscrita só na palavra "Barbearia" do logotipo, como na placa. */
 .america {
-  --bg: #0c0c0d;
-  --surf: #16161a;
-  --txt: #ede8df;
-  --muted: #a9a397; /* texto secundário: 7,5:1 sobre o grafite */
-  --ouro: #b8975a;
-  --ouro-claro: #cfb27a;
-  --linha: rgb(237 232 223 / 0.12);
-  --linha-ouro: rgb(184 151 90 / 0.5);
-  --vermelho: #b31942;
+  --bg: #14171a;
+  --surf: #1f2427;
+  --txt: #f1ede0;
+  --muted: #b4b7b2; /* prata, texto secundário: 8,9:1 sobre o carvão e 7,7:1 sobre os cartões */
+  --ouro: #c9b04a;
+  --ouro-claro: #ddc66d;
+  --linha: rgb(241 237 224 / 0.12);
+  --linha-ouro: rgb(201 176 74 / 0.5);
+  --vermelho: #b5342f; /* só em pontos pequenos: estrelas e filete */
+  --verde: #3f7a4f; /* só em linhas e bordas (3,6:1 sobre o carvão): nunca em texto pequeno */
   background: var(--bg);
   color: var(--txt);
   font-family: var(--font-inter), system-ui, sans-serif;
   line-height: 1.6;
 }
 html:has(.america) {
-  background: #0c0c0d;
+  background: #14171a;
   scroll-padding-top: 76px;
   scroll-behavior: smooth;
 }
@@ -71,7 +73,7 @@ html:has(.america) {
   top: 0;
   z-index: 40;
   border-bottom: 1px solid var(--linha);
-  background: rgb(12 12 13 / 0.92);
+  background: rgb(20 23 26 / 0.92);
   backdrop-filter: blur(8px);
 }
 .america .am-marca {
@@ -112,7 +114,7 @@ html:has(.america) {
   position: relative;
   overflow: hidden;
   background: var(--ouro);
-  color: #14110a;
+  color: #14171a;
 }
 /* Brilho que atravessa o botão dourado, só no hover */
 .america .am-btn--ouro::after {
@@ -140,7 +142,7 @@ html:has(.america) {
 }
 .america .am-btn--linha:hover {
   border-color: var(--ouro);
-  background: rgb(184 151 90 / 0.1);
+  background: rgb(201 176 74 / 0.1);
 }
 .america .am-btn--sm {
   min-height: 44px;
@@ -277,7 +279,7 @@ html:has(.america) {
   inset: 0;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(184 151 90 / 0.09), transparent 62%);
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgb(201 176 74 / 0.09), transparent 62%);
   transition: opacity 0.3s;
 }
 @media (hover: hover) and (pointer: fine) {
@@ -300,7 +302,7 @@ html:has(.america) {
   background: var(--ouro);
 }
 .america .am-quiz__progresso > .is-atual {
-  background: rgb(184 151 90 / 0.45);
+  background: rgb(201 176 74 / 0.45);
 }
 .america .am-quiz__contador {
   margin-top: 10px;
@@ -325,7 +327,7 @@ html:has(.america) {
   padding: 14px 18px;
   border: 1px solid var(--linha);
   border-radius: 2px;
-  background: rgb(237 232 223 / 0.015);
+  background: rgb(241 237 224 / 0.015);
   color: inherit;
   text-align: left;
   transition: border-color 0.2s, background-color 0.2s, color 0.2s;
@@ -355,7 +357,7 @@ html:has(.america) {
 .america .am-opcao:hover,
 .america .am-opcao:focus-visible {
   border-color: var(--linha-ouro);
-  background: rgb(184 151 90 / 0.06);
+  background: rgb(201 176 74 / 0.06);
 }
 .america .am-opcao:hover::before,
 .america .am-opcao:focus-visible::before {
@@ -369,11 +371,11 @@ html:has(.america) {
 .america .am-opcao:active {
   border-color: var(--ouro);
   background: var(--ouro);
-  color: #14110a;
+  color: #14171a;
 }
 .america .am-opcao:active .am-opcao__n,
 .america .am-opcao:active .am-opcao__seta {
-  color: #14110a;
+  color: #14171a;
 }
 
 /* Fotos de trabalho: cada uma inteira, na proporção original, sem recorte e sem zoom */
@@ -410,7 +412,8 @@ html:has(.america) {
 
 /* O único vermelho da página: um filete de poste, parado, no alto do rodapé */
 .america .am-filete {
-  height: 6px;
+  height: 8px;
+  border-top: 2px solid var(--verde); /* o fio verde da folhagem da placa */
   background: repeating-linear-gradient(-45deg, var(--vermelho) 0 8px, var(--txt) 8px 16px);
 }
 
@@ -426,7 +429,7 @@ html:has(.america) {
   height: 56px;
   border-radius: 50%;
   background: var(--ouro);
-  color: #14110a;
+  color: #14171a;
   box-shadow: 0 6px 18px rgb(0 0 0 / 0.5);
   visibility: hidden;
   opacity: 0;
@@ -451,6 +454,86 @@ html:has(.america) {
   .america .am-rodape {
     padding-bottom: 96px;
   }
+}
+
+/* Hero: a arte da placa da fachada (bandeiras do Brasil e dos EUA) por trás de tudo, bem escurecida, só como textura.
+   A camada de cores fica entre a arte e o texto para o título e os botões continuarem legíveis. */
+.america .hero-secao {
+  position: relative;
+  overflow: hidden;
+}
+.america .hero-fundo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.america .hero-fundo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% 40%;
+  opacity: 0.3;
+  filter: blur(1.5px) saturate(1.05);
+  animation: am-aparece 1400ms ease both;
+}
+.america .hero-fundo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgb(20 23 26 / 0.94) 0%, rgb(20 23 26 / 0.7) 48%, rgb(20 23 26 / 0.35) 100%),
+    linear-gradient(180deg, rgb(20 23 26 / 0.55) 0%, transparent 28%, transparent 62%, var(--bg) 100%);
+}
+/* Moldura e legenda da foto do Mateus */
+.america .am-legenda {
+  margin-top: 28px;
+  font-size: 0.95rem;
+  color: var(--muted);
+  text-align: right;
+}
+.america .am-legenda .am-serif {
+  font-size: 1.3rem;
+  color: var(--txt);
+}
+/* "Quero aprender" ganha um fio verde: o caminho de quem vai estudar (borda, nunca texto) */
+.america .am-btn--linha.hero-aprender {
+  border-color: rgb(63 122 79 / 0.85);
+}
+.america .am-btn--linha.hero-aprender:hover {
+  border-color: var(--verde);
+  background: rgb(63 122 79 / 0.16);
+}
+/* "Barbearia" manuscrito do logotipo (como na placa) */
+.america .am-script {
+  font-family: var(--font-script), 'Brush Script MT', cursive;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--ouro);
+  transform: translateY(3px);
+}
+/* A frase da porta, com as estrelas vermelhas de cada lado */
+.america .am-faixa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--linha);
+  border-bottom: 1px solid var(--linha);
+  background: var(--surf);
+}
+.america .am-faixa p {
+  font-size: 0.82rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.america .am-faixa__estrela {
+  font-size: 0.8rem;
+  color: var(--vermelho);
 }
 
 /* Hero: entrada que acontece UMA vez, em sequência. O texto sobe um item de cada vez, a linha dourada se desenha, a foto se
@@ -561,6 +644,7 @@ html:has(.america) {
   .america .am-sobe,
   .america .hero-texto > *,
   .america .hero-seal .selo-anel,
+  .america .hero-fundo img,
   .america .am-quiz__passo {
     animation: none;
   }

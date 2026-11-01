@@ -13,17 +13,18 @@ export function Cabecalho() {
             <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7L12 17.3 5.7 21l1.7-7L2 9.2l7.1-.6L12 2z" />
           </svg>
           <span className="am-serif am-marca__nome">AMÉRICA</span>{' '}
-          <span className="am-muted hidden text-xs sm:inline">Barbearia</span>
+          {/* "Barbearia" manuscrito em amarelo-dourado, como na placa da fachada: o único lugar com letra manuscrita */}
+          <span className="am-script hidden sm:inline">Barbearia</span>
           <span className="sr-only">, voltar ao início</span>
         </a>
         <nav className="hidden items-center gap-8 text-sm md:flex" aria-label="Seções">
-          <a href="#cursos" className="am-muted hover:text-[#ede8df]">Cursos</a>
-          <a href="#servicos" className="am-muted hover:text-[#ede8df]">Serviços</a>
-          <a href="#contato" className="am-muted hover:text-[#ede8df]">Contato</a>
+          <a href="#cursos" className="am-muted hover:text-[#f1ede0]">Cursos</a>
+          <a href="#servicos" className="am-muted hover:text-[#f1ede0]">Serviços</a>
+          <a href="#contato" className="am-muted hover:text-[#f1ede0]">Contato</a>
         </nav>
         <div className="flex items-center gap-1">
           <AgendarCabecalho />
-          <Link href="/login" className="am-muted inline-flex min-h-11 items-center px-3 text-xs hover:text-[#ede8df]" title="Entrar no sistema (equipe)">
+          <Link href="/login" className="am-muted inline-flex min-h-11 items-center px-3 text-xs hover:text-[#f1ede0]" title="Entrar no sistema (equipe)">
             Entrar
           </Link>
         </div>

@@ -7,13 +7,13 @@ export function Selo({ className, id = 'am-selo-volta' }: { className?: string; 
       <defs>
         <path id={id} d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0" />
       </defs>
-      <circle cx="100" cy="100" r="98" fill="#0c0c0d" fillOpacity="0.94" />
-      <circle cx="100" cy="100" r="95" fill="none" stroke="#b8975a" strokeWidth="1.2" />
-      <circle cx="100" cy="100" r="58" fill="none" stroke="#b8975a" strokeWidth="1" />
+      <circle cx="100" cy="100" r="98" fill="#14171a" fillOpacity="0.94" />
+      <circle cx="100" cy="100" r="95" fill="none" stroke="#c9b04a" strokeWidth="1.2" />
+      <circle cx="100" cy="100" r="58" fill="none" stroke="#c9b04a" strokeWidth="1" />
       {/* só o anel de texto pode girar (classe selo-anel, ligada no hero); a estrela e os círculos ficam parados */}
       <g className="selo-anel">
         <text
-          fill="#b8975a"
+          fill="#c9b04a"
           fontSize="14.5"
           textLength="470"
           lengthAdjust="spacing"
@@ -26,7 +26,7 @@ export function Selo({ className, id = 'am-selo-volta' }: { className?: string; 
       <path
         d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7L12 17.3 5.7 21l1.7-7L2 9.2l7.1-.6L12 2z"
         fill="none"
-        stroke="#b8975a"
+        stroke="#c9b04a"
         strokeWidth="0.7"
         strokeLinejoin="round"
         transform="translate(70 70) scale(2.5)"

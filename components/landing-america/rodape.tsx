@@ -3,7 +3,7 @@ import Link from 'next/link'
 // O único vermelho da página é o filete de poste no alto do rodapé (parado, fino, decorativo).
 export function Rodape() {
   return (
-    <footer className="am-rodape bg-[#0c0c0d]">
+    <footer className="am-rodape bg-[#14171a]">
       <div aria-hidden="true" className="am-filete" />
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8 text-sm sm:px-6">
         <p className="am-muted">
