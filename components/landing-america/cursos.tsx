@@ -17,20 +17,20 @@ export function Cursos() {
           Com o Mateus Cremas, CEO e fundador da América. O conteúdo, as turmas e os valores a gente explica pelo WhatsApp: é só chamar.
         </p>
 
-        {/* Três cartões de tamanhos diferentes: o primeiro (Barbeiro Profissional) é o maior; o numeral vem do CSS (contador) */}
+        {/* Três cartões de tamanhos diferentes: o primeiro (Barbeiro Profissional) é uma faixa larga, os outros dois ficam embaixo; o numeral vem do CSS (contador) */}
         <div className="mt-12 am-cursos">
           {ORDEM_DOS_CURSOS.map((id, i) => {
             const curso = CURSOS[id]
             return (
               <article key={id} className={`am-curso am-revela${i === 0 ? ' am-curso--destaque' : ''}`}>
-                <h3 className="am-serif text-3xl leading-tight">{curso.titulo}</h3>
-                <p className="am-serif am-ouro-claro text-xl font-medium italic leading-snug">{curso.gancho}</p>
-                <p className="am-muted text-sm">Conteúdo, turmas e valores: conversamos pelo WhatsApp.</p>
+                <h3 className="am-curso__titulo am-serif text-3xl leading-tight">{curso.titulo}</h3>
+                <p className="am-curso__gancho am-serif am-ouro-claro text-xl font-medium italic leading-snug">{curso.gancho}</p>
+                <p className="am-curso__nota am-muted text-sm">Conteúdo, turmas e valores: conversamos pelo WhatsApp.</p>
                 <a
                   href={linkWhatsapp(tenantConfig.whatsappNumber, mensagemDoCurso(curso))}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="am-btn am-btn--linha mt-auto"
+                  className="am-curso__cta am-btn am-btn--linha mt-auto"
                 >
                   Quero saber como funciona
                 </a>

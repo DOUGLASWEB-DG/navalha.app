@@ -18,7 +18,7 @@ fs.mkdirSync(saida, { recursive: true })
 
 // ---------- Mateus ----------
 // Restos da cadeira do salão que o modelo manteve (atrás do pescoço): apagados por polígonos, em pixels do recorte original (1007x646).
-const APAGAR = (process.env.APAGAR || '655,350 800,350 800,440 760,440 720,432 690,420 655,408;330,392 452,392 452,424 400,430 330,432')
+const APAGAR = (process.env.APAGAR || '645,350 800,350 800,440 760,440 720,432 690,420 645,408;320,385 456,385 456,424 400,430 320,446')
   .split(';')
   .map((p) => p.trim())
 const meta = await sharp(recorte).metadata()

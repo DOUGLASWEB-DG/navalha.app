@@ -415,11 +415,33 @@ html:has(.america) {
 }
 @media (min-width: 900px) {
   .america .am-cursos {
-    grid-template-columns: 1.25fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
   }
+  /* o curso em destaque é uma faixa larga: título e gancho à esquerda, texto e botão à direita (sem buraco vazio no meio) */
   .america .am-curso--destaque {
-    grid-row: span 2;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    grid-template-areas:
+      't n'
+      'g c';
+    align-items: end;
+    column-gap: 56px;
+    row-gap: 14px;
+  }
+  .america .am-curso--destaque .am-curso__titulo {
+    grid-area: t;
+  }
+  .america .am-curso--destaque .am-curso__gancho {
+    grid-area: g;
+  }
+  .america .am-curso--destaque .am-curso__nota {
+    grid-area: n;
+    justify-self: start;
+  }
+  .america .am-curso--destaque .am-curso__cta {
+    grid-area: c;
+    justify-self: start;
   }
 }
 .america .am-curso {
@@ -474,18 +496,28 @@ html:has(.america) {
   transform: translateX(120%);
 }
 .america .am-curso--destaque {
-  justify-content: flex-end;
-  padding: 40px 34px 34px;
-  min-height: 22rem;
+  padding: 36px 30px 32px;
 }
 .america .am-curso--destaque::before {
-  font-size: 8.5rem;
-  right: 26px;
-  top: 10px;
+  font-size: 5.6rem;
+  right: 20px;
+  top: 6px;
 }
 .america .am-curso--destaque h3 {
-  font-size: clamp(2.3rem, 4.6vw, 3.4rem);
-  max-width: 100%;
+  font-size: clamp(2.2rem, 4.6vw, 3.4rem);
+}
+@media (min-width: 900px) {
+  .america .am-curso--destaque {
+    padding: 44px 40px 40px;
+  }
+  .america .am-curso--destaque::before {
+    font-size: 8rem;
+    right: 28px;
+    top: 14px;
+  }
+  .america .am-curso--destaque h3 {
+    max-width: 100%;
+  }
 }
 .america .am-curso__ouro {
   color: var(--ouro-claro);
