@@ -59,21 +59,37 @@ const pessoa = await sharp(rgb, { raw: { width: W, height: H, channels: 3 } })
   .png()
   .toBuffer()
 
-// 2) contorno de luz dourada: o próprio contorno levemente borrado e pintado de dourado, por baixo da pessoa (o brilho amplo é CSS)
+// 2) contorno de luz dourada: o próprio contorno levemente borrado e pintado de dourado, por baixo da pessoa (o brilho amplo é CSS).
+// Tudo com imagens codificadas (PNG de 1 canal), sem montar bytes brutos: o empacotamento manual de canais gerou um retângulo
+// quadriculado e listras no arquivo (o alfa ficava 255 longe da pessoa).
 const margem = 24
-const aura = await sharp(alfa, { raw: { width: W, height: H, channels: 1 } })
-  .extend({ top: margem, bottom: 0, left: margem, right: margem, background: { r: 0, g: 0, b: 0, alpha: 0 } })
+const alfaPng = await sharp(pessoa).ensureAlpha().extractChannel(3).toColourspace('b-w').png().toBuffer()
+const auraAlfaBruta = await sharp(alfaPng)
+  .extend({ top: margem, bottom: 0, left: margem, right: margem, background: '#000000' })
+  .removeAlpha()
+  .toColourspace('b-w')
   .blur(5)
-  .linear(1.25, 0)
-  .toBuffer({ resolveWithObject: true })
-const auraDourada = await sharp({
-  create: { width: aura.info.width, height: aura.info.height, channels: 3, background: { r: 221, g: 198, b: 109 } },
+  .linear(1.1, 0)
+  .png()
+  .toBuffer()
+// a luz some na base (onde a camisa esmaece), senão aparece uma faixa dourada no pé da imagem
+const degrade = Buffer.from(
+  `<svg width="${W + 2 * margem}" height="${H + margem}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0.7" stop-color="#fff"/><stop offset="0.9" stop-color="#000"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/></svg>`,
+)
+const auraAlfa = await sharp(auraAlfaBruta).composite([{ input: degrade, blend: 'multiply' }]).removeAlpha().toColourspace('b-w').png().toBuffer()
+const metaAura = await sharp(auraAlfa).metadata()
+if (metaAura.channels !== 1) {
+  console.error(`ABORTADO: alfa da aura com ${metaAura.channels} canais (esperava 1)`)
+  process.exit(1)
+}
+const ouro = await sharp({
+  create: { width: W + 2 * margem, height: H + margem, channels: 3, background: { r: 221, g: 198, b: 109 } },
 })
-  .joinChannel(await sharp(aura.data, { raw: aura.info }).linear(0.7, 0).raw().toBuffer(), { raw: { width: aura.info.width, height: aura.info.height, channels: 1 } })
+  .joinChannel(auraAlfa)
   .png()
   .toBuffer()
 
-const m = await sharp(auraDourada)
+const m = await sharp(ouro)
   .composite([{ input: pessoa, left: margem, top: margem }])
   .webp({ quality: 84, alphaQuality: 92 })
   .toFile(path.join(saida, 'mateus.webp'))
