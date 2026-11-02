@@ -1,7 +1,5 @@
-import Link from 'next/link'
-
-// Rodapé limpo: só um fio fino no alto. O filete listrado de branco e vermelho (poste de barbeiro) saiu a pedido do dono ("isso é
-// passado"); o vermelho da página agora é só a estrela do letreiro.
+// Rodapé limpo: só um fio fino no alto e o direito autoral. O filete listrado de branco e vermelho (poste de barbeiro) e o link
+// "Entrar (equipe)" saíram a pedido do dono. A equipe continua entrando pelo "Entrar" pequeno do cabeçalho e pelo endereço /login.
 export function Rodape() {
   return (
     <footer className="am-rodape bg-[#14171a]">
@@ -13,9 +11,6 @@ export function Rodape() {
           </a>
           .
         </p>
-        <Link href="/login" className="am-link inline-flex min-h-11 items-center">
-          Entrar (equipe)
-        </Link>
       </div>
     </footer>
   )
