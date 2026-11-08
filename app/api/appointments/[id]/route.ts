@@ -237,7 +237,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           const commAmount = Math.round(unitCutPrice * (commPercent / 100) * 100) / 100
 
           await prisma.appointment.update({
-            where: { id },
+            where: { id, barbeariaId },
             data: {
               commissionPercent: commPercent,
               commissionAmount: commAmount,
@@ -249,7 +249,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           const commAmount = Math.round(servicePrice * (commPercent / 100) * 100) / 100
 
           await prisma.appointment.update({
-            where: { id },
+            where: { id, barbeariaId },
             data: {
               commissionPercent: commPercent,
               commissionAmount: commAmount,
