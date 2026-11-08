@@ -35,7 +35,12 @@ const items = [
     label: 'Clientes',
     iconUrl: '/assets/icons/clientes-icon.png',
     match: (p: string) => p.startsWith('/dashboard/clients'),
-    adminOnly: true,
+  },
+  {
+    href: '/dashboard/packages',
+    label: 'Pacotes',
+    iconUrl: '/assets/icons/produtos-icon.png',
+    match: (p: string) => p.startsWith('/dashboard/packages'),
   },
   {
     href: '/dashboard/finances',

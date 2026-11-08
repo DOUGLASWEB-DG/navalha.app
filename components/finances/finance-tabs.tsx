@@ -6,9 +6,10 @@ import {
   List,
   BarChart3,
   Bell,
+  Percent,
 } from 'lucide-react'
 
-export type FinanceTab = 'overview' | 'transactions' | 'reports' | 'alerts'
+export type FinanceTab = 'overview' | 'transactions' | 'reports' | 'alerts' | 'commissions'
 
 interface FinanceTabsProps {
   active: FinanceTab
@@ -19,6 +20,7 @@ interface FinanceTabsProps {
 const tabs: { value: FinanceTab; label: string; icon: React.ElementType }[] = [
   { value: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
   { value: 'transactions', label: 'Transações', icon: List },
+  { value: 'commissions', label: 'Comissões & Repasses', icon: Percent },
   { value: 'reports', label: 'Relatórios', icon: BarChart3 },
   { value: 'alerts', label: 'Alertas', icon: Bell },
 ]

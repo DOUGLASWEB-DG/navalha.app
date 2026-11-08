@@ -24,6 +24,7 @@ const createSchema = z.object({
   serviceIds: z.array(z.string().min(1).max(LIMITES.id)).min(1).max(LIMITES.ids).optional(),
   serviceId: z.string().min(1).max(LIMITES.id).optional(),
   barberId: z.string().max(LIMITES.id).optional(),
+  clientPackageId: z.string().max(LIMITES.id).nullable().optional(),
   date: z.string().max(LIMITES.data),
   notes: z.string().max(LIMITES.notas).optional(),
   status: z.enum(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED']).optional(),
@@ -154,6 +155,7 @@ export async function POST(req: NextRequest) {
           service: { connect: { id: services[0].id } }, // FIXME: legacy field
           appointmentServices: { create: appointmentServiceCreateData(services) },
           barber: { connect: { id: selectedBarber.id } },
+          clientPackage: parsed.clientPackageId ? { connect: { id: parsed.clientPackageId } } : undefined,
           date,
           status: parsed.status,
           notes: parsed.notes,

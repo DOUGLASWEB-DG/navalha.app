@@ -12,6 +12,7 @@ const updateUserSchema = z.object({
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').max(LIMITES.senha).optional(),
   role: z.enum(['ADMIN', 'BARBER']).optional(),
   active: z.boolean().optional(),
+  commissionPercent: z.number().min(0).max(100).optional(),
 }).strict()
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -60,11 +61,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       }
     }
 
-    const data: { name?: string; email?: string; role?: 'ADMIN' | 'BARBER'; password?: string; active?: boolean } = {}
+    const data: { name?: string; email?: string; role?: 'ADMIN' | 'BARBER'; password?: string; active?: boolean; commissionPercent?: number } = {}
     if (parsed.name) data.name = parsed.name
     if (parsed.email) data.email = parsed.email
     if (parsed.role) data.role = parsed.role
     if (parsed.active !== undefined) data.active = parsed.active
+    if (parsed.commissionPercent !== undefined) data.commissionPercent = parsed.commissionPercent
     if (parsed.password) {
       data.password = await bcrypt.hash(parsed.password, 10)
     }
@@ -78,6 +80,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         email: true,
         role: true,
         active: true,
+        commissionPercent: true,
       }
     })
 

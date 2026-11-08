@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { User, Mail, Lock, ShieldCheck } from 'lucide-react'
+import { User, Mail, Lock, ShieldCheck, Percent } from 'lucide-react'
 import { PhotoField, syncPhoto, usePhotoField } from '@/components/shared/photo-field'
 import { apiRequest } from '@/lib/http-errors'
 import { showError } from '@/lib/feedback'
@@ -33,6 +33,7 @@ const schema = z.object({
   email: z.string().email('E-mail inválido'),
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').optional().or(z.literal('')),
   role: z.enum(['ADMIN', 'BARBER']),
+  commissionPercent: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').default(50),
 })
 
 type FormData = z.infer<typeof schema>
@@ -54,7 +55,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { role: 'BARBER' },
+    defaultValues: { role: 'BARBER', commissionPercent: 50 },
   })
 
   // Foto do barbeiro/admin (só o admin chega neste formulário)
@@ -67,9 +68,10 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         email: user.email,
         role: user.role,
         password: '',
+        commissionPercent: user.commissionPercent ?? 50,
       })
     } else {
-      reset({ name: '', email: '', role: 'BARBER', password: '' })
+      reset({ name: '', email: '', role: 'BARBER', password: '', commissionPercent: 50 })
     }
     photo.reset()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,6 +91,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         name: data.name,
         email: data.email,
         role: data.role,
+        commissionPercent: Number(data.commissionPercent),
       }
 
       if (data.password) {
@@ -197,6 +200,28 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Comissão (%) */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold text-foreground">Comissão de Repasse (%)</Label>
+              <span className="text-xs text-muted-foreground">Sugestão: 20% a 75%</span>
+            </div>
+            <div className="relative">
+              <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                disabled={isSubmitting}
+                {...register('commissionPercent')}
+                placeholder="50"
+                className="pl-9"
+              />
+            </div>
+            {errors.commissionPercent && <p className="text-xs text-destructive">{errors.commissionPercent.message}</p>}
           </div>
 
           {/* Rodapé */}

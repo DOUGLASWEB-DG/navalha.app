@@ -24,6 +24,7 @@ import { FinanceTabs, type FinanceTab } from '@/components/finances/finance-tabs
 import { FinanceDashboard } from '@/components/finances/finance-dashboard'
 import { FinanceReports } from '@/components/finances/finance-reports'
 import { FinanceAlerts } from '@/components/finances/finance-alerts'
+import { BarberCommissions } from '@/components/finances/barber-commissions'
 import { cn } from '@/lib/utils'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
@@ -119,6 +120,8 @@ export default function FinancesPage() {
       )}
 
       {activeTab === 'reports' && <FinanceReports />}
+
+      {activeTab === 'commissions' && <BarberCommissions />}
 
       {activeTab === 'alerts' && <FinanceAlerts />}
 

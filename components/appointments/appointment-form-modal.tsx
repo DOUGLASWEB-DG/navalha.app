@@ -26,7 +26,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { User, Scissors, CalendarDays, Clock, FileText, Activity } from 'lucide-react'
+import { User, Scissors, CalendarDays, Clock, FileText, Activity, Sparkles } from 'lucide-react'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
 import { apiFetcher } from '@/lib/http-errors'
@@ -39,6 +39,7 @@ const schema = z.object({
   clientId: z.string().min(1, 'Selecione um cliente'),
   serviceIds: z.array(z.string()).min(1, 'Selecione pelo menos um serviço'),
   barberId: z.string().optional(),
+  clientPackageId: z.string().optional().nullable(),
   date: z.string().min(1, 'Selecione uma data'),
   time: z.string().min(1, 'Selecione um horário'),
   status: z.enum(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED']),
@@ -87,8 +88,15 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
       status: 'PENDING',
       date: defaultDate ? format(defaultDate, 'yyyy-MM-dd') : todayValue(),
       time: '09:00',
+      clientPackageId: null,
     },
   })
+
+  const selectedClientId = watch('clientId')
+  const { data: clientPackages } = useSWR(
+    selectedClientId ? `/api/client-packages?clientId=${selectedClientId}&status=ACTIVE` : null,
+    fetcher
+  )
 
   useEffect(() => {
     if (appointment) {
@@ -97,6 +105,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
         clientId: appointment.clientId,
         serviceIds: appointment.appointmentServices?.map((item: any) => item.serviceId) || [appointment.serviceId],
         barberId: appointment.barberId ?? 'any',
+        clientPackageId: appointment.clientPackageId || null,
         date: format(apptDate, 'yyyy-MM-dd'),
         time: format(apptDate, 'HH:mm'),
         status: appointment.status,
@@ -109,13 +118,14 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
         time: '09:00',
         clientId: '',
         serviceIds: [],
-        barberId: 'any',
+        barberId: user?.role === 'BARBER' ? user.id : 'any',
+        clientPackageId: null,
         notes: '',
       })
     }
     // timeZone entra nas dependências: se o fuso chegar depois da abertura, o formulário é refeito com ele
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appointment, open, defaultDate, reset, timeZone])
+  }, [appointment, open, defaultDate, reset, timeZone, user])
 
   async function onSubmit(data: FormData) {
     // Envia data e hora como digitadas (sem "Z"): o servidor interpreta no fuso da barbearia.
@@ -133,6 +143,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
           serviceIds: data.serviceIds,
           serviceId: data.serviceIds[0],
           barberId: data.barberId === 'any' ? undefined : data.barberId,
+          clientPackageId: data.clientPackageId ? data.clientPackageId : null,
           date: datetime,
           status: data.status,
           notes: data.notes,
@@ -182,6 +193,33 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
               </Select>
             </div>
             {errors.clientId && <p className="text-xs text-destructive">{errors.clientId.message}</p>}
+
+            {/* Aviso de Pacote Ativo do Cliente */}
+            {clientPackages && clientPackages.length > 0 && (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 space-y-2 mt-1">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                  <Sparkles className="h-4 w-4" />
+                  Cliente possui pacote ativo!
+                </div>
+                {clientPackages.map((cp: any) => {
+                  const remaining = Math.max(0, cp.totalCuts - cp.usedCuts)
+                  const isChecked = watch('clientPackageId') === cp.id
+                  return (
+                    <label key={cp.id} className="flex items-center gap-2 cursor-pointer text-xs text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => setValue('clientPackageId', e.target.checked ? cp.id : null)}
+                        className="rounded border-border text-primary focus:ring-primary h-4 w-4"
+                      />
+                      <span>
+                        Descontar corte do <strong>{cp.package.name}</strong> ({remaining} restantes)
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           {/* Serviço */}

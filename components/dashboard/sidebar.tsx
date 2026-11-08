@@ -32,7 +32,8 @@ interface SidebarProps {
 const navItems = [
   { label: 'Painel', href: '/dashboard', iconUrl: '/assets/icons/painel-icon.png', adminOnly: true },
   { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/icons/agendamentos-icon.png' },
-  { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/icons/clientes-icon.png', adminOnly: true },
+  { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/icons/clientes-icon.png' },
+  { label: 'Pacotes', href: '/dashboard/packages', iconUrl: '/assets/icons/produtos-icon.png' },
   { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/icons/finaces-icon.png', adminOnly: true },
   { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/icons/metas-icon.png', adminOnly: true },
   { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/icons/servicos-icon.png', adminOnly: true },

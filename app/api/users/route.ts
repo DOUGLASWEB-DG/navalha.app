@@ -3,18 +3,19 @@ import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { LIMITES } from '@/lib/input-limits'
-import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { requireTenantAdmin, requireTenantUser, tenantErrorResponse } from '@/lib/api'
 
 const createUserSchema = z.object({
   name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres').max(LIMITES.nome),
   email: z.string().trim().toLowerCase().max(LIMITES.email).email('E-mail inválido'),
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').max(LIMITES.senha),
   role: z.enum(['ADMIN', 'BARBER']).default('BARBER'),
+  commissionPercent: z.number().min(0).max(100).optional(),
 }).strict()
 
 export async function GET() {
   try {
-    const { barbearia } = await requireTenantAdmin()
+    const { user: currentUser, barbearia } = await requireTenantUser()
 
     const users = await prisma.user.findMany({
       where: { barbeariaId: barbearia.id },
@@ -25,11 +26,21 @@ export async function GET() {
         role: true,
         active: true,
         avatarUrl: true,
+        commissionPercent: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' }
     })
-    return NextResponse.json(users)
+
+    // Se for barbeiro, esconde a comissão dos outros barbeiros (mostra só a dele)
+    const sanitized = currentUser.role === 'ADMIN'
+      ? users
+      : users.map((u) => ({
+          ...u,
+          commissionPercent: u.id === currentUser.id ? u.commissionPercent : undefined,
+        }))
+
+    return NextResponse.json(sanitized)
   } catch (error) {
     const handled = tenantErrorResponse(error)
     if (handled) return handled
@@ -60,12 +71,14 @@ export async function POST(req: NextRequest) {
         email: parsed.email,
         password: hashedPassword,
         role: parsed.role,
+        commissionPercent: parsed.commissionPercent ?? 50.0,
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
+        commissionPercent: true,
       }
     })
     
