@@ -30,7 +30,6 @@ import { getAvatarTone } from '@/components/shared/avatar-tone'
 import { formatBrazilPhone, formatDate, getInitial, normalizeBrazilPhone } from '@/lib/format'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
-
 import { ErrorState, ListSkeleton } from '@/components/shared/data-state'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
@@ -149,13 +148,13 @@ export default function ClientsPage() {
       </PageHeader>
 
       <div className="relative w-full max-w-md">
-        <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <AppIcon src="/assets/icons/navegacao-painel/buscar.png" className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Buscar por nome ou telefone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="min-h-12 rounded-xl border border-border bg-card pl-10 text-sm text-foreground placeholder:text-muted-foreground shadow-sm"
-        />
+       />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
@@ -280,7 +279,7 @@ export default function ClientsPage() {
         ) : (
           <div className="text-center py-14">
             <div className="mx-auto mb-3 h-16 w-16">
-              <AppIcon src="/assets/icons/clientes-icon.png" />
+              <AppIcon src="/assets/icons/clientes-equipe/clientes.png" />
             </div>
             <p className="text-sm font-semibold text-foreground mb-1">
               {search ? 'Nenhum cliente encontrado' : 'Nenhum cliente ainda'}
@@ -302,7 +301,7 @@ export default function ClientsPage() {
         onClose={() => { setModalOpen(false); setEditingClient(null) }}
         client={editingClient}
         onSaved={() => { mutate(); setModalOpen(false); setEditingClient(null) }}
-      />
+     />
     </div>
   )
 }

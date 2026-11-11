@@ -18,6 +18,7 @@ import { confirmAction } from '@/lib/confirm-toast'
 import { apiFetcher, apiRequest } from '@/lib/http-errors'
 import { showError } from '@/lib/feedback'
 import { cn } from '@/lib/utils'
+import { AppIcon } from '@/components/shared/app-icon'
 
 export function BarberCommissions() {
   const { data, isLoading, mutate } = useSWR('/api/finances/commissions', apiFetcher)
@@ -84,7 +85,7 @@ export function BarberCommissions() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-            <DollarSign className="h-4 w-4 text-primary" /> Total em Comissões Geradas
+            <AppIcon src="/assets/icons/financeiro/comissoes.png" className="h-5 w-5" /> Total em Comissões Geradas
           </span>
           <p className="text-2xl font-extrabold text-foreground mt-2">
             R$ {totalEarnedAll.toFixed(2)}
@@ -190,7 +191,7 @@ export function BarberCommissions() {
       <div className="space-y-3 pt-4">
         <div className="flex justify-between items-center">
           <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-            <Scissors className="h-5 w-5 text-primary" />
+            <AppIcon src="/assets/icons/servicos-produtos/servicos-tesoura.png" className="h-5 w-5 text-primary" />
             Histórico de Atendimentos & Comissões {activeBarber ? `(${activeBarber.barber.name})` : ''}
           </h3>
           {selectedBarberId && (

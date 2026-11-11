@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { apiFetcher } from '@/lib/http-errors'
+import { AppIcon } from '@/components/shared/app-icon'
 
 const fetcher = apiFetcher
 
@@ -103,7 +104,7 @@ export function FinanceReports() {
         <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all active:scale-[0.99]">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-success/20 bg-success/10">
-              <TrendingUp className="h-6 w-6 text-success" />
+              <AppIcon src="/assets/icons/financeiro/receita.png" className="h-6 w-6 text-success" />
             </div>
             <p className="text-sm font-semibold tracking-wide text-muted-foreground">Total de receitas</p>
           </div>
@@ -115,7 +116,7 @@ export function FinanceReports() {
         <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all active:scale-[0.99]">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-destructive/20 bg-destructive/10">
-              <TrendingDown className="h-6 w-6 text-destructive" />
+              <AppIcon src="/assets/icons/financeiro/despesas.png" className="h-6 w-6 text-destructive" />
             </div>
             <p className="text-sm font-semibold tracking-wide text-muted-foreground">Total de despesas</p>
           </div>
@@ -136,7 +137,7 @@ export function FinanceReports() {
             >
               <DollarSign
                 className={cn('h-6 w-6', balance >= 0 ? 'text-primary' : 'text-destructive')}
-              />
+             />
             </div>
             <p className="text-sm font-semibold tracking-wide text-muted-foreground">Saldo periódico</p>
           </div>
@@ -187,7 +188,7 @@ export function FinanceReports() {
                 strokeLinejoin="round"
                 dot={{ r: 4, fill: CHART_COLORS.saldo, strokeWidth: 2, stroke: 'hsl(var(--card))' }}
                 activeDot={{ r: 5, strokeWidth: 2, stroke: 'hsl(var(--card))' }}
-              />
+             />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -196,7 +197,7 @@ export function FinanceReports() {
           data={categoryBreakdown ?? []}
           title="Onde você mais gastou"
           subtitle={`Últimos ${period} meses`}
-        />
+       />
       </div>
     </div>
   )

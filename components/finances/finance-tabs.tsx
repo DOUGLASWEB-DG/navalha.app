@@ -8,6 +8,7 @@ import {
   Bell,
   Percent,
 } from 'lucide-react'
+import { AppIcon } from '@/components/shared/app-icon'
 
 export type FinanceTab = 'overview' | 'transactions' | 'reports' | 'alerts' | 'commissions'
 
@@ -17,19 +18,18 @@ interface FinanceTabsProps {
   alertCount?: number
 }
 
-const tabs: { value: FinanceTab; label: string; icon: React.ElementType }[] = [
-  { value: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
-  { value: 'transactions', label: 'Transações', icon: List },
-  { value: 'commissions', label: 'Comissões & Repasses', icon: Percent },
-  { value: 'reports', label: 'Relatórios', icon: BarChart3 },
-  { value: 'alerts', label: 'Alertas', icon: Bell },
+const tabs: { value: FinanceTab; label: string; icon: string }[] = [
+  { value: 'overview', label: 'Visão Geral', icon: '/assets/icons/financeiro/financeiro-caixa.png' },
+  { value: 'transactions', label: 'Transações', icon: '/assets/icons/financeiro/receita-alt.png' },
+  { value: 'commissions', label: 'Comissões & Repasses', icon: '/assets/icons/financeiro/comissoes.png' },
+  { value: 'reports', label: 'Relatórios', icon: '/assets/icons/navegacao-painel/relatorios.png' },
+  { value: 'alerts', label: 'Alertas', icon: '/assets/icons/navegacao-painel/notificacoes.png' },
 ]
 
 export function FinanceTabs({ active, onChange, alertCount = 0 }: FinanceTabsProps) {
   return (
     <div className="scrollbar-hide -mx-1 flex snap-x snap-mandatory items-stretch gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 touch-pan-x">
       {tabs.map((tab) => {
-        const Icon = tab.icon
         const isActive = active === tab.value
         return (
           <button
@@ -45,7 +45,7 @@ export function FinanceTabs({ active, onChange, alertCount = 0 }: FinanceTabsPro
                 : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50 active:bg-muted'
             )}
           >
-            <Icon className="h-5 w-5 shrink-0" />
+            <AppIcon src={tab.icon} className="h-7 w-7 shrink-0" />
             <span className="hidden whitespace-nowrap sm:inline">{tab.label}</span>
             {tab.value === 'alerts' && alertCount > 0 && (
               <span className={cn(

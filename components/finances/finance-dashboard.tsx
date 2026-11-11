@@ -16,6 +16,7 @@ import { CategoryBreakdown } from './category-breakdown'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { apiFetcher } from '@/lib/http-errors'
+import { AppIcon } from '@/components/shared/app-icon'
 
 const fetcher = apiFetcher
 
@@ -46,7 +47,7 @@ export function FinanceDashboard() {
         trends={trends}
         months={months}
         onMonthsChange={setMonths}
-      />
+     />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -54,29 +55,29 @@ export function FinanceDashboard() {
           title="Receitas do Mês"
           value={formatCurrency(currentMonth?.income ?? 0)}
           trend={trends?.income}
-          icon={<TrendingUp className="w-4 h-4" />}
+          icon={<AppIcon src="/assets/icons/financeiro/receita.png" className="w-4 h-4" />}
           iconBg="bg-success/10 border-success/20"
           iconColor="text-success"
           valueColor="text-success"
-        />
+       />
         <KPICard
           title="Despesas do Mês"
           value={formatCurrency(currentMonth?.expense ?? 0)}
           trend={trends?.expense}
           invertTrend
-          icon={<TrendingDown className="w-4 h-4" />}
+          icon={<AppIcon src="/assets/icons/financeiro/despesas.png" className="w-4 h-4" />}
           iconBg="bg-destructive/10 border-destructive/20"
           iconColor="text-destructive"
           valueColor="text-destructive"
-        />
+       />
         <KPICard
           title="Lucro Líquido"
           value={formatCurrency(profit)}
-          icon={<DollarSign className="w-4 h-4" />}
+          icon={<AppIcon src="/assets/icons/financeiro/lucro-liquido.png" className="h-5 w-5" />}
           iconBg={profit >= 0 ? 'bg-primary/10 border-primary/20' : 'bg-destructive/10 border-destructive/20'}
           iconColor={profit >= 0 ? 'text-primary' : 'text-destructive'}
           valueColor={profit >= 0 ? 'text-primary' : 'text-destructive'}
-        />
+       />
         <KPICard
           title="Margem de Lucro"
           value={`${profitMargin.toFixed(1)}%`}
@@ -84,7 +85,7 @@ export function FinanceDashboard() {
           iconBg={profitMargin >= 0 ? 'bg-info/10 border-info/20' : 'bg-destructive/10 border-destructive/20'}
           iconColor={profitMargin >= 0 ? 'text-info' : 'text-destructive'}
           valueColor={profitMargin >= 0 ? 'text-info' : 'text-destructive'}
-        />
+       />
       </div>
 
       {/* Categorias e saúde do negócio lado a lado */}

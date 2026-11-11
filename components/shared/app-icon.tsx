@@ -9,9 +9,10 @@ export function AppIcon({ src, className }: { src: string; className?: string })
       src={src}
       alt=""
       width={192}
+      sizes="(max-width: 640px) 32px, 48px"
       height={192}
       draggable={false}
-      className={cn('h-full w-full select-none object-contain', className)}
-    />
+      className={cn('inline-block h-full w-full shrink-0 select-none object-contain', className)}
+   />
   )
 }

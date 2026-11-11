@@ -30,13 +30,12 @@ import { formatBrazilPhone, formatCurrency, normalizeBrazilPhone } from '@/lib/f
 import { CANCELLATION_NOTICE_MINUTES } from '@/lib/appointment-rules'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
-
 import { PageHeader } from '@/components/dashboard/page-header'
-
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
 import { showError } from '@/lib/feedback'
+import { AppIcon } from '@/components/shared/app-icon'
 
 const fetcher = apiFetcher
 
@@ -268,13 +267,14 @@ export default function AppointmentsPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       <PageHeader
         title="Agendamentos"
+        iconUrl="/assets/icons/agenda-atendimento/agenda-horarios.png"
         description="Gerencie sua agenda de horários"
       >
         <Button
           onClick={() => { setEditingAppointment(null); setModalOpen(true) }}
           className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
         >
-          <Plus className="h-4 w-4" />
+          <AppIcon src="/assets/icons/agenda-atendimento/novo-agendamento.png" className="h-6 w-6" />
           Novo Agendamento
         </Button>
       </PageHeader>
@@ -292,7 +292,7 @@ export default function AppointmentsPage() {
              }
           }}
           className="min-h-12 rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-        />
+       />
 
         <div className="scrollbar-hide flex max-w-full snap-x snap-mandatory items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 shadow-sm touch-pan-x">
           {statusFilters.map((f) => (
@@ -498,7 +498,7 @@ export default function AppointmentsPage() {
         appointment={editingAppointment}
         onSaved={() => { mutate(); setModalOpen(false); setEditingAppointment(null) }}
         defaultDate={selectedDate}
-      />
+     />
     </div>
   )
 }

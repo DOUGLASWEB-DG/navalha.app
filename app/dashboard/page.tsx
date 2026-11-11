@@ -25,7 +25,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { formatCurrency } from '@/lib/format'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
-
 import { ErrorState } from '@/components/shared/data-state'
 import { apiFetcher } from '@/lib/http-errors'
 
@@ -85,39 +84,39 @@ export default function DashboardPage() {
           title="Receita de Hoje"
           value={formatCurrency(revenue?.daily ?? 0)}
           subtitle="Faturamento do dia"
-          iconUrl="/assets/icons/receitahoje-icon.png"
+          iconUrl="/assets/icons/financeiro/faturamento-do-dia.png"
           accent="gold"
           trend={{ value: '12%', positive: true }}
-        />
+       />
         <StatCard
           title="Receita Semanal"
           value={formatCurrency(revenue?.weekly ?? 0)}
           subtitle="Faturamento da semana"
-          iconUrl="/assets/icons/receitasamanal-icon.png"
+          iconUrl="/assets/icons/financeiro/receita.png"
           accent="green"
-        />
+       />
         <StatCard
           title="Receita Mensal"
           value={formatCurrency(revenue?.monthly ?? 0)}
           subtitle="Faturamento do mês"
-          iconUrl="/assets/icons/receitamensal-icon.png"
+          iconUrl="/assets/icons/financeiro/faturamento.png"
           accent="blue"
-        />
+       />
         <StatCard
           title="Total de Clientes"
           value={String(totalClients ?? 0)}
           subtitle="Cadastrados no sistema"
-          iconUrl="/assets/icons/totalclientes-icon.png"
+          iconUrl="/assets/icons/clientes-equipe/total-de-clientes.png"
           accent="gold"
-        />
+       />
       </div>
 
       {/* Status de hoje: uma faixa só, três contadores */}
       <section aria-label="Situação dos agendamentos de hoje" className="grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-card">
         {[
-          { label: 'Pendentes', value: appointmentStats?.pending ?? 0, icon: '/assets/icons/pendentes-icon.png' },
-          { label: 'Confirmados', value: appointmentStats?.confirmed ?? 0, icon: '/assets/icons/confirmados-icon.png' },
-          { label: 'Concluídos', value: appointmentStats?.completed ?? 0, icon: '/assets/icons/concluidos-icon.png' },
+          { label: 'Pendentes', value: appointmentStats?.pending ?? 0, icon: '/assets/icons/agenda-atendimento/pendentes.png' },
+          { label: 'Confirmados', value: appointmentStats?.confirmed ?? 0, icon: '/assets/icons/agenda-atendimento/confirmados.png' },
+          { label: 'Concluídos', value: appointmentStats?.completed ?? 0, icon: '/assets/icons/agenda-atendimento/concluidos.png' },
         ].map((item) => (
           <div key={item.label} className="flex flex-col items-center gap-1 px-2 py-3 text-center sm:flex-row sm:justify-center sm:gap-3 sm:px-4 sm:text-left">
             <div className="h-8 w-8 shrink-0 sm:h-10 sm:w-10">

@@ -14,10 +14,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { ServiceFormModal } from '@/components/services/service-form-modal'
-
 import { PageHeader } from '@/components/dashboard/page-header'
 import { AppIcon } from '@/components/shared/app-icon'
-
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
@@ -54,7 +52,7 @@ export default function ServicesPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       <PageHeader
         title="Catálogo de Serviços"
-        iconUrl="/assets/icons/servicos-icon.png"
+        iconUrl="/assets/icons/servicos-produtos/servicos-tesoura.png"
         description="Gerencie os serviços, preços e durações oferecidos"
       >
         <Button
@@ -82,7 +80,7 @@ export default function ServicesPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/60 p-1.5">
-                      <AppIcon src="/assets/icons/servicos-icon.png" />
+                      <AppIcon src="/assets/icons/servicos-produtos/servicos-tesoura.png" />
                     </div>
                   </div>
                   <DropdownMenu>
@@ -123,7 +121,7 @@ export default function ServicesPage() {
                   )}
                   
                   <div className="mt-4 flex items-center gap-2 text-sm font-medium text-foreground bg-muted/50 px-3 py-1.5 rounded-lg border border-border w-fit">
-                    <span className="h-6 w-6 shrink-0"><AppIcon src="/assets/icons/pendentes-icon.png" /></span>
+                    <span className="h-6 w-6 shrink-0"><AppIcon src="/assets/icons/agenda-atendimento/pendentes.png" /></span>
                     <span>{svc.durationMins} min</span>
                   </div>
                 </div>
@@ -131,7 +129,7 @@ export default function ServicesPage() {
                 {/* Rodapé (Preço) */}
                 <div className="flex items-center justify-between border-t border-border pt-4 mt-2">
                   <span className="flex items-center gap-2 text-sm font-bold text-foreground">
-                    <span className="h-6 w-6 shrink-0"><AppIcon src="/assets/icons/finaces-icon.png" /></span>
+                    <span className="h-6 w-6 shrink-0"><AppIcon src="/assets/icons/financeiro/financeiro-caixa.png" /></span>
                     Valor
                   </span>
                   <span className="text-base font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20">
@@ -144,7 +142,7 @@ export default function ServicesPage() {
         ) : (
           <div className="text-center py-20">
             <div className="mx-auto mb-6 h-24 w-24">
-              <AppIcon src="/assets/icons/servicos-icon.png" />
+              <AppIcon src="/assets/icons/servicos-produtos/servicos-tesoura.png" />
             </div>
             <p className="text-lg font-bold text-foreground mb-2">Nenhum serviço ainda</p>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">
@@ -165,7 +163,7 @@ export default function ServicesPage() {
         onClose={() => { setModalOpen(false); setEditingService(null) }}
         service={editingService}
         onSaved={() => { mutate(); setModalOpen(false); setEditingService(null) }}
-      />
+     />
     </div>
   )
 }

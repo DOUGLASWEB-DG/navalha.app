@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { UserFormModal } from '@/components/users/user-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
-
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
@@ -54,6 +53,7 @@ export default function UsersPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       <PageHeader
         title="Equipe e Usuários"
+        iconUrl="/assets/icons/clientes-equipe/equipe.png"
         description="Gerencie os barbeiros e administradores do sistema"
       >
         <Button
@@ -177,7 +177,7 @@ export default function UsersPage() {
         onClose={() => { setModalOpen(false); setEditingUser(null) }}
         user={editingUser}
         onSaved={() => { mutate(); setModalOpen(false); setEditingUser(null) }}
-      />
+     />
     </div>
   )
 }

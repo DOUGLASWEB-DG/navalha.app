@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { GoalFormModal } from '@/components/goals/goal-form-modal'
 import { cn } from '@/lib/utils'
-
 import { PageHeader } from '@/components/dashboard/page-header'
 import { AppIcon } from '@/components/shared/app-icon'
 import { apiFetcher } from '@/lib/http-errors'
@@ -23,9 +22,9 @@ import { showError } from '@/lib/feedback'
 const fetcher = apiFetcher
 
 const goalTypeConfig = {
-  REVENUE: { label: 'Receita', iconUrl: '/assets/icons/receitamensal-icon.png' },
-  CLIENTS: { label: 'Novos Clientes', iconUrl: '/assets/icons/totalclientes-icon.png' },
-  APPOINTMENTS: { label: 'Agendamentos', iconUrl: '/assets/icons/agendamentos-icon.png' },
+  REVENUE: { label: 'Receita', iconUrl: '/assets/icons/financeiro/faturamento.png' },
+  CLIENTS: { label: 'Novos Clientes', iconUrl: '/assets/icons/clientes-equipe/total-de-clientes.png' },
+  APPOINTMENTS: { label: 'Agendamentos', iconUrl: '/assets/icons/agenda-atendimento/agenda-horarios.png' },
 }
 
 const periodLabels: Record<string, string> = {
@@ -96,7 +95,7 @@ export default function GoalsPage() {
     <div className="mx-auto max-w-6xl space-y-8 animate-fade-in">
       <PageHeader
         title="Metas"
-        iconUrl="/assets/icons/metas-icon.png"
+        iconUrl="/assets/icons/desempenho-relacionamento/metas-desempenho.png"
         description="Acompanhe seus objetivos de negócio e crescimento"
       >
         <Button
@@ -143,7 +142,7 @@ export default function GoalsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       {isCompleted && (
-                        <span className="h-7 w-7 shrink-0"><AppIcon src="/assets/icons/concluidos-icon.png" /></span>
+                        <span className="h-7 w-7 shrink-0"><AppIcon src="/assets/icons/agenda-atendimento/concluidos.png" /></span>
                       )}
                       <Button
                         variant="ghost"
@@ -163,14 +162,14 @@ export default function GoalsPage() {
                         {progress.toFixed(0)}%
                       </span>
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground bg-background px-2.5 py-1 rounded-lg border border-border">
-                        <span className="h-5 w-5 shrink-0"><AppIcon src="/assets/icons/metas-icon.png" /></span>
+                        <span className="h-5 w-5 shrink-0"><AppIcon src="/assets/icons/desempenho-relacionamento/metas-desempenho.png" /></span>
                         Alvo: {goal.type === 'REVENUE' ? 'R$' : ''}{goal.targetAmount.toLocaleString('pt-BR')}
                       </span>
                     </div>
                     <Progress
                       value={progress}
                       className={cn('h-3 rounded-full', isCompleted ? 'bg-primary/20 [&>div]:bg-primary' : 'bg-card')}
-                    />
+                   />
                     {isCompleted && (
                       <p className="text-xs text-primary font-medium text-center animate-in fade-in slide-in-from-bottom-1">Meta alcançada! 🎉</p>
                     )}
@@ -230,7 +229,7 @@ export default function GoalsPage() {
       {(!goals || goals.length === 0) && (
         <div className="text-center py-20">
           <div className="mx-auto mb-6 h-24 w-24">
-            <AppIcon src="/assets/icons/metas-icon.png" />
+            <AppIcon src="/assets/icons/desempenho-relacionamento/metas-desempenho.png" />
           </div>
           <p className="text-lg font-bold text-foreground mb-2">Nenhuma meta definida</p>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">
@@ -249,7 +248,7 @@ export default function GoalsPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSaved={() => { mutate(); setModalOpen(false) }}
-      />
+     />
     </div>
   )
 }
