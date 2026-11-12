@@ -1,0 +1,206 @@
+{
+  "icons": [
+    {
+      "label": "Início/Painel",
+      "bytes": 40500,
+      "transparent": true
+    },
+    {
+      "label": "Buscar",
+      "bytes": 29069,
+      "transparent": true
+    },
+    {
+      "label": "Notificações",
+      "bytes": 25996,
+      "transparent": true
+    },
+    {
+      "label": "WhatsApp",
+      "bytes": 44291,
+      "transparent": true
+    },
+    {
+      "label": "Relatórios",
+      "bytes": 28125,
+      "transparent": true
+    },
+    {
+      "label": "Agenda/Horários",
+      "bytes": 37361,
+      "transparent": true
+    },
+    {
+      "label": "Novo Agendamento",
+      "bytes": 37099,
+      "transparent": true
+    },
+    {
+      "label": "Lista de Espera",
+      "bytes": 34530,
+      "transparent": true
+    },
+    {
+      "label": "Horários e Folgas",
+      "bytes": 41405,
+      "transparent": true
+    },
+    {
+      "label": "Bloqueios de Agenda",
+      "bytes": 40907,
+      "transparent": true
+    },
+    {
+      "label": "Confirmados",
+      "bytes": 22605,
+      "transparent": true
+    },
+    {
+      "label": "Concluídos",
+      "bytes": 15201,
+      "transparent": true
+    },
+    {
+      "label": "Pendentes",
+      "bytes": 39252,
+      "transparent": true
+    },
+    {
+      "label": "Pendentes ($)",
+      "bytes": 35417,
+      "transparent": true
+    },
+    {
+      "label": "Lista de Clientes",
+      "bytes": 37750,
+      "transparent": true
+    },
+    {
+      "label": "Total de Clientes",
+      "bytes": 22961,
+      "transparent": true
+    },
+    {
+      "label": "Total Grupo",
+      "bytes": 24677,
+      "transparent": true
+    },
+    {
+      "label": "Clientes",
+      "bytes": 40061,
+      "transparent": true
+    },
+    {
+      "label": "Equipe",
+      "bytes": 17164,
+      "transparent": true
+    },
+    {
+      "label": "Perfil da Barbearia",
+      "bytes": 44592,
+      "transparent": true
+    },
+    {
+      "label": "Serviços/Tesoura",
+      "bytes": 27826,
+      "transparent": true
+    },
+    {
+      "label": "Produtos/Estoque",
+      "bytes": 24891,
+      "transparent": true
+    },
+    {
+      "label": "Financeiro/Caixa",
+      "bytes": 37784,
+      "transparent": true
+    },
+    {
+      "label": "Despesas",
+      "bytes": 35242,
+      "transparent": true
+    },
+    {
+      "label": "Lucro Líquido",
+      "bytes": 32399,
+      "transparent": true
+    },
+    {
+      "label": "Receita",
+      "bytes": 35948,
+      "transparent": true
+    },
+    {
+      "label": "Receita (alt.)",
+      "bytes": 31843,
+      "transparent": true
+    },
+    {
+      "label": "Faturamento",
+      "bytes": 36893,
+      "transparent": true
+    },
+    {
+      "label": "Faturamento do Dia",
+      "bytes": 33918,
+      "transparent": true
+    },
+    {
+      "label": "Comissões",
+      "bytes": 40912,
+      "transparent": true
+    },
+    {
+      "label": "Formas de Pagamento",
+      "bytes": 32207,
+      "transparent": true
+    },
+    {
+      "label": "Metas/Desempenho",
+      "bytes": 39177,
+      "transparent": true
+    },
+    {
+      "label": "Clube de Assinatura/VIP",
+      "bytes": 28828,
+      "transparent": true
+    },
+    {
+      "label": "Configurações/Ajustes",
+      "bytes": 29354,
+      "transparent": true
+    }
+  ],
+  "browser": [
+    {
+      "width": 390,
+      "theme": "dark",
+      "axeViolations": 0
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "axeViolations": 0
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "axeViolations": 0
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "axeViolations": 0
+    },
+    {
+      "width": 1280,
+      "theme": "dark",
+      "axeViolations": 0
+    },
+    {
+      "width": 1280,
+      "theme": "light",
+      "axeViolations": 0
+    }
+  ]
+}

@@ -1,0 +1,362 @@
+[
+  {
+    "id": "agenda",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 72,
+      "width": 390,
+      "height": 828
+    },
+    "icons": 7,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "clientes",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 279,
+      "width": 390,
+      "height": 621
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "servicos",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 199,
+      "width": 390,
+      "height": 701
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "produtos",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 283,
+      "width": 390,
+      "height": 617
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "equipe",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 72,
+      "width": 390,
+      "height": 828
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "metas",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 289,
+      "width": 390,
+      "height": 611
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "pacote-modelo",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 271,
+      "width": 390,
+      "height": 629
+    },
+    "icons": 6,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "pacote-cliente",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 190.90625,
+      "width": 390,
+      "height": 709.09375
+    },
+    "icons": 4,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "despesa",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 247,
+      "width": 390,
+      "height": 653
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "permissoes",
+    "width": 390,
+    "dialogBounds": {
+      "x": 0,
+      "y": 547,
+      "width": 390,
+      "height": 353
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "agenda",
+    "width": 768,
+    "dialogBounds": {
+      "x": 128,
+      "y": 67.5,
+      "width": 512,
+      "height": 765
+    },
+    "icons": 7,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "clientes",
+    "width": 768,
+    "dialogBounds": {
+      "x": 160,
+      "y": 150.5,
+      "width": 448,
+      "height": 599
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "servicos",
+    "width": 768,
+    "dialogBounds": {
+      "x": 160,
+      "y": 108.5,
+      "width": 448,
+      "height": 683
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "produtos",
+    "width": 768,
+    "dialogBounds": {
+      "x": 192,
+      "y": 145.5,
+      "width": 384,
+      "height": 609
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "equipe",
+    "width": 768,
+    "dialogBounds": {
+      "x": 192,
+      "y": 67.5,
+      "width": 384,
+      "height": 765
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "metas",
+    "width": 768,
+    "dialogBounds": {
+      "x": 160,
+      "y": 162.5,
+      "width": 448,
+      "height": 575
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "pacote-modelo",
+    "width": 768,
+    "dialogBounds": {
+      "x": 128,
+      "y": 156.5,
+      "width": 512,
+      "height": 587
+    },
+    "icons": 6,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "pacote-cliente",
+    "width": 768,
+    "dialogBounds": {
+      "x": 128,
+      "y": 121.453125,
+      "width": 512,
+      "height": 657.09375
+    },
+    "icons": 4,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "despesa",
+    "width": 768,
+    "dialogBounds": {
+      "x": 160,
+      "y": 141.5,
+      "width": 448,
+      "height": 617
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "permissoes",
+    "width": 768,
+    "dialogBounds": {
+      "x": 128,
+      "y": 83.5,
+      "width": 512,
+      "height": 733
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "agenda",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 384,
+      "y": 67.5,
+      "width": 512,
+      "height": 765
+    },
+    "icons": 7,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "clientes",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 416,
+      "y": 150.5,
+      "width": 448,
+      "height": 599
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "servicos",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 416,
+      "y": 108.5,
+      "width": 448,
+      "height": 683
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "produtos",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 448,
+      "y": 145.5,
+      "width": 384,
+      "height": 609
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "equipe",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 448,
+      "y": 67.5,
+      "width": 384,
+      "height": 765
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "metas",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 416,
+      "y": 162.5,
+      "width": 448,
+      "height": 575
+    },
+    "icons": 3,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "pacote-modelo",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 384,
+      "y": 156.5,
+      "width": 512,
+      "height": 587
+    },
+    "icons": 6,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "pacote-cliente",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 384,
+      "y": 121.453125,
+      "width": 512,
+      "height": 657.09375
+    },
+    "icons": 4,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "despesa",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 416,
+      "y": 141.5,
+      "width": 448,
+      "height": 617
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  },
+  {
+    "id": "permissoes",
+    "width": 1280,
+    "dialogBounds": {
+      "x": 384,
+      "y": 83.5,
+      "width": 512,
+      "height": 733
+    },
+    "icons": 1,
+    "horizontalOverflow": false
+  }
+]

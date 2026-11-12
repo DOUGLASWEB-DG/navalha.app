@@ -1,0 +1,177 @@
+[
+  {
+    "id": "color-contrast",
+    "impact": "serious",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=playwright",
+    "nodes": [
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#64748b",
+              "bgColor": "#f3f4f6",
+              "contrastRatio": 4.32,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1"
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"flex h-[100dvh] bg-background text-foreground overflow-hidden\">",
+                "target": [
+                  ".h-\\[100dvh\\]"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 4.32 (foreground color: #64748b, background color: #f3f4f6, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<p class=\"mt-0.5 text-sm text-muted-foreground\">Gerencie sua agenda de horários</p>",
+        "target": [
+          ".mt-0\\.5"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.32 (foreground color: #64748b, background color: #f3f4f6, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#2463eb",
+              "bgColor": "#dee5f5",
+              "contrastRatio": 4.09,
+              "fontSize": "9.0pt (12px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1"
+            },
+            "relatedNodes": [
+              {
+                "html": "<span class=\"text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full\">1 agendamentos</span>",
+                "target": [
+                  ".border-primary\\/20"
+                ]
+              },
+              {
+                "html": "<div class=\"flex h-[100dvh] bg-background text-foreground overflow-hidden\">",
+                "target": [
+                  ".h-\\[100dvh\\]"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 4.09 (foreground color: #2463eb, background color: #dee5f5, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<span class=\"text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-full\">1 agendamentos</span>",
+        "target": [
+          ".border-primary\\/20"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.09 (foreground color: #2463eb, background color: #dee5f5, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#64748b",
+              "bgColor": "#f4f7fe",
+              "contrastRatio": 4.43,
+              "fontSize": "9.0pt (12px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1"
+            },
+            "relatedNodes": [
+              {
+                "html": "<header class=\"flex items-center justify-between gap-3 border-b border-border px-4 py-3 lg:px-5 bg-primary/5\">",
+                "target": [
+                  ".lg\\:px-5"
+                ]
+              },
+              {
+                "html": "<section aria-label=\"Hoje · quarta-feira, 11 de novembro\" class=\"overflow-hidden rounded-2xl border border-border bg-card shadow-sm\">",
+                "target": [
+                  ".space-y-6 > section"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 4.43 (foreground color: #64748b, background color: #f4f7fe, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<span class=\"text-xs text-muted-foreground tabular-nums\">1 horário</span>",
+        "target": [
+          ".lg\\:px-5 > .tabular-nums.text-xs"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.43 (foreground color: #64748b, background color: #f4f7fe, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#479ef5",
+              "bgColor": "#edf5fe",
+              "contrastRatio": 2.55,
+              "fontSize": "9.0pt (12px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1"
+            },
+            "relatedNodes": [
+              {
+                "html": "<span class=\"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium border-info/25 bg-info/10 text-info mt-1.5\">",
+                "target": [
+                  ".mt-1\\.5"
+                ]
+              },
+              {
+                "html": "<section aria-label=\"Hoje · quarta-feira, 11 de novembro\" class=\"overflow-hidden rounded-2xl border border-border bg-card shadow-sm\">",
+                "target": [
+                  ".space-y-6 > section"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 2.55 (foreground color: #479ef5, background color: #edf5fe, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<span class=\"inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium border-info/25 bg-info/10 text-info mt-1.5\">",
+        "target": [
+          ".mt-1\\.5"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 2.55 (foreground color: #479ef5, background color: #edf5fe, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+      }
+    ]
+  }
+]

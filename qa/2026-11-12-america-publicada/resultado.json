@@ -1,0 +1,38 @@
+[
+  {
+    "width": 390,
+    "route": "/",
+    "status": 200,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/login",
+    "status": 200,
+    "overflow": false
+  },
+  {
+    "width": 390,
+    "route": "/book",
+    "status": 200,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "route": "/",
+    "status": 200,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "route": "/login",
+    "status": 200,
+    "overflow": false
+  },
+  {
+    "width": 1280,
+    "route": "/book",
+    "status": 200,
+    "overflow": false
+  }
+]

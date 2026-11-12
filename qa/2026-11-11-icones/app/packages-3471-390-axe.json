@@ -1,0 +1,171 @@
+[
+  {
+    "id": "color-contrast",
+    "impact": "serious",
+    "tags": [
+      "cat.color",
+      "wcag2aa",
+      "wcag143",
+      "TTv5",
+      "TT13.c",
+      "EN-301-549",
+      "EN-9.1.4.3",
+      "ACT",
+      "RGAAv4",
+      "RGAA-3.2.1"
+    ],
+    "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+    "help": "Elements must meet minimum color contrast ratio thresholds",
+    "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=playwright",
+    "nodes": [
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#64748b",
+              "bgColor": "#f3f4f6",
+              "contrastRatio": 4.32,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1"
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"flex h-[100dvh] bg-background text-foreground overflow-hidden\">",
+                "target": [
+                  ".h-\\[100dvh\\]"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 4.32 (foreground color: #64748b, background color: #f3f4f6, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<p class=\"mt-0.5 text-sm text-muted-foreground\">Controle de pacotes pré-pagos, cartelas de clientes e disparos automáticos</p>",
+        "target": [
+          ".mt-0\\.5"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.32 (foreground color: #64748b, background color: #f3f4f6, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#64748b",
+              "bgColor": "#f3f4f6",
+              "contrastRatio": 4.32,
+              "fontSize": "10.5pt (14px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1"
+            },
+            "relatedNodes": [
+              {
+                "html": "<div class=\"flex h-[100dvh] bg-background text-foreground overflow-hidden\">",
+                "target": [
+                  ".h-\\[100dvh\\]"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 4.32 (foreground color: #64748b, background color: #f3f4f6, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<button class=\"flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-all border-transparent text-muted-foreground hover:text-foreground\">",
+        "target": [
+          ".border-transparent"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.32 (foreground color: #64748b, background color: #f3f4f6, font size: 10.5pt (14px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#64748b",
+              "bgColor": "#f2f5f8",
+              "contrastRatio": 4.34,
+              "fontSize": "9.0pt (12px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1"
+            },
+            "relatedNodes": [
+              {
+                "html": "<button class=\"px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-muted/50 text-muted-foreground hover:bg-muted\">Finalizados</button>",
+                "target": [
+                  ".py-1\\.5.rounded-lg.bg-muted\\/50:nth-child(2)"
+                ]
+              },
+              {
+                "html": "<div class=\"flex h-[100dvh] bg-background text-foreground overflow-hidden\">",
+                "target": [
+                  ".h-\\[100dvh\\]"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f2f5f8, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<button class=\"px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-muted/50 text-muted-foreground hover:bg-muted\">Finalizados</button>",
+        "target": [
+          ".py-1\\.5.rounded-lg.bg-muted\\/50:nth-child(2)"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f2f5f8, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+      },
+      {
+        "any": [
+          {
+            "id": "color-contrast",
+            "data": {
+              "fgColor": "#64748b",
+              "bgColor": "#f2f5f8",
+              "contrastRatio": 4.34,
+              "fontSize": "9.0pt (12px)",
+              "fontWeight": "normal",
+              "messageKey": null,
+              "expectedContrastRatio": "4.5:1"
+            },
+            "relatedNodes": [
+              {
+                "html": "<button class=\"px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-muted/50 text-muted-foreground hover:bg-muted\">Todos</button>",
+                "target": [
+                  ".py-1\\.5.rounded-lg.bg-muted\\/50:nth-child(3)"
+                ]
+              },
+              {
+                "html": "<div class=\"flex h-[100dvh] bg-background text-foreground overflow-hidden\">",
+                "target": [
+                  ".h-\\[100dvh\\]"
+                ]
+              }
+            ],
+            "impact": "serious",
+            "message": "Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f2f5f8, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+          }
+        ],
+        "all": [],
+        "none": [],
+        "impact": "serious",
+        "html": "<button class=\"px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-muted/50 text-muted-foreground hover:bg-muted\">Todos</button>",
+        "target": [
+          ".py-1\\.5.rounded-lg.bg-muted\\/50:nth-child(3)"
+        ],
+        "failureSummary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f2f5f8, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1"
+      }
+    ]
+  }
+]
