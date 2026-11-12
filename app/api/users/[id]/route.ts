@@ -1,3 +1,4 @@
+import { permissionOverridesSchema } from '@/lib/permission-schema'
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
@@ -13,6 +14,7 @@ const updateUserSchema = z.object({
   role: z.enum(['ADMIN', 'BARBER']).optional(),
   active: z.boolean().optional(),
   commissionPercent: z.number().min(0).max(100).optional(),
+  permissionOverrides: permissionOverridesSchema.optional(),
 }).strict()
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -61,12 +63,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       }
     }
 
-    const data: { name?: string; email?: string; role?: 'ADMIN' | 'BARBER'; password?: string; active?: boolean; commissionPercent?: number } = {}
+    const data: { name?: string; email?: string; role?: 'ADMIN' | 'BARBER'; password?: string; active?: boolean; commissionPercent?: number; permissionOverrides?: Record<string, boolean> } = {}
     if (parsed.name) data.name = parsed.name
     if (parsed.email) data.email = parsed.email
     if (parsed.role) data.role = parsed.role
     if (parsed.active !== undefined) data.active = parsed.active
     if (parsed.commissionPercent !== undefined) data.commissionPercent = parsed.commissionPercent
+    if (parsed.permissionOverrides !== undefined) data.permissionOverrides = parsed.permissionOverrides as Record<string, boolean>
     if (parsed.password) {
       data.password = await bcrypt.hash(parsed.password, 10)
     }
@@ -81,6 +84,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         role: true,
         active: true,
         commissionPercent: true,
+        permissionOverrides: true,
       }
     })
 

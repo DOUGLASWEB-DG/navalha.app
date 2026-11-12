@@ -5,7 +5,7 @@ import { LIMITES } from '@/lib/input-limits'
 import { sendTextMessage } from '@/lib/whatsapp'
 import { normalizeBrazilPhone } from '@/lib/format'
 import { Prisma } from '@prisma/client'
-import { notFound, requireTenantUser, tenantErrorResponse } from '@/lib/api'
+import { notFound, requireTenantUser, requirePermission, tenantErrorResponse } from '@/lib/api'
 import {
   AppointmentRuleError,
   assertStatusTransition,
@@ -34,7 +34,8 @@ const updateSchema = z.object({
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, barbearia } = await requireTenantUser()
+    const session = await requireTenantUser()
+    const { user, barbearia } = session
     const barbeariaId = barbearia.id
     const { id } = await params
     const body = await req.json()
@@ -51,6 +52,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const isAdmin = user.role === 'ADMIN'
+    const permissionChangesSchedule = ['clientId', 'serviceIds', 'serviceId', 'barberId', 'clientPackageId', 'date', 'notes'].some(key => Object.prototype.hasOwnProperty.call(parsed, key))
+    if (permissionChangesSchedule) await requirePermission(session, 'appointments.edit')
+    if (parsed.status && parsed.status !== current.status) {
+      const permission = { CONFIRMED: 'appointments.confirm', COMPLETED: 'appointments.complete', CANCELED: 'appointments.cancel', PENDING: 'appointments.edit' } as const
+      await requirePermission(session, permission[parsed.status])
+    }
     const nextStatus = parsed.status ?? current.status
     assertStatusTransition(current.status, nextStatus, current.date, isAdmin)
     const hasServiceChange = parsed.serviceIds !== undefined || parsed.serviceId !== undefined

@@ -123,12 +123,12 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             <Label className="text-sm font-semibold text-foreground">Nome do Serviço *</Label>
             <div className="relative">
               <Type className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                {...register('name')} maxLength={LIMITES.nome} 
-                disabled={isSubmitting} 
-                placeholder="Ex: Corte Clássico" 
-                className="pl-11" 
-              />
+              <Input
+                {...register('name')} maxLength={LIMITES.nome}
+                disabled={isSubmitting}
+                placeholder="Ex: Corte Clássico"
+                className="pl-11"
+             />
             </div>
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
@@ -137,13 +137,13 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             <Label className="text-sm font-semibold text-foreground">Descrição</Label>
             <div className="relative">
               <AlignLeft className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Textarea 
-                {...register('description')} maxLength={LIMITES.descricao} 
-                disabled={isSubmitting} 
-                placeholder="Breve descrição do serviço..." 
-                rows={3} 
-                className="pl-11 resize-none" 
-              />
+              <Textarea
+                {...register('description')} maxLength={LIMITES.descricao}
+                disabled={isSubmitting}
+                placeholder="Breve descrição do serviço..."
+                rows={3}
+                className="pl-11 resize-none"
+             />
             </div>
           </div>
 
@@ -151,31 +151,31 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Preço *</Label>
               <div className="relative">
-                <SystemIcon name="financeiro-caixa" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary pointer-events-none"  />
-                <Input 
-                  {...register('price')} 
-                  disabled={isSubmitting} 
-                  type="number" 
-                  step="0.01" 
-                  min="0" 
-                  placeholder="35,00" 
-                  className="pl-11 font-medium" 
-                />
+                <SystemIcon name="financeiro-caixa" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary pointer-events-none" />
+                <Input
+                  {...register('price')}
+                  disabled={isSubmitting}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="35,00"
+                  className="pl-11 font-medium"
+               />
               </div>
               {errors.price && <p className="text-xs text-destructive">{errors.price.message}</p>}
             </div>
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Duração *</Label>
               <div className="relative">
-                <SystemIcon name="horarios-e-folgas" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none"  />
-                <Input 
-                  {...register('durationMins')} 
-                  disabled={isSubmitting} 
-                  type="number" 
-                  min="5" 
-                  placeholder="30" 
-                  className="pl-11" 
-                />
+                <SystemIcon name="horarios-e-folgas" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                <Input
+                  {...register('durationMins')}
+                  disabled={isSubmitting}
+                  type="number"
+                  min="5"
+                  placeholder="30"
+                  className="pl-11"
+               />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium pointer-events-none">
                   min
                 </span>

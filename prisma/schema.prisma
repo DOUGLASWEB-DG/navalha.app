@@ -12,6 +12,7 @@ datasource db {
 
 // Tenant: cada barbearia isola seus dados operacionais pelo barbeariaId.
 model Barbearia {
+  barberPermissions Json @default("{}")
   id           String         @id @default(cuid())
   name         String
   subdomain    String         @unique // ex.: "america" em america.navalha.app
@@ -231,6 +232,7 @@ enum Role {
 }
 
 model User {
+  permissionOverrides Json @default("{}")
   id                  String        @id @default(cuid())
   barbeariaId         String
   name                String

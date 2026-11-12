@@ -17,7 +17,7 @@ import {
   normalizeServiceIds,
 } from '@/lib/appointment-services'
 import { notifyAppointmentCreated } from '@/lib/notifications'
-import { notFound, requireTenantUser, tenantErrorResponse } from '@/lib/api'
+import { notFound, requireTenantUser, requirePermission, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
   clientId: z.string().min(1).max(LIMITES.id),
@@ -94,7 +94,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { user, barbearia } = await requireTenantUser()
+    const session = await requireTenantUser()
+    await requirePermission(session, 'appointments.create')
+    const { user, barbearia } = session
     const barbeariaId = barbearia.id
     const body = await req.json()
     const parsed = createSchema.parse(body)

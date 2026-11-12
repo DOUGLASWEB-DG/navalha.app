@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { LIMITES } from '@/lib/input-limits'
 import { normalizeBrazilPhone } from '@/lib/format'
-import { requireTenantUser, tenantErrorResponse } from '@/lib/api'
+import { requireTenantUser, requirePermission, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(LIMITES.nome),
@@ -79,7 +79,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { barbearia } = await requireTenantUser()
+    const session = await requireTenantUser()
+    await requirePermission(session, 'clients.create')
+    const { barbearia } = session
     const body = await req.json()
     const parsed = createSchema.parse(body)
 

@@ -2,6 +2,8 @@
 
 import { SystemIcon } from '@/components/shared/system-icon'
 
+import { PERMISSION_DEFINITIONS, readPermissionOverrides } from '@/lib/permissions'
+import { permissionOverridesSchema } from '@/lib/permission-schema'
 import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -36,6 +38,7 @@ const schema = z.object({
   email: z.string().email('E-mail inválido'),
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').optional().or(z.literal('')),
   role: z.enum(['ADMIN', 'BARBER']),
+  permissionOverrides: permissionOverridesSchema.default({}),
   commissionPercent: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').default(50),
 })
 
@@ -58,7 +61,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { role: 'BARBER', commissionPercent: 50 },
+    defaultValues: { role: 'BARBER', commissionPercent: 50, permissionOverrides: {} },
   })
 
   // Foto do barbeiro/admin (só o admin chega neste formulário)
@@ -72,9 +75,10 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         role: user.role,
         password: '',
         commissionPercent: user.commissionPercent ?? 50,
+        permissionOverrides: readPermissionOverrides(user.permissionOverrides),
       })
     } else {
-      reset({ name: '', email: '', role: 'BARBER', password: '', commissionPercent: 50 })
+      reset({ name: '', email: '', role: 'BARBER', password: '', commissionPercent: 50, permissionOverrides: {} })
     }
     photo.reset()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,6 +99,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         email: data.email,
         role: data.role,
         commissionPercent: Number(data.commissionPercent),
+        permissionOverrides: data.role === 'BARBER' ? data.permissionOverrides : {},
       }
 
       if (data.password) {
@@ -227,6 +232,25 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
           </div>
 
           {/* Rodapé */}
+          {watch('role') === 'BARBER' && <fieldset className="space-y-3 rounded-xl border border-border p-4">
+            <legend className="px-1 text-sm font-semibold">Permissões deste profissional</legend>
+            <p className="text-xs text-muted-foreground">Herdar usa o padrão da equipe. As exceções valem somente para este profissional e para a própria agenda.</p>
+            {PERMISSION_DEFINITIONS.map(({ key, label }) => {
+              const overrides = watch('permissionOverrides') ?? {}
+              const value = overrides[key] === undefined ? 'inherit' : overrides[key] ? 'allow' : 'deny'
+              return <label key={key} className="flex min-h-12 flex-col items-stretch justify-between gap-2 text-sm sm:flex-row sm:items-center">
+                <span>{label}</span>
+                <select value={value} disabled={isSubmitting} className="min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm sm:w-auto" onChange={event => {
+                  const next = { ...overrides }
+                  if (event.target.value === 'inherit') delete next[key]
+                  else next[key] = event.target.value === 'allow'
+                  setValue('permissionOverrides', next, { shouldDirty: true })
+                }}>
+                  <option value="inherit">Herdar da equipe</option><option value="allow">Permitir</option><option value="deny">Bloquear</option>
+                </select>
+              </label>
+            })}
+          </fieldset>}
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
               Cancelar

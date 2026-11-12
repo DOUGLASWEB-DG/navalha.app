@@ -1,3 +1,5 @@
+import prisma from '@/lib/prisma'
+import { resolvePermissions, type Permission } from '@/lib/permissions'
 import { NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import { getTenantSession } from '@/lib/auth'
@@ -50,4 +52,14 @@ export function tenantErrorResponse(error: unknown): NextResponse | null {
     return NextResponse.json({ error: 'Não encontrado.' }, { status: 404 })
   }
   return null
+}
+
+export async function getUserPermissions(session: Awaited<ReturnType<typeof requireTenantUser>>) {
+  if (session.user.role === 'ADMIN') return resolvePermissions('ADMIN', {}, {})
+  const group = await prisma.barbearia.findFirst({ where: { id: session.barbearia.id }, select: { barberPermissions: true } })
+  return resolvePermissions(session.user.role, group?.barberPermissions, session.user.permissionOverrides)
+}
+export async function requirePermission(session: Awaited<ReturnType<typeof requireTenantUser>>, permission: Permission) {
+  const permissions = await getUserPermissions(session)
+  if (!permissions[permission]) throw new ApiError(403, 'Esta ação não está liberada no seu perfil. Fale com o administrador.')
 }

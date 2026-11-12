@@ -64,6 +64,7 @@ export default function ClientsPage() {
   // Datas no relógio da barbearia, não no do aparelho
   const timeZone = useBarbeariaTimeZone()
   const isAdmin = authData?.user?.role === 'ADMIN'
+  const canCreateClient = isAdmin || authData?.user?.role === 'BARBER' && authData?.permissions?.['clients.create'] === true
 
   function openCreate() {
     setEditingClient(null)
@@ -139,6 +140,7 @@ export default function ClientsPage() {
         description={!isLoading && !error ? `${clients?.length ?? 0} clientes cadastrados` : 'Gerencie seus clientes'}
       >
         <Button
+          disabled={!canCreateClient}
           onClick={openCreate}
           className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
         >

@@ -1,3 +1,4 @@
+import { permissionOverridesSchema } from '@/lib/permission-schema'
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
@@ -11,6 +12,7 @@ const createUserSchema = z.object({
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').max(LIMITES.senha),
   role: z.enum(['ADMIN', 'BARBER']).default('BARBER'),
   commissionPercent: z.number().min(0).max(100).optional(),
+  permissionOverrides: permissionOverridesSchema.optional(),
 }).strict()
 
 export async function GET() {
@@ -27,6 +29,7 @@ export async function GET() {
         active: true,
         avatarUrl: true,
         commissionPercent: true,
+        permissionOverrides: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' }
@@ -38,6 +41,7 @@ export async function GET() {
       : users.map((u) => ({
           ...u,
           commissionPercent: u.id === currentUser.id ? u.commissionPercent : undefined,
+          permissionOverrides: u.id === currentUser.id ? u.permissionOverrides : undefined,
         }))
 
     return NextResponse.json(sanitized)
@@ -72,6 +76,7 @@ export async function POST(req: NextRequest) {
         password: hashedPassword,
         role: parsed.role,
         commissionPercent: parsed.commissionPercent ?? 50.0,
+        permissionOverrides: parsed.permissionOverrides ?? {},
       },
       select: {
         id: true,
@@ -79,6 +84,7 @@ export async function POST(req: NextRequest) {
         email: true,
         role: true,
         commissionPercent: true,
+        permissionOverrides: true,
       }
     })
     

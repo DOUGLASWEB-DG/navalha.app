@@ -1,5 +1,6 @@
 'use client'
 
+import { type Permission } from '@/lib/permissions'
 import { SystemIcon } from '@/components/shared/system-icon'
 
 import { useState } from 'react'
@@ -125,6 +126,7 @@ export default function AppointmentsPage() {
   const { data: appointments, error, isLoading, mutate } = useSWR<AppointmentItem[]>(`/api/appointments${queryParams}`, fetcher)
   const { data: authData } = useSWR('/api/auth/me', fetcher)
   const isAdmin = authData?.user?.role === 'ADMIN'
+  const allowed = (permission: Permission) => isAdmin || authData?.user?.role === 'BARBER' && authData?.permissions?.[permission] === true
   const timeZone = useBarbeariaTimeZone()
   const now = new Date()
   // Dia e hora exibidos são os do relógio da barbearia, não os do aparelho
@@ -196,6 +198,13 @@ export default function AppointmentsPage() {
     setModalOpen(true)
   }
 
+  function appointmentActions(appt: AppointmentItem, admin: boolean, at: Date) {
+    const actions = getActions(appt, admin, at)
+    if (actions.primary && !allowed(actions.primary.status === 'COMPLETED' ? 'appointments.complete' : 'appointments.confirm')) actions.primary = null
+    if (!allowed('appointments.cancel')) actions.canCancel = false
+    return actions
+  }
+
   function renderMenu(appt: AppointmentItem, actions: ReturnType<typeof getActions>) {
     return (
       <DropdownMenu>
@@ -210,7 +219,7 @@ export default function AppointmentsPage() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuItem onClick={() => openEdit(appt)} className="gap-2 cursor-pointer">
+          <DropdownMenuItem disabled={!allowed('appointments.edit') || !isAdmin && (appt.status === 'COMPLETED' || appt.status === 'CANCELED')} onClick={() => openEdit(appt)} className="gap-2 cursor-pointer">
             <Pencil className="w-4 h-4" /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => openWhatsApp(appt)} className="gap-2 cursor-pointer">
@@ -273,6 +282,8 @@ export default function AppointmentsPage() {
         description="Gerencie sua agenda de horários"
       >
         <Button
+          disabled={!allowed('appointments.create')}
+          title={!allowed('appointments.create') ? 'Cadastro de horários bloqueado pelo administrador' : undefined}
           onClick={() => { setEditingAppointment(null); setModalOpen(true) }}
           className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
         >
@@ -376,7 +387,7 @@ export default function AppointmentsPage() {
                         const date = toZonedWallClock(appt.date, timeZone)
                         const summary = summarize(appt)
                         const end = new Date(date.getTime() + summary.durationMins * 60_000)
-                        const actions = getActions(appt, isAdmin, now)
+                        const actions = appointmentActions(appt, isAdmin, now)
                         return (
                           <tr key={appt.id} className={cn('align-top transition-colors hover:bg-muted/30', appt.status === 'CANCELED' && 'opacity-60')}>
                             <td className="px-5 py-3">
@@ -421,7 +432,7 @@ export default function AppointmentsPage() {
                       const date = toZonedWallClock(appt.date, timeZone)
                       const summary = summarize(appt)
                       const end = new Date(date.getTime() + summary.durationMins * 60_000)
-                      const actions = getActions(appt, isAdmin, now)
+                      const actions = appointmentActions(appt, isAdmin, now)
                       return (
                         <li key={appt.id} className={cn('p-4', appt.status === 'CANCELED' && 'opacity-60')}>
                           <div className="flex items-start justify-between gap-3">
