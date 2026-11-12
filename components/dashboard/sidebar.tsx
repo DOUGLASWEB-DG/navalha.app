@@ -33,7 +33,7 @@ const navItems = [
   { label: 'Painel', href: '/dashboard', iconUrl: '/assets/icons/navegacao-painel/inicio-painel.png', adminOnly: true },
   { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/icons/agenda-atendimento/agenda-horarios.png' },
   { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/icons/clientes-equipe/clientes.png' },
-  { label: 'Pacotes', href: '/dashboard/packages', iconUrl: '/assets/icons/servicos-produtos/produtos-estoque.png' },
+  { label: 'Pacotes', href: '/dashboard/packages', iconUrl: '/assets/icons/desempenho-relacionamento/clube-de-assinatura-vip.png' },
   { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/icons/financeiro/financeiro-caixa.png', adminOnly: true },
   { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/icons/desempenho-relacionamento/metas-desempenho.png', adminOnly: true },
   { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/icons/servicos-produtos/servicos-tesoura.png', adminOnly: true },

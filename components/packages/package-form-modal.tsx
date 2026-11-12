@@ -128,7 +128,7 @@ export function PackageFormModal({ open, onClose, pkg, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Nome do Pacote *</Label>
             <div className="relative">
-              <SystemIcon name="produtos-estoque" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
+              <SystemIcon name="clube-de-assinatura-vip" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Input
                 disabled={isSubmitting}
                 {...register('name')}

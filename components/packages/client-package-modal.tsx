@@ -101,7 +101,7 @@ export function ClientPackageModal({ open, onClose, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><span><SystemIcon name="clube-de-assinatura-vip" className="h-5 w-5 text-primary"  />
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><span><SystemIcon name="lista-de-clientes" className="h-8 w-8"  />
             Adicionar Cliente ao Pacote</span></DialogTitle>
           <DialogDescription>Selecione o cliente e confira as condições do pacote.</DialogDescription>
         </DialogHeader>

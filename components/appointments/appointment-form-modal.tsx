@@ -229,7 +229,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
           <div className="flex flex-col gap-2">
             <Label id="appointment-services-label" className="inline-flex items-center gap-2 text-sm font-semibold text-foreground"><SystemIcon name="servicos-tesoura" />Serviço *</Label>
             <div className="relative">
-              
+
               <div role="group" aria-labelledby="appointment-services-label" className="flex flex-col gap-1 rounded-xl border border-border bg-muted/20 p-2">
                 {services?.map((s: any) => {
                   const checked = watch('serviceIds')?.includes(s.id)

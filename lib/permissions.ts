@@ -19,12 +19,12 @@ export function readPermissionOverrides(value: unknown): PermissionOverrides {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {}
   const input = value as Record<string, unknown>
   const result: PermissionOverrides = {}
-  for (const { key } of PERMISSION_DEFINITIONS) if (typeof input[key] === 'boolean') result[key] = input[key] as boolean
+  for (const { key } of PERMISSION_DEFINITIONS) if (Object.prototype.hasOwnProperty.call(input, key) && typeof input[key] === 'boolean') result[key] = input[key] as boolean
   return result
 }
 export function resolvePermissions(role: string, group: unknown, individual: unknown): Permissions {
   const defaults = { ...DEFAULT_BARBER_PERMISSIONS }
-  if (role === 'ADMIN') return defaults
+  if (role === 'ADMIN') return Object.fromEntries(PERMISSION_DEFINITIONS.map(({ key }) => [key, true])) as Permissions
   if (role !== 'BARBER') return Object.fromEntries(PERMISSION_DEFINITIONS.map(({ key }) => [key, false])) as Permissions
   return { ...defaults, ...readPermissionOverrides(group), ...readPermissionOverrides(individual) }
 }

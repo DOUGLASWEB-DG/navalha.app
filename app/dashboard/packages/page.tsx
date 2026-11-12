@@ -25,6 +25,7 @@ import { showError } from '@/lib/feedback'
 import { cn } from '@/lib/utils'
 import { PackageFormModal } from '@/components/packages/package-form-modal'
 import { ClientPackageModal } from '@/components/packages/client-package-modal'
+import { SystemIcon } from '@/components/shared/system-icon'
 import { AppIcon } from '@/components/shared/app-icon'
 
 export default function PackagesPage() {
@@ -103,7 +104,7 @@ export default function PackagesPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       <PageHeader
         title="Planos & Pacotes de Cortes"
-        iconUrl="/assets/icons/servicos-produtos/produtos-estoque.png"
+        iconUrl="/assets/icons/desempenho-relacionamento/clube-de-assinatura-vip.png"
         description="Controle de pacotes pré-pagos, cartelas de clientes e disparos automáticos"
       >
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
@@ -124,7 +125,7 @@ export default function PackagesPage() {
             onClick={() => setClientPackageModalOpen(true)}
             className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            <Sparkles className="h-4 w-4" /> Adicionar Cliente ao Pacote
+            <SystemIcon name="lista-de-clientes" className="h-4 w-4"  /> Adicionar Cliente ao Pacote
           </Button>
         </div>
       </PageHeader>
@@ -153,7 +154,7 @@ export default function PackagesPage() {
               : 'border-transparent text-muted-foreground hover:text-foreground'
           )}
         >
-          <PackageIcon className="h-4 w-4" />
+          <SystemIcon name="clube-de-assinatura-vip" className="h-4 w-4"  />
           Modelos de Pacotes ({packageModels?.length || 0})
         </button>
       </div>

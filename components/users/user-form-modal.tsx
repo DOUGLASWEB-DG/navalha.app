@@ -240,7 +240,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
               const value = overrides[key] === undefined ? 'inherit' : overrides[key] ? 'allow' : 'deny'
               return <label key={key} className="flex min-h-12 flex-col items-stretch justify-between gap-2 text-sm sm:flex-row sm:items-center">
                 <span>{label}</span>
-                <select value={value} disabled={isSubmitting} className="min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm sm:w-auto" onChange={event => {
+                <select aria-label={label} value={value} disabled={isSubmitting} className="min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm sm:w-auto" onChange={event => {
                   const next = { ...overrides }
                   if (event.target.value === 'inherit') delete next[key]
                   else next[key] = event.target.value === 'allow'

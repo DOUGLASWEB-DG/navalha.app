@@ -39,7 +39,7 @@ const items = [
   {
     href: '/dashboard/packages',
     label: 'Pacotes',
-    iconUrl: '/assets/icons/servicos-produtos/produtos-estoque.png',
+    iconUrl: '/assets/icons/desempenho-relacionamento/clube-de-assinatura-vip.png',
     match: (p: string) => p.startsWith('/dashboard/packages'),
   },
   {
