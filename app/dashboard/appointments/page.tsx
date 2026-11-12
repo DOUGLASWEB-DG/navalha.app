@@ -1,5 +1,7 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { useState } from 'react'
 import useSWR from 'swr'
 import { addDays, format, isSameDay } from 'date-fns'
@@ -248,7 +250,7 @@ export default function AppointmentsPage() {
         variant={status === 'COMPLETED' ? 'default' : 'outline'}
         className={cn('gap-2', className)}
       >
-        <CheckCircle2 className="h-4 w-4" />
+        <SystemIcon name={status === 'COMPLETED' ? 'concluidos' : 'confirmados'} className="h-5 w-5" />
         {label}
       </Button>
     )
@@ -360,11 +362,11 @@ export default function AppointmentsPage() {
                     </colgroup>
                     <thead className="border-b border-border text-left text-xs text-muted-foreground">
                       <tr>
-                        <th scope="col" className="px-5 py-2.5 font-medium">Horário</th>
-                        <th scope="col" className="px-4 py-2.5 font-medium">Cliente</th>
-                        <th scope="col" className="px-4 py-2.5 font-medium">Serviços</th>
-                        {isAdmin && <th scope="col" className="px-4 py-2.5 font-medium">Barbeiro</th>}
-                        <th scope="col" className="px-4 py-2.5 text-right font-medium">Valor</th>
+                        <th scope="col" className="px-5 py-2.5 font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="agenda-horarios" className="h-4 w-4" />Horário</span></th>
+                        <th scope="col" className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="clientes" className="h-4 w-4" />Cliente</span></th>
+                        <th scope="col" className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="servicos-tesoura" className="h-4 w-4" />Serviços</span></th>
+                        {isAdmin && <th scope="col" className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="equipe" className="h-4 w-4" />Barbeiro</span></th>}
+                        <th scope="col" className="px-4 py-2.5 text-right font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="receita" className="h-4 w-4" />Valor</span></th>
                         <th scope="col" className="px-4 py-2.5 font-medium">Status</th>
                         <th scope="col" className="px-4 py-2.5 font-medium"><span className="sr-only">Ações</span></th>
                       </tr>
@@ -440,17 +442,17 @@ export default function AppointmentsPage() {
 
                           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                             <div className="col-span-2">
-                              <dt className="text-xs text-muted-foreground">Serviços</dt>
+                              <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="servicos-tesoura" className="h-4 w-4" />Serviços</dt>
                               <dd className="text-foreground">{summary.names}</dd>
                             </div>
                             {isAdmin && (
                               <div>
-                                <dt className="text-xs text-muted-foreground">Barbeiro</dt>
+                                <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="equipe" className="h-4 w-4" />Barbeiro</dt>
                                 <dd className="text-foreground">{appt.barber?.name ?? '—'}</dd>
                               </div>
                             )}
                             <div>
-                              <dt className="text-xs text-muted-foreground">Valor</dt>
+                              <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="receita" className="h-4 w-4" />Valor</dt>
                               <dd className="font-medium text-foreground tabular-nums">{formatCurrency(summary.price)}</dd>
                             </div>
                           </dl>

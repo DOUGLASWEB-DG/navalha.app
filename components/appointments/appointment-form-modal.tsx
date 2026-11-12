@@ -1,11 +1,14 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
+import { formatCurrency } from '@/lib/format'
 import useSWR from 'swr'
 import { toast } from 'sonner'
 import {
@@ -13,6 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import {
@@ -168,19 +172,18 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">
-            {appointment ? 'Editar Agendamento' : 'Novo Agendamento'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="novo-agendamento" className="h-8 w-8" /><span>{appointment ? 'Editar Agendamento' : 'Novo Agendamento'}</span></DialogTitle>
+          <DialogDescription>Escolha o cliente, os serviços e o horário do atendimento.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 mt-4">
           {/* Cliente */}
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-semibold text-foreground">Cliente *</Label>
+            <Label htmlFor="appointment-client" className="text-sm font-semibold text-foreground">Cliente *</Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="clientes" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Select onValueChange={(v) => setValue('clientId', v)} value={watch('clientId')}>
-                <SelectTrigger className="pl-9">
+                <SelectTrigger id="appointment-client" className="pl-11">
                   <SelectValue placeholder="Selecione o cliente..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -198,7 +201,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
             {clientPackages && clientPackages.length > 0 && (
               <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 space-y-2 mt-1">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                  <Sparkles className="h-4 w-4" />
+                  <SystemIcon name="clube-de-assinatura-vip" className="h-5 w-5"  />
                   Cliente possui pacote ativo!
                 </div>
                 {clientPackages.map((cp: any) => {
@@ -224,23 +227,24 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
 
           {/* Serviço */}
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-semibold text-foreground">Serviço *</Label>
+            <Label id="appointment-services-label" className="inline-flex items-center gap-2 text-sm font-semibold text-foreground"><SystemIcon name="servicos-tesoura" />Serviço *</Label>
             <div className="relative">
-              <Scissors className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-              <div className="flex flex-col gap-2 rounded-lg border border-border p-2">
+              <SystemIcon name="servicos-tesoura" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
+              <div role="group" aria-labelledby="appointment-services-label" className="flex flex-col gap-1 rounded-xl border border-border bg-muted/20 p-2">
                 {services?.map((s: any) => {
                   const checked = watch('serviceIds')?.includes(s.id)
                   return (
-                    <label key={s.id} className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-2 hover:bg-muted">
+                    <label key={s.id} className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted has-[:checked]:bg-primary/5">
                       <input
                         type="checkbox"
+                        className="h-5 w-5 shrink-0 accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
                         checked={checked}
                         onChange={() => {
                           const ids = watch('serviceIds') || []
                           setValue('serviceIds', checked ? ids.filter((id) => id !== s.id) : [...ids, s.id], { shouldValidate: true })
                         }}
                       />
-                      <span className="text-sm">{s.name} — R${s.price.toFixed(2)} ({s.durationMins}min)</span>
+                      <span className="min-w-0 flex-1 text-sm font-medium">{s.name}</span><span className="shrink-0 text-right text-sm font-semibold">{formatCurrency(s.price)}<span className="block text-xs font-normal text-muted-foreground">{s.durationMins} min</span></span>
                     </label>
                   )
                 })}
@@ -249,7 +253,7 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
             {errors.serviceIds && <p className="text-xs text-destructive">{errors.serviceIds.message}</p>}
             {selectedServices.length > 0 && (
               <p className="text-xs text-muted-foreground font-medium">
-                Total: R${totalPrice.toFixed(2)} · {totalDuration} minutos
+                Total: {formatCurrency(totalPrice)} · {totalDuration} minutos
               </p>
             )}
           </div>
@@ -257,11 +261,11 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
           {/* Barbeiro (Somente Admin) */}
           {user?.role === 'ADMIN' && (
             <div className="flex flex-col gap-2">
-              <Label className="text-sm font-semibold text-foreground">Barbeiro</Label>
+              <Label htmlFor="appointment-barber" className="text-sm font-semibold text-foreground">Barbeiro</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <SystemIcon name="equipe" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
                 <Select onValueChange={(v) => setValue('barberId', v)} value={watch('barberId')}>
-                  <SelectTrigger className="pl-9">
+                  <SelectTrigger id="appointment-barber" className="pl-11">
                     <SelectValue placeholder="Sem preferência / Qualquer" />
                   </SelectTrigger>
                   <SelectContent>
@@ -281,27 +285,29 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
           {/* Data + Horário */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <Label className="text-sm font-semibold text-foreground">Data *</Label>
+              <Label htmlFor="appointment-date" className="text-sm font-semibold text-foreground">Data *</Label>
               <div className="relative">
-                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <SystemIcon name="agenda-horarios" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none"  />
                 <Input
+                  id="appointment-date"
                   type="date"
                   disabled={isSubmitting}
                   {...register('date')}
-                  className="pl-9"
+                  className="pl-11"
                 />
               </div>
               {errors.date && <p className="text-xs text-destructive">{errors.date.message}</p>}
             </div>
             <div className="flex flex-col gap-2">
-              <Label className="text-sm font-semibold text-foreground">Horário *</Label>
+              <Label htmlFor="appointment-time" className="text-sm font-semibold text-foreground">Horário *</Label>
               <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <SystemIcon name="horarios-e-folgas" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none"  />
                 <Input
+                  id="appointment-time"
                   type="time"
                   disabled={isSubmitting}
                   {...register('time')}
-                  className="pl-9"
+                  className="pl-11"
                 />
               </div>
               {errors.time && <p className="text-xs text-destructive">{errors.time.message}</p>}
@@ -310,11 +316,11 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
 
           {/* Status */}
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-semibold text-foreground">Status</Label>
+            <Label htmlFor="appointment-status" className="text-sm font-semibold text-foreground">Status</Label>
             <div className="relative">
               <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
               <Select onValueChange={(v) => setValue('status', v as any)} value={watch('status')}>
-                <SelectTrigger className="pl-9">
+                <SelectTrigger id="appointment-status" className="pl-11">
                   <SelectValue placeholder="Selecione o status..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -330,15 +336,16 @@ export function AppointmentFormModal({ open, onClose, appointment, onSaved, defa
 
           {/* Observações */}
           <div className="flex flex-col gap-2">
-            <Label className="text-sm font-semibold text-foreground">Observações (opcional)</Label>
+            <Label htmlFor="appointment-notes" className="text-sm font-semibold text-foreground">Observações (opcional)</Label>
             <div className="relative">
               <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea
+                id="appointment-notes"
                 {...register('notes')} maxLength={LIMITES.notas}
                 disabled={isSubmitting}
                 placeholder="Preferências, solicitações..."
                 rows={2}
-                className="pl-9 resize-none"
+                className="pl-11 resize-none"
               />
             </div>
           </div>

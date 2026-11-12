@@ -1,5 +1,7 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -116,9 +119,8 @@ export function PackageFormModal({ open, onClose, pkg, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-foreground">
-            {pkg ? 'Editar Modelo de Pacote' : 'Novo Modelo de Pacote'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="clube-de-assinatura-vip" className="h-8 w-8" /><span>{pkg ? 'Editar Modelo de Pacote' : 'Novo Modelo de Pacote'}</span></DialogTitle>
+          <DialogDescription>Defina o pacote de cortes e suas condições de validade.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
@@ -126,12 +128,12 @@ export function PackageFormModal({ open, onClose, pkg, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Nome do Pacote *</Label>
             <div className="relative">
-              <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="produtos-estoque" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Input
                 disabled={isSubmitting}
                 {...register('name')}
                 placeholder="Ex: Pacote 4 Cortes Mensal"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
@@ -142,14 +144,14 @@ export function PackageFormModal({ open, onClose, pkg, onSaved }: Props) {
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Preço Total (R$) *</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <SystemIcon name="financeiro-caixa" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
                 <Input
                   type="number"
                   step="0.01"
                   disabled={isSubmitting}
                   {...register('price')}
                   placeholder="120,00"
-                  className="pl-9"
+                  className="pl-11"
                 />
               </div>
               {errors.price && <p className="text-xs text-destructive">{errors.price.message}</p>}
@@ -158,14 +160,14 @@ export function PackageFormModal({ open, onClose, pkg, onSaved }: Props) {
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Qtd. de Cortes *</Label>
               <div className="relative">
-                <Scissors className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <SystemIcon name="servicos-tesoura" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
                 <Input
                   type="number"
                   min="1"
                   disabled={isSubmitting}
                   {...register('totalCuts')}
                   placeholder="4"
-                  className="pl-9"
+                  className="pl-11"
                 />
               </div>
               {errors.totalCuts && <p className="text-xs text-destructive">{errors.totalCuts.message}</p>}
@@ -177,14 +179,14 @@ export function PackageFormModal({ open, onClose, pkg, onSaved }: Props) {
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Validade (Dias) *</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <SystemIcon name="agenda-horarios" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
                 <Input
                   type="number"
                   min="1"
                   disabled={isSubmitting}
                   {...register('validityDays')}
                   placeholder="30"
-                  className="pl-9"
+                  className="pl-11"
                 />
               </div>
               {errors.validityDays && <p className="text-xs text-destructive">{errors.validityDays.message}</p>}
@@ -193,9 +195,9 @@ export function PackageFormModal({ open, onClose, pkg, onSaved }: Props) {
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Barbeiro Exclusivo</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <SystemIcon name="equipe" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
                 <Select onValueChange={(v) => setValue('barberId', v)} value={watch('barberId')}>
-                  <SelectTrigger className="pl-9">
+                  <SelectTrigger className="pl-11">
                     <SelectValue placeholder="Qualquer Barbeiro" />
                   </SelectTrigger>
                   <SelectContent>

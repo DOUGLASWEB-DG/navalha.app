@@ -1,5 +1,7 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -98,10 +101,9 @@ export function ClientPackageModal({ open, onClose, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Adicionar Cliente ao Pacote
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><span><SystemIcon name="clube-de-assinatura-vip" className="h-5 w-5 text-primary"  />
+            Adicionar Cliente ao Pacote</span></DialogTitle>
+          <DialogDescription>Selecione o cliente e confira as condições do pacote.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
@@ -109,9 +111,9 @@ export function ClientPackageModal({ open, onClose, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Cliente *</Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="clientes" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Select onValueChange={(v) => setValue('clientId', v)} value={watch('clientId')}>
-                <SelectTrigger className="pl-9">
+                <SelectTrigger className="pl-11">
                   <SelectValue placeholder="Selecione o cliente..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -130,9 +132,9 @@ export function ClientPackageModal({ open, onClose, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Pacote Escolhido *</Label>
             <div className="relative">
-              <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="produtos-estoque" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Select onValueChange={(v) => setValue('packageId', v)} value={watch('packageId')}>
-                <SelectTrigger className="pl-9">
+                <SelectTrigger className="pl-11">
                   <SelectValue placeholder="Selecione o plano/pacote..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -171,9 +173,9 @@ export function ClientPackageModal({ open, onClose, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Barbeiro Vinculado (Opcional)</Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="equipe" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Select onValueChange={(v) => setValue('barberId', v)} value={watch('barberId')}>
-                <SelectTrigger className="pl-9">
+                <SelectTrigger className="pl-11">
                   <SelectValue placeholder="Qualquer Barbeiro" />
                 </SelectTrigger>
                 <SelectContent>

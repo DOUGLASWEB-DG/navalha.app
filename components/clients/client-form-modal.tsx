@@ -1,5 +1,7 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -81,9 +84,8 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">
-            {client ? 'Editar Cliente' : 'Novo Cliente'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="lista-de-clientes" className="h-8 w-8" /><span>{client ? 'Editar Cliente' : 'Novo Cliente'}</span></DialogTitle>
+          <DialogDescription>Mantenha os dados de contato e as preferências do cliente organizados.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">

@@ -1,5 +1,7 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -128,9 +131,8 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">
-            {user ? 'Editar Usuário' : 'Novo Usuário (Barbeiro/Admin)'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="equipe" className="h-8 w-8" /><span>{user ? 'Editar Usuário' : 'Novo Usuário (Barbeiro/Admin)'}</span></DialogTitle>
+          <DialogDescription>Organize o acesso e os dados do profissional da equipe.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
@@ -140,12 +142,12 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Nome *</Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="equipe" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Input
                 disabled={isSubmitting}
                 {...register('name')} maxLength={LIMITES.nome}
                 placeholder="Ex: João da Silva"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
@@ -161,7 +163,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
                 disabled={isSubmitting}
                 {...register('email')}
                 placeholder="joao@barbearia.com"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
@@ -179,7 +181,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
                 disabled={isSubmitting}
                 {...register('password')}
                 placeholder="******"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
@@ -191,7 +193,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
             <div className="relative">
               <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
               <Select onValueChange={(v) => setValue('role', v as any)} value={watch('role')}>
-                <SelectTrigger className="pl-9">
+                <SelectTrigger className="pl-11">
                   <SelectValue placeholder="Selecione o acesso..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -209,7 +211,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
               <span className="text-xs text-muted-foreground">Sugestão: 20% a 75%</span>
             </div>
             <div className="relative">
-              <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="comissoes" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Input
                 type="number"
                 min={0}
@@ -218,7 +220,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
                 disabled={isSubmitting}
                 {...register('commissionPercent')}
                 placeholder="50"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.commissionPercent && <p className="text-xs text-destructive">{errors.commissionPercent.message}</p>}
