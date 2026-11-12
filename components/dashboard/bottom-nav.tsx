@@ -101,7 +101,8 @@ export function BottomNav() {
                 "relative inline-flex h-8 w-8 items-center justify-center rounded-xl p-1 transition-all duration-200",
                 active ? "bg-primary/10" : "opacity-80"
               )}>
-                <AppIcon src={item.iconUrl} />
+                {/* Optical sizing compensates for the inner margin of the supplied client artwork. */}
+                <AppIcon src={item.iconUrl} className={item.href === '/dashboard/clients' ? 'scale-[1.35]' : undefined} />
                 {showBadge && (
                   <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold leading-none text-white tabular-nums z-10">
                     {alertCount > 9 ? '9+' : alertCount}
