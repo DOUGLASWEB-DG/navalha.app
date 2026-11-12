@@ -1,5 +1,7 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -120,7 +123,8 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">Criar Nova Meta</DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="metas-desempenho" className="h-8 w-8" /><span>Criar Nova Meta</span></DialogTitle>
+          <DialogDescription>Defina o objetivo e o período que deseja acompanhar.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 mt-4">
@@ -132,7 +136,7 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
                 {...register('title')}
                 disabled={isSubmitting}
                 placeholder="Ex: Meta de Receita Mensal"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
@@ -144,7 +148,7 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
               <div className="relative">
                 <Type className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                 <Select onValueChange={(v: string) => setValue('type', v as any)} value={watch('type')}>
-                  <SelectTrigger className="pl-9">
+                  <SelectTrigger className="pl-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -158,9 +162,9 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Período *</Label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <SystemIcon name="agenda-horarios" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
                 <Select onValueChange={(v: string) => setValue('period', v as any)} value={watch('period')}>
-                  <SelectTrigger className="pl-9">
+                  <SelectTrigger className="pl-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -176,7 +180,7 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Valor da Meta *</Label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+              <SystemIcon name="financeiro-caixa" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary pointer-events-none"  />
               <Input
                 {...register('targetAmount')}
                 disabled={isSubmitting}
@@ -184,7 +188,7 @@ export function GoalFormModal({ open, onClose, onSaved }: Props) {
                 step="1"
                 min="1"
                 placeholder="Ex: 3000"
-                className="pl-9 font-medium"
+                className="pl-11 font-medium"
               />
             </div>
             {errors.targetAmount && <p className="text-xs text-destructive">{errors.targetAmount.message}</p>}

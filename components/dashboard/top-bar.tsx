@@ -92,7 +92,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
               className="relative bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
               aria-label="Notificações"
             >
-              <Bell className="h-4 w-4" strokeWidth={2.5} />
+              <AppIcon src="/assets/icons/navegacao-painel/notificacoes.png" className="h-4 w-4" />
               {unreadCount > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold text-white shadow-sm ring-2 ring-card animate-in zoom-in">
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -133,7 +133,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 ))
               ) : (
                 <div className="p-8 text-center">
-                  <Bell className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                  <AppIcon src="/assets/icons/navegacao-painel/notificacoes.png" className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
                   <p className="text-xs text-muted-foreground">Nenhuma notificação por enquanto</p>
                 </div>
               )}
@@ -167,7 +167,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/goals" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <AppIcon src="/assets/icons/metas-icon.png" />
+                      <AppIcon src="/assets/icons/desempenho-relacionamento/metas-desempenho.png" />
                     </div>
                     Metas
                   </Link>
@@ -175,7 +175,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/products" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <AppIcon src="/assets/icons/produtos-icon.png" />
+                      <AppIcon src="/assets/icons/servicos-produtos/produtos-estoque.png" />
                     </div>
                     Produtos
                   </Link>
@@ -183,7 +183,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/users" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <AppIcon src="/assets/icons/equipe-icon.png" />
+                      <AppIcon src="/assets/icons/clientes-equipe/equipe.png" />
                     </div>
                     Equipe
                   </Link>
@@ -191,7 +191,7 @@ export function TopBar({ onMenuToggle }: TopBarProps) {
                 <DropdownMenuItem asChild className="min-h-12 rounded-xl">
                   <Link href="/dashboard/settings" className="cursor-pointer gap-3">
                     <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden">
-                      <AppIcon src="/assets/icons/configuracoes-icon.png" />
+                      <AppIcon src="/assets/icons/configuracoes/configuracoes-ajustes.png" />
                     </div>
                     Configurações
                   </Link>

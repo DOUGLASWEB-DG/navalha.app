@@ -1,5 +1,8 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
+import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -80,16 +84,15 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">
-            {client ? 'Editar Cliente' : 'Novo Cliente'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="lista-de-clientes" className="h-8 w-8" /><span>{client ? 'Editar Cliente' : 'Novo Cliente'}</span></DialogTitle>
+          <DialogDescription>Mantenha os dados de contato e as preferências do cliente organizados.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
           <div className="flex flex-col gap-1.5">
             <Label className="text-sm text-foreground">Nome Completo *</Label>
             <Input
-              {...register('name')}
+              {...register('name')} maxLength={LIMITES.nome}
               placeholder="João Silva"
               className="bg-input border-border text-foreground placeholder:text-muted-foreground"
             />
@@ -99,7 +102,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
           <div className="flex flex-col gap-1.5">
             <Label className="text-sm text-foreground">Telefone / WhatsApp *</Label>
             <Input
-              {...register('phone')}
+              {...register('phone')} maxLength={LIMITES.telefone}
               placeholder="(69) 99999-9999"
               className="bg-input border-border text-foreground placeholder:text-muted-foreground"
             />
@@ -120,7 +123,7 @@ export function ClientFormModal({ open, onClose, client, onSaved }: Props) {
           <div className="flex flex-col gap-1.5">
             <Label className="text-sm text-foreground">Observações (opcional)</Label>
             <Textarea
-              {...register('notes')}
+              {...register('notes')} maxLength={LIMITES.notas}
               placeholder="Preferências, alergias, anotações..."
               rows={3}
               className="bg-input border-border text-foreground placeholder:text-muted-foreground resize-none"

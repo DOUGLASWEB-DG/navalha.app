@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { AppointmentStatus, Prisma } from '@prisma/client'
 import {
   AppointmentRuleError,
@@ -16,15 +17,16 @@ import {
   normalizeServiceIds,
 } from '@/lib/appointment-services'
 import { notifyAppointmentCreated } from '@/lib/notifications'
-import { notFound, requireTenantUser, tenantErrorResponse } from '@/lib/api'
+import { notFound, requireTenantUser, requirePermission, tenantErrorResponse } from '@/lib/api'
 
 const createSchema = z.object({
-  clientId: z.string().min(1),
-  serviceIds: z.array(z.string().min(1)).min(1).optional(),
-  serviceId: z.string().min(1).optional(),
-  barberId: z.string().optional(),
-  date: z.string(),
-  notes: z.string().optional(),
+  clientId: z.string().min(1).max(LIMITES.id),
+  serviceIds: z.array(z.string().min(1).max(LIMITES.id)).min(1).max(LIMITES.ids).optional(),
+  serviceId: z.string().min(1).max(LIMITES.id).optional(),
+  barberId: z.string().max(LIMITES.id).optional(),
+  clientPackageId: z.string().max(LIMITES.id).nullable().optional(),
+  date: z.string().max(LIMITES.data),
+  notes: z.string().max(LIMITES.notas).optional(),
   status: z.enum(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED']).optional(),
 })
 
@@ -92,7 +94,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { user, barbearia } = await requireTenantUser()
+    const session = await requireTenantUser()
+    await requirePermission(session, 'appointments.create')
+    const { user, barbearia } = session
     const barbeariaId = barbearia.id
     const body = await req.json()
     const parsed = createSchema.parse(body)
@@ -153,6 +157,7 @@ export async function POST(req: NextRequest) {
           service: { connect: { id: services[0].id } }, // FIXME: legacy field
           appointmentServices: { create: appointmentServiceCreateData(services) },
           barber: { connect: { id: selectedBarber.id } },
+          clientPackage: parsed.clientPackageId ? { connect: { id: parsed.clientPackageId } } : undefined,
           date,
           status: parsed.status,
           notes: parsed.notes,

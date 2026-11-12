@@ -1,0 +1,86 @@
+[
+  {
+    "name": "admin login",
+    "status": "PASS"
+  },
+  {
+    "name": "barber login",
+    "status": "PASS"
+  },
+  {
+    "name": "barber creates own appointment",
+    "status": "PASS"
+  },
+  {
+    "name": "client-supplied other barber ignored",
+    "status": "PASS"
+  },
+  {
+    "name": "barber lists own appointments only",
+    "status": "PASS"
+  },
+  {
+    "name": "cannot edit other barber",
+    "status": "PASS"
+  },
+  {
+    "name": "cannot grant own admin role",
+    "status": "PASS"
+  },
+  {
+    "name": "cannot change team permissions",
+    "status": "PASS"
+  },
+  {
+    "name": "cannot access shop finances",
+    "status": "PASS"
+  },
+  {
+    "name": "admin saves group policy",
+    "status": "PASS"
+  },
+  {
+    "name": "group immediately blocks editing",
+    "status": "PASS"
+  },
+  {
+    "name": "group immediately blocks creation",
+    "status": "PASS"
+  },
+  {
+    "name": "group blocks client creation",
+    "status": "PASS"
+  },
+  {
+    "name": "admin grants individual exception",
+    "status": "PASS"
+  },
+  {
+    "name": "exception allows own edit with same session",
+    "status": "PASS"
+  },
+  {
+    "name": "exception never allows editing colleague",
+    "status": "PASS"
+  },
+  {
+    "name": "exception does not allow new appointments",
+    "status": "PASS"
+  },
+  {
+    "name": "unknown privileged capability rejected",
+    "status": "PASS"
+  },
+  {
+    "name": "frontend gets effective override",
+    "status": "PASS"
+  },
+  {
+    "name": "frontend gets group denial",
+    "status": "PASS"
+  },
+  {
+    "name": "cross tenant cookie refused",
+    "status": "PASS"
+  }
+]

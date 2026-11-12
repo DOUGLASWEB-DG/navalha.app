@@ -12,6 +12,7 @@ datasource db {
 
 // Tenant: cada barbearia isola seus dados operacionais pelo barbeariaId.
 model Barbearia {
+  barberPermissions Json @default("{}")
   id           String         @id @default(cuid())
   name         String
   subdomain    String         @unique // ex.: "america" em america.navalha.app
@@ -29,6 +30,8 @@ model Barbearia {
   alerts       FinanceAlert[]
   goals        Goal[]
   products     Product[]
+  packages     Package[]
+  clientPackages ClientPackage[]
 }
 
 model Client {
@@ -43,6 +46,7 @@ model Client {
   updatedAt    DateTime      @updatedAt
   barbearia    Barbearia     @relation(fields: [barbeariaId], references: [id])
   appointments Appointment[]
+  clientPackages ClientPackage[]
 
   // Mesmo telefone pode ser cliente de barbearias diferentes
   @@unique([barbeariaId, phone])
@@ -87,6 +91,11 @@ model Appointment {
   service             Service              @relation(fields: [serviceId], references: [id])
   barber              User?                @relation("AppointmentBarber", fields: [barberId], references: [id]) // Relacionamento com o barbeiro
   deletedBy           User?                @relation("AppointmentDeletedBy", fields: [deletedById], references: [id], onDelete: Restrict)
+  commissionPercent   Float?
+  commissionAmount    Float?
+  commissionPaid      Boolean              @default(false)
+  clientPackageId     String?
+  clientPackage       ClientPackage?       @relation(fields: [clientPackageId], references: [id])
   transaction         Transaction?
   appointmentServices AppointmentService[]
 
@@ -223,6 +232,7 @@ enum Role {
 }
 
 model User {
+  permissionOverrides Json @default("{}")
   id                  String        @id @default(cuid())
   barbeariaId         String
   name                String
@@ -238,6 +248,9 @@ model User {
   appointments        Appointment[] @relation("AppointmentBarber") // Agendamentos vinculados a este barbeiro
   deletedAppointments Appointment[] @relation("AppointmentDeletedBy")
   createdTransactions Transaction[] @relation("TransactionCreatedBy")
+  commissionPercent   Float         @default(50.0) // Comissão padrão em % (20 a 75)
+  packages            Package[]     @relation("BarberPackages")
+  clientPackages      ClientPackage[] @relation("BarberClientPackages")
 
   @@index([barbeariaId])
 }
@@ -255,4 +268,61 @@ model Product {
   barbearia   Barbearia @relation(fields: [barbeariaId], references: [id])
 
   @@index([barbeariaId])
+}
+
+enum PackageStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  CANCELED
+}
+
+model Package {
+  id           String          @id @default(cuid())
+  barbeariaId  String
+  name         String
+  description  String?
+  price        Float
+  totalCuts    Int             @default(4)
+  validityDays Int             @default(30)
+  barberId     String?
+  active       Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  barbearia      Barbearia       @relation(fields: [barbeariaId], references: [id])
+  barber         User?           @relation("BarberPackages", fields: [barberId], references: [id])
+  clientPackages ClientPackage[]
+
+  @@index([barbeariaId])
+  @@index([barberId])
+}
+
+model ClientPackage {
+  id           String        @id @default(cuid())
+  barbeariaId  String
+  clientId     String
+  packageId    String
+  barberId     String?
+  totalCuts    Int
+  usedCuts     Int           @default(0)
+  startDate    DateTime      @default(now())
+  expiresAt    DateTime
+  status       PackageStatus @default(ACTIVE)
+  paidToAdmin  Boolean       @default(false)
+  notes        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  barbearia    Barbearia     @relation(fields: [barbeariaId], references: [id])
+  client       Client        @relation(fields: [clientId], references: [id])
+  package      Package       @relation(fields: [packageId], references: [id])
+  barber       User?         @relation("BarberClientPackages", fields: [barberId], references: [id])
+  appointments Appointment[]
+
+  @@index([barbeariaId])
+  @@index([clientId])
+  @@index([packageId])
+  @@index([barberId])
+  @@index([status])
 }

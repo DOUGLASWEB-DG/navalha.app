@@ -17,15 +17,20 @@ import {
 import { toast } from 'sonner'
 import { confirmAction } from '@/lib/confirm-toast'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/dashboard/page-header'
+import { AppIcon } from '@/components/shared/app-icon'
 import { TransactionFormModal } from '@/components/finances/transaction-form-modal'
 import { FinanceTabs, type FinanceTab } from '@/components/finances/finance-tabs'
 import { FinanceDashboard } from '@/components/finances/finance-dashboard'
 import { FinanceReports } from '@/components/finances/finance-reports'
 import { FinanceAlerts } from '@/components/finances/finance-alerts'
+import { BarberCommissions } from '@/components/finances/barber-commissions'
 import { cn } from '@/lib/utils'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
 import { showError } from '@/lib/feedback'
+import { ErrorState } from '@/components/shared/data-state'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const fetcher = apiFetcher
 
@@ -76,26 +81,24 @@ export default function FinancesPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       {/* Cabeçalho */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-foreground">Controle Financeiro</h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">Gestão completa das finanças da barbearia</p>
-        </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <Button
-            onClick={openExpense}
-            variant="outline"
-            className="w-full gap-2 border-border text-foreground sm:w-auto"
-          >
-            <TrendingDown className="h-4 w-4 text-destructive" />
-            Nova Despesa
-          </Button>
-          <Button onClick={openIncome} className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto">
-            <Plus className="h-4 w-4" />
-            Nova Receita
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Controle Financeiro"
+        description="Gestão completa das finanças da barbearia"
+        iconUrl="/assets/icons/financeiro/financeiro-caixa.png"
+      >
+        <Button
+          onClick={openExpense}
+          variant="outline"
+          className="w-full gap-2 border-border text-foreground sm:w-auto"
+        >
+          <AppIcon src="/assets/icons/financeiro/despesas.png" className="h-4 w-4 text-destructive" />
+          Nova Despesa
+        </Button>
+        <Button onClick={openIncome} className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto">
+          <Plus className="h-4 w-4" />
+          Nova Receita
+        </Button>
+      </PageHeader>
 
       {/* Abas */}
       <FinanceTabs active={activeTab} onChange={setActiveTab} alertCount={alertCount} />
@@ -115,10 +118,12 @@ export default function FinancesPage() {
           isLoading={isLoading}
           error={error}
           mutate={mutate}
-        />
+       />
       )}
 
       {activeTab === 'reports' && <FinanceReports />}
+
+      {activeTab === 'commissions' && <BarberCommissions />}
 
       {activeTab === 'alerts' && <FinanceAlerts />}
 
@@ -128,14 +133,10 @@ export default function FinancesPage() {
         defaultType={defaultType}
         onClose={() => setModalOpen(false)}
         onSaved={() => { mutate(); setModalOpen(false) }}
-      />
+     />
     </div>
   )
 }
-
-// ─── Aba de Transações (extraída da versão anterior) ──────────────────────────
-
-import { ErrorState } from '@/components/shared/data-state'
 
 interface TransactionsViewProps {
   month: string
@@ -172,7 +173,7 @@ function TransactionsView({
         <div className="min-w-[min(100%,13rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-150 active:scale-[0.99] lg:min-w-0">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-success/20 bg-success/10">
-              <TrendingUp className="h-5 w-5 text-success" />
+              <AppIcon src="/assets/icons/financeiro/receita.png" className="h-5 w-5 text-success" />
             </div>
             <p className="text-xs font-medium text-muted-foreground">Receitas</p>
           </div>
@@ -181,7 +182,7 @@ function TransactionsView({
         <div className="min-w-[min(100%,13rem)] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-sm transition-all duration-150 active:scale-[0.99] lg:min-w-0">
           <div className="mb-2 flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-destructive/20 bg-destructive/10">
-              <TrendingDown className="h-5 w-5 text-destructive" />
+              <AppIcon src="/assets/icons/financeiro/despesas.png" className="h-5 w-5 text-destructive" />
             </div>
             <p className="text-xs font-medium text-muted-foreground">Despesas</p>
           </div>
@@ -197,7 +198,7 @@ function TransactionsView({
             >
               <DollarSign
                 className={cn('h-5 w-5', summary.profit >= 0 ? 'text-primary' : 'text-destructive')}
-              />
+             />
             </div>
             <p className="text-xs font-medium text-muted-foreground">Lucro</p>
           </div>
@@ -214,7 +215,7 @@ function TransactionsView({
           value={month}
           onChange={(e) => setMonth(e.target.value)}
           className="min-h-12 rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm"
-        />
+       />
         <div className="scrollbar-hide flex max-w-full snap-x snap-mandatory items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 touch-pan-x">
           {typeFilters.map((f) => (
             <button
@@ -253,9 +254,9 @@ function TransactionsView({
                     )}
                   >
                     {txn.type === 'INCOME' ? (
-                      <TrendingUp className="h-5 w-5" />
+                      <AppIcon src="/assets/icons/financeiro/receita.png" className="h-5 w-5" />
                     ) : (
-                      <TrendingDown className="h-5 w-5" />
+                      <AppIcon src="/assets/icons/financeiro/despesas.png" className="h-5 w-5" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -310,7 +311,9 @@ function TransactionsView({
           </div>
         ) : (
           <div className="text-center py-14">
-            <DollarSign className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+            <div className="mx-auto mb-3 h-16 w-16">
+              <AppIcon src="/assets/icons/financeiro/financeiro-caixa.png" />
+            </div>
             <p className="text-sm font-semibold text-foreground mb-1">Sem transações</p>
             <p className="text-xs text-muted-foreground">Nenhuma transação para o período selecionado</p>
           </div>
@@ -319,10 +322,6 @@ function TransactionsView({
     </div>
   )
 }
-
-// ─── Skeleton de Transações ──────────────────────────────────────────────────
-
-import { Skeleton } from '@/components/ui/skeleton'
 
 function TransactionsSkeleton() {
   return (

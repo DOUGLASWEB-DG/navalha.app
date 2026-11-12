@@ -13,9 +13,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import { TeamPermissionsModal } from '@/components/users/team-permissions-modal'
 import { UserFormModal } from '@/components/users/user-form-modal'
 import { PageHeader } from '@/components/dashboard/page-header'
-
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
@@ -25,6 +25,7 @@ const fetcher = apiFetcher
 
 export default function UsersPage() {
   const [modalOpen, setModalOpen] = useState(false)
+  const [permissionsOpen, setPermissionsOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<any>(null)
   const { data: users, error, isLoading, mutate } = useSWR('/api/users', fetcher)
 
@@ -52,10 +53,13 @@ export default function UsersPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
+      <TeamPermissionsModal open={permissionsOpen} onClose={() => setPermissionsOpen(false)} />
       <PageHeader
         title="Equipe e Usuários"
+        iconUrl="/assets/icons/clientes-equipe/equipe.png"
         description="Gerencie os barbeiros e administradores do sistema"
       >
+        <Button type="button" variant="outline" onClick={() => setPermissionsOpen(true)}>Permissões da equipe</Button>
         <Button
           onClick={() => { setEditingUser(null); setModalOpen(true) }}
           className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
@@ -177,7 +181,7 @@ export default function UsersPage() {
         onClose={() => { setModalOpen(false); setEditingUser(null) }}
         user={editingUser}
         onSaved={() => { mutate(); setModalOpen(false); setEditingUser(null) }}
-      />
+     />
     </div>
   )
 }

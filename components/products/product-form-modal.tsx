@@ -1,5 +1,7 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,6 +12,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -85,9 +88,8 @@ export function ProductFormModal({ open, onClose, product, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">
-            {product ? 'Editar Produto' : 'Novo Produto'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="produtos-estoque" className="h-8 w-8" /><span>{product ? 'Editar Produto' : 'Novo Produto'}</span></DialogTitle>
+          <DialogDescription>Organize o produto, seu preço e a quantidade em estoque.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
@@ -95,12 +97,12 @@ export function ProductFormModal({ open, onClose, product, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Nome *</Label>
             <div className="relative">
-              <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="produtos-estoque" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Input
                 disabled={isSubmitting}
                 {...register('name')}
                 placeholder="Pomada Modeladora..."
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
@@ -111,13 +113,13 @@ export function ProductFormModal({ open, onClose, product, onSaved }: Props) {
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Preço (R$) *</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <SystemIcon name="financeiro-caixa" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
                 <Input
                   type="number"
                   step="0.01"
                   disabled={isSubmitting}
                   {...register('price', { valueAsNumber: true })}
-                  className="pl-9"
+                  className="pl-11"
                 />
               </div>
               {errors.price && <p className="text-xs text-destructive">{errors.price.message}</p>}
@@ -132,7 +134,7 @@ export function ProductFormModal({ open, onClose, product, onSaved }: Props) {
                   type="number"
                   disabled={isSubmitting}
                   {...register('stock', { valueAsNumber: true })}
-                  className="pl-9"
+                  className="pl-11"
                 />
               </div>
               {errors.stock && <p className="text-xs text-destructive">{errors.stock.message}</p>}
@@ -149,7 +151,7 @@ export function ProductFormModal({ open, onClose, product, onSaved }: Props) {
                 {...register('description')}
                 placeholder="Detalhes sobre o produto..."
                 rows={2}
-                className="pl-9 resize-none"
+                className="pl-11 resize-none"
               />
             </div>
           </div>

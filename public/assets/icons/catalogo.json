@@ -1,0 +1,248 @@
+[
+  {
+    "id": "navegacao-painel",
+    "title": "Navegação e painel",
+    "icons": [
+      {
+        "id": "inicio-painel",
+        "label": "Início/Painel",
+        "src": "/assets/icons/navegacao-painel/inicio-painel.png",
+        "original": "/assets/icons/originais/navegacao-painel/inicio-painel.png"
+      },
+      {
+        "id": "buscar",
+        "label": "Buscar",
+        "src": "/assets/icons/navegacao-painel/buscar.png",
+        "original": "/assets/icons/originais/navegacao-painel/buscar.png"
+      },
+      {
+        "id": "notificacoes",
+        "label": "Notificações",
+        "src": "/assets/icons/navegacao-painel/notificacoes.png",
+        "original": "/assets/icons/originais/navegacao-painel/notificacoes.png"
+      },
+      {
+        "id": "whatsapp",
+        "label": "WhatsApp",
+        "src": "/assets/icons/navegacao-painel/whatsapp.png",
+        "original": "/assets/icons/originais/navegacao-painel/whatsapp.png"
+      },
+      {
+        "id": "relatorios",
+        "label": "Relatórios",
+        "src": "/assets/icons/navegacao-painel/relatorios.png",
+        "original": "/assets/icons/originais/navegacao-painel/relatorios.png"
+      }
+    ]
+  },
+  {
+    "id": "agenda-atendimento",
+    "title": "Agenda e atendimento",
+    "icons": [
+      {
+        "id": "agenda-horarios",
+        "label": "Agenda/Horários",
+        "src": "/assets/icons/agenda-atendimento/agenda-horarios.png",
+        "original": "/assets/icons/originais/agenda-atendimento/agenda-horarios.png"
+      },
+      {
+        "id": "novo-agendamento",
+        "label": "Novo Agendamento",
+        "src": "/assets/icons/agenda-atendimento/novo-agendamento.png",
+        "original": "/assets/icons/originais/agenda-atendimento/novo-agendamento.png"
+      },
+      {
+        "id": "lista-de-espera",
+        "label": "Lista de Espera",
+        "src": "/assets/icons/agenda-atendimento/lista-de-espera.png",
+        "original": "/assets/icons/originais/agenda-atendimento/lista-de-espera.png"
+      },
+      {
+        "id": "horarios-e-folgas",
+        "label": "Horários e Folgas",
+        "src": "/assets/icons/agenda-atendimento/horarios-e-folgas.png",
+        "original": "/assets/icons/originais/agenda-atendimento/horarios-e-folgas.png"
+      },
+      {
+        "id": "bloqueios-de-agenda",
+        "label": "Bloqueios de Agenda",
+        "src": "/assets/icons/agenda-atendimento/bloqueios-de-agenda.png",
+        "original": "/assets/icons/originais/agenda-atendimento/bloqueios-de-agenda.png"
+      },
+      {
+        "id": "confirmados",
+        "label": "Confirmados",
+        "src": "/assets/icons/agenda-atendimento/confirmados.png",
+        "original": "/assets/icons/originais/agenda-atendimento/confirmados.png"
+      },
+      {
+        "id": "concluidos",
+        "label": "Concluídos",
+        "src": "/assets/icons/agenda-atendimento/concluidos.png",
+        "original": "/assets/icons/originais/agenda-atendimento/concluidos.png"
+      },
+      {
+        "id": "pendentes",
+        "label": "Pendentes",
+        "src": "/assets/icons/agenda-atendimento/pendentes.png",
+        "original": "/assets/icons/originais/agenda-atendimento/pendentes.png"
+      },
+      {
+        "id": "pendentes-dinheiro",
+        "label": "Pendentes ($)",
+        "src": "/assets/icons/agenda-atendimento/pendentes-dinheiro.png",
+        "original": "/assets/icons/originais/agenda-atendimento/pendentes-dinheiro.png"
+      }
+    ]
+  },
+  {
+    "id": "clientes-equipe",
+    "title": "Clientes e equipe",
+    "icons": [
+      {
+        "id": "lista-de-clientes",
+        "label": "Lista de Clientes",
+        "src": "/assets/icons/clientes-equipe/lista-de-clientes.png",
+        "original": "/assets/icons/originais/clientes-equipe/lista-de-clientes.png"
+      },
+      {
+        "id": "total-de-clientes",
+        "label": "Total de Clientes",
+        "src": "/assets/icons/clientes-equipe/total-de-clientes.png",
+        "original": "/assets/icons/originais/clientes-equipe/total-de-clientes.png"
+      },
+      {
+        "id": "total-grupo",
+        "label": "Total Grupo",
+        "src": "/assets/icons/clientes-equipe/total-grupo.png",
+        "original": "/assets/icons/originais/clientes-equipe/total-grupo.png"
+      },
+      {
+        "id": "clientes",
+        "label": "Clientes",
+        "src": "/assets/icons/clientes-equipe/clientes.png",
+        "original": "/assets/icons/originais/clientes-equipe/clientes.png"
+      },
+      {
+        "id": "equipe",
+        "label": "Equipe",
+        "src": "/assets/icons/clientes-equipe/equipe.png",
+        "original": "/assets/icons/originais/clientes-equipe/equipe.png"
+      },
+      {
+        "id": "perfil-da-barbearia",
+        "label": "Perfil da Barbearia",
+        "src": "/assets/icons/clientes-equipe/perfil-da-barbearia.png",
+        "original": "/assets/icons/originais/clientes-equipe/perfil-da-barbearia.png"
+      }
+    ]
+  },
+  {
+    "id": "servicos-produtos",
+    "title": "Serviços e produtos",
+    "icons": [
+      {
+        "id": "servicos-tesoura",
+        "label": "Serviços/Tesoura",
+        "src": "/assets/icons/servicos-produtos/servicos-tesoura.png",
+        "original": "/assets/icons/originais/servicos-produtos/servicos-tesoura.png"
+      },
+      {
+        "id": "produtos-estoque",
+        "label": "Produtos/Estoque",
+        "src": "/assets/icons/servicos-produtos/produtos-estoque.png",
+        "original": "/assets/icons/originais/servicos-produtos/produtos-estoque.png"
+      }
+    ]
+  },
+  {
+    "id": "financeiro",
+    "title": "Financeiro",
+    "icons": [
+      {
+        "id": "financeiro-caixa",
+        "label": "Financeiro/Caixa",
+        "src": "/assets/icons/financeiro/financeiro-caixa.png",
+        "original": "/assets/icons/originais/financeiro/financeiro-caixa.png"
+      },
+      {
+        "id": "despesas",
+        "label": "Despesas",
+        "src": "/assets/icons/financeiro/despesas.png",
+        "original": "/assets/icons/originais/financeiro/despesas.png"
+      },
+      {
+        "id": "lucro-liquido",
+        "label": "Lucro Líquido",
+        "src": "/assets/icons/financeiro/lucro-liquido.png",
+        "original": "/assets/icons/originais/financeiro/lucro-liquido.png"
+      },
+      {
+        "id": "receita",
+        "label": "Receita",
+        "src": "/assets/icons/financeiro/receita.png",
+        "original": "/assets/icons/originais/financeiro/receita.png"
+      },
+      {
+        "id": "receita-alt",
+        "label": "Receita (alt.)",
+        "src": "/assets/icons/financeiro/receita-alt.png",
+        "original": "/assets/icons/originais/financeiro/receita-alt.png"
+      },
+      {
+        "id": "faturamento",
+        "label": "Faturamento",
+        "src": "/assets/icons/financeiro/faturamento.png",
+        "original": "/assets/icons/originais/financeiro/faturamento.png"
+      },
+      {
+        "id": "faturamento-do-dia",
+        "label": "Faturamento do Dia",
+        "src": "/assets/icons/financeiro/faturamento-do-dia.png",
+        "original": "/assets/icons/originais/financeiro/faturamento-do-dia.png"
+      },
+      {
+        "id": "comissoes",
+        "label": "Comissões",
+        "src": "/assets/icons/financeiro/comissoes.png",
+        "original": "/assets/icons/originais/financeiro/comissoes.png"
+      },
+      {
+        "id": "formas-de-pagamento",
+        "label": "Formas de Pagamento",
+        "src": "/assets/icons/financeiro/formas-de-pagamento.png",
+        "original": "/assets/icons/originais/financeiro/formas-de-pagamento.png"
+      }
+    ]
+  },
+  {
+    "id": "desempenho-relacionamento",
+    "title": "Desempenho e relacionamento",
+    "icons": [
+      {
+        "id": "metas-desempenho",
+        "label": "Metas/Desempenho",
+        "src": "/assets/icons/desempenho-relacionamento/metas-desempenho.png",
+        "original": "/assets/icons/originais/desempenho-relacionamento/metas-desempenho.png"
+      },
+      {
+        "id": "clube-de-assinatura-vip",
+        "label": "Clube de Assinatura/VIP",
+        "src": "/assets/icons/desempenho-relacionamento/clube-de-assinatura-vip.png",
+        "original": "/assets/icons/originais/desempenho-relacionamento/clube-de-assinatura-vip.png"
+      }
+    ]
+  },
+  {
+    "id": "configuracoes",
+    "title": "Configurações",
+    "icons": [
+      {
+        "id": "configuracoes-ajustes",
+        "label": "Configurações/Ajustes",
+        "src": "/assets/icons/configuracoes/configuracoes-ajustes.png",
+        "original": "/assets/icons/originais/configuracoes/configuracoes-ajustes.png"
+      }
+    ]
+  }
+]

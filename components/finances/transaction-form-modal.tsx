@@ -1,5 +1,7 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,6 +14,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -136,9 +139,8 @@ export function TransactionFormModal({ open, defaultType, onClose, onSaved }: Pr
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md border-border text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">
-            {defaultType === 'INCOME' ? 'Nova Receita' : 'Nova Despesa'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="financeiro-caixa" className="h-8 w-8" /><span>{defaultType === 'INCOME' ? 'Nova Receita' : 'Nova Despesa'}</span></DialogTitle>
+          <DialogDescription>Confira o valor, a categoria e a data do lançamento.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

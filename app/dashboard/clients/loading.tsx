@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { Users } from 'lucide-react'
+import { AppIcon } from '@/components/shared/app-icon'
 
 export default function ClientsLoading() {
   return (
@@ -7,7 +8,7 @@ export default function ClientsLoading() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
-            <Users className="w-6 h-6" />
+            <AppIcon src="/assets/icons/clientes-equipe/clientes.png" className="w-6 h-6" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground ">Clientes</h1>

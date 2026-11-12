@@ -20,34 +20,39 @@ const items = [
   {
     href: '/dashboard',
     label: 'Painel',
-    iconUrl: '/assets/icons/painel-icon.png',
+    iconUrl: '/assets/icons/navegacao-painel/inicio-painel.png',
     match: (p: string) => p === '/dashboard',
     adminOnly: true,
   },
   {
     href: '/dashboard/appointments',
     label: 'Agenda',
-    iconUrl: '/assets/icons/agendamentos-icon.png',
+    iconUrl: '/assets/icons/agenda-atendimento/agenda-horarios.png',
     match: (p: string) => p.startsWith('/dashboard/appointments'),
   },
   {
     href: '/dashboard/clients',
     label: 'Clientes',
-    iconUrl: '/assets/icons/clientes-icon.png',
+    iconUrl: '/assets/icons/clientes-equipe/clientes.png',
     match: (p: string) => p.startsWith('/dashboard/clients'),
-    adminOnly: true,
+  },
+  {
+    href: '/dashboard/packages',
+    label: 'Pacotes',
+    iconUrl: '/assets/icons/desempenho-relacionamento/clube-de-assinatura-vip.png',
+    match: (p: string) => p.startsWith('/dashboard/packages'),
   },
   {
     href: '/dashboard/finances',
     label: 'Finanças',
-    iconUrl: '/assets/icons/finaces-icon.png',
+    iconUrl: '/assets/icons/financeiro/financeiro-caixa.png',
     match: (p: string) => p.startsWith('/dashboard/finances'),
     adminOnly: true,
   },
   {
     href: '/dashboard/services',
     label: 'Serviços',
-    iconUrl: '/assets/icons/servicos-icon.png',
+    iconUrl: '/assets/icons/servicos-produtos/servicos-tesoura.png',
     match: (p: string) => p.startsWith('/dashboard/services'),
     adminOnly: true,
   },
@@ -96,7 +101,8 @@ export function BottomNav() {
                 "relative inline-flex h-8 w-8 items-center justify-center rounded-xl p-1 transition-all duration-200",
                 active ? "bg-primary/10" : "opacity-80"
               )}>
-                <AppIcon src={item.iconUrl} />
+                {/* Optical sizing compensates for the inner margin of the supplied client artwork. */}
+                <AppIcon src={item.iconUrl} className={item.href === '/dashboard/clients' ? 'scale-[1.35]' : undefined} />
                 {showBadge && (
                   <span className="absolute -top-1 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-xs font-bold leading-none text-white tabular-nums z-10">
                     {alertCount > 9 ? '9+' : alertCount}

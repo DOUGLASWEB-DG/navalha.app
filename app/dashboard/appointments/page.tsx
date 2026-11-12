@@ -1,5 +1,8 @@
 'use client'
 
+import { type Permission } from '@/lib/permissions'
+import { SystemIcon } from '@/components/shared/system-icon'
+
 import { useState } from 'react'
 import useSWR from 'swr'
 import { addDays, format, isSameDay } from 'date-fns'
@@ -30,13 +33,12 @@ import { formatBrazilPhone, formatCurrency, normalizeBrazilPhone } from '@/lib/f
 import { CANCELLATION_NOTICE_MINUTES } from '@/lib/appointment-rules'
 import { toZonedWallClock } from '@/lib/time-zone'
 import { useBarbeariaTimeZone } from '@/lib/use-barbearia-time-zone'
-
 import { PageHeader } from '@/components/dashboard/page-header'
-
 import { ErrorState, GridSkeleton } from '@/components/shared/data-state'
 import { apiFetcher } from '@/lib/http-errors'
 import { apiRequest } from '@/lib/http-errors'
 import { showError } from '@/lib/feedback'
+import { AppIcon } from '@/components/shared/app-icon'
 
 const fetcher = apiFetcher
 
@@ -124,6 +126,7 @@ export default function AppointmentsPage() {
   const { data: appointments, error, isLoading, mutate } = useSWR<AppointmentItem[]>(`/api/appointments${queryParams}`, fetcher)
   const { data: authData } = useSWR('/api/auth/me', fetcher)
   const isAdmin = authData?.user?.role === 'ADMIN'
+  const allowed = (permission: Permission) => isAdmin || authData?.user?.role === 'BARBER' && authData?.permissions?.[permission] === true
   const timeZone = useBarbeariaTimeZone()
   const now = new Date()
   // Dia e hora exibidos são os do relógio da barbearia, não os do aparelho
@@ -195,6 +198,13 @@ export default function AppointmentsPage() {
     setModalOpen(true)
   }
 
+  function appointmentActions(appt: AppointmentItem, admin: boolean, at: Date) {
+    const actions = getActions(appt, admin, at)
+    if (actions.primary && !allowed(actions.primary.status === 'COMPLETED' ? 'appointments.complete' : 'appointments.confirm')) actions.primary = null
+    if (!allowed('appointments.cancel')) actions.canCancel = false
+    return actions
+  }
+
   function renderMenu(appt: AppointmentItem, actions: ReturnType<typeof getActions>) {
     return (
       <DropdownMenu>
@@ -209,7 +219,7 @@ export default function AppointmentsPage() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuItem onClick={() => openEdit(appt)} className="gap-2 cursor-pointer">
+          <DropdownMenuItem disabled={!allowed('appointments.edit') || !isAdmin && (appt.status === 'COMPLETED' || appt.status === 'CANCELED')} onClick={() => openEdit(appt)} className="gap-2 cursor-pointer">
             <Pencil className="w-4 h-4" /> Editar
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => openWhatsApp(appt)} className="gap-2 cursor-pointer">
@@ -249,7 +259,7 @@ export default function AppointmentsPage() {
         variant={status === 'COMPLETED' ? 'default' : 'outline'}
         className={cn('gap-2', className)}
       >
-        <CheckCircle2 className="h-4 w-4" />
+        <SystemIcon name={status === 'COMPLETED' ? 'concluidos' : 'confirmados'} className="h-5 w-5" />
         {label}
       </Button>
     )
@@ -268,13 +278,16 @@ export default function AppointmentsPage() {
     <div className="mx-auto max-w-6xl space-y-6 animate-fade-in">
       <PageHeader
         title="Agendamentos"
+        iconUrl="/assets/icons/agenda-atendimento/agenda-horarios.png"
         description="Gerencie sua agenda de horários"
       >
         <Button
+          disabled={!allowed('appointments.create')}
+          title={!allowed('appointments.create') ? 'Cadastro de horários bloqueado pelo administrador' : undefined}
           onClick={() => { setEditingAppointment(null); setModalOpen(true) }}
           className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
         >
-          <Plus className="h-4 w-4" />
+          <AppIcon src="/assets/icons/agenda-atendimento/novo-agendamento.png" className="h-6 w-6" />
           Novo Agendamento
         </Button>
       </PageHeader>
@@ -292,7 +305,7 @@ export default function AppointmentsPage() {
              }
           }}
           className="min-h-12 rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200"
-        />
+       />
 
         <div className="scrollbar-hide flex max-w-full snap-x snap-mandatory items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 shadow-sm touch-pan-x">
           {statusFilters.map((f) => (
@@ -360,11 +373,11 @@ export default function AppointmentsPage() {
                     </colgroup>
                     <thead className="border-b border-border text-left text-xs text-muted-foreground">
                       <tr>
-                        <th scope="col" className="px-5 py-2.5 font-medium">Horário</th>
-                        <th scope="col" className="px-4 py-2.5 font-medium">Cliente</th>
-                        <th scope="col" className="px-4 py-2.5 font-medium">Serviços</th>
-                        {isAdmin && <th scope="col" className="px-4 py-2.5 font-medium">Barbeiro</th>}
-                        <th scope="col" className="px-4 py-2.5 text-right font-medium">Valor</th>
+                        <th scope="col" className="px-5 py-2.5 font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="agenda-horarios" className="h-4 w-4" />Horário</span></th>
+                        <th scope="col" className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="clientes" className="h-4 w-4" />Cliente</span></th>
+                        <th scope="col" className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="servicos-tesoura" className="h-4 w-4" />Serviços</span></th>
+                        {isAdmin && <th scope="col" className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="equipe" className="h-4 w-4" />Barbeiro</span></th>}
+                        <th scope="col" className="px-4 py-2.5 text-right font-medium"><span className="inline-flex items-center gap-2"><SystemIcon name="receita" className="h-4 w-4" />Valor</span></th>
                         <th scope="col" className="px-4 py-2.5 font-medium">Status</th>
                         <th scope="col" className="px-4 py-2.5 font-medium"><span className="sr-only">Ações</span></th>
                       </tr>
@@ -374,7 +387,7 @@ export default function AppointmentsPage() {
                         const date = toZonedWallClock(appt.date, timeZone)
                         const summary = summarize(appt)
                         const end = new Date(date.getTime() + summary.durationMins * 60_000)
-                        const actions = getActions(appt, isAdmin, now)
+                        const actions = appointmentActions(appt, isAdmin, now)
                         return (
                           <tr key={appt.id} className={cn('align-top transition-colors hover:bg-muted/30', appt.status === 'CANCELED' && 'opacity-60')}>
                             <td className="px-5 py-3">
@@ -419,7 +432,7 @@ export default function AppointmentsPage() {
                       const date = toZonedWallClock(appt.date, timeZone)
                       const summary = summarize(appt)
                       const end = new Date(date.getTime() + summary.durationMins * 60_000)
-                      const actions = getActions(appt, isAdmin, now)
+                      const actions = appointmentActions(appt, isAdmin, now)
                       return (
                         <li key={appt.id} className={cn('p-4', appt.status === 'CANCELED' && 'opacity-60')}>
                           <div className="flex items-start justify-between gap-3">
@@ -440,17 +453,17 @@ export default function AppointmentsPage() {
 
                           <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                             <div className="col-span-2">
-                              <dt className="text-xs text-muted-foreground">Serviços</dt>
+                              <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="servicos-tesoura" className="h-4 w-4" />Serviços</dt>
                               <dd className="text-foreground">{summary.names}</dd>
                             </div>
                             {isAdmin && (
                               <div>
-                                <dt className="text-xs text-muted-foreground">Barbeiro</dt>
+                                <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="equipe" className="h-4 w-4" />Barbeiro</dt>
                                 <dd className="text-foreground">{appt.barber?.name ?? '—'}</dd>
                               </div>
                             )}
                             <div>
-                              <dt className="text-xs text-muted-foreground">Valor</dt>
+                              <dt className="flex items-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="receita" className="h-4 w-4" />Valor</dt>
                               <dd className="font-medium text-foreground tabular-nums">{formatCurrency(summary.price)}</dd>
                             </div>
                           </dl>
@@ -498,7 +511,7 @@ export default function AppointmentsPage() {
         appointment={editingAppointment}
         onSaved={() => { mutate(); setModalOpen(false); setEditingAppointment(null) }}
         defaultDate={selectedDate}
-      />
+     />
     </div>
   )
 }

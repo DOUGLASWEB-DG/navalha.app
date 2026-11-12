@@ -1,19 +1,23 @@
+import { permissionOverridesSchema } from '@/lib/permission-schema'
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
+import { LIMITES } from '@/lib/input-limits'
+import { requireTenantAdmin, requireTenantUser, tenantErrorResponse } from '@/lib/api'
 
 const createUserSchema = z.object({
-  name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  email: z.string().trim().toLowerCase().email('E-mail inválido'),
-  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres'),
+  name: z.string().trim().min(2, 'Nome deve ter no mínimo 2 caracteres').max(LIMITES.nome),
+  email: z.string().trim().toLowerCase().max(LIMITES.email).email('E-mail inválido'),
+  password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').max(LIMITES.senha),
   role: z.enum(['ADMIN', 'BARBER']).default('BARBER'),
+  commissionPercent: z.number().min(0).max(100).optional(),
+  permissionOverrides: permissionOverridesSchema.optional(),
 }).strict()
 
 export async function GET() {
   try {
-    const { barbearia } = await requireTenantAdmin()
+    const { user: currentUser, barbearia } = await requireTenantUser()
 
     const users = await prisma.user.findMany({
       where: { barbeariaId: barbearia.id },
@@ -24,11 +28,23 @@ export async function GET() {
         role: true,
         active: true,
         avatarUrl: true,
+        commissionPercent: true,
+        permissionOverrides: true,
         createdAt: true,
       },
       orderBy: { createdAt: 'desc' }
     })
-    return NextResponse.json(users)
+
+    // Se for barbeiro, esconde a comissão dos outros barbeiros (mostra só a dele)
+    const sanitized = currentUser.role === 'ADMIN'
+      ? users
+      : users.map((u) => ({
+          ...u,
+          commissionPercent: u.id === currentUser.id ? u.commissionPercent : undefined,
+          permissionOverrides: u.id === currentUser.id ? u.permissionOverrides : undefined,
+        }))
+
+    return NextResponse.json(sanitized)
   } catch (error) {
     const handled = tenantErrorResponse(error)
     if (handled) return handled
@@ -59,12 +75,16 @@ export async function POST(req: NextRequest) {
         email: parsed.email,
         password: hashedPassword,
         role: parsed.role,
+        commissionPercent: parsed.commissionPercent ?? 50.0,
+        permissionOverrides: parsed.permissionOverrides ?? {},
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
+        commissionPercent: true,
+        permissionOverrides: true,
       }
     })
     

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { sendTextMessage } from '@/lib/whatsapp'
 import { notFound, requireTenantAdmin, tenantErrorResponse } from '@/lib/api'
 import { parseZonedDate, zonedMonthRange } from '@/lib/time-zone'
@@ -8,10 +9,10 @@ import { parseZonedDate, zonedMonthRange } from '@/lib/time-zone'
 const createSchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE']),
   amount: z.number().positive('Amount must be positive'),
-  description: z.string().min(1, 'Description is required'),
-  category: z.string().optional(),
-  categoryId: z.string().optional(),
-  date: z.string(),
+  description: z.string().min(1, 'Description is required').max(LIMITES.descricaoFinanceira),
+  category: z.string().max(LIMITES.categoria).optional(),
+  categoryId: z.string().max(LIMITES.id).optional(),
+  date: z.string().max(LIMITES.data),
 })
 
 export async function GET(req: NextRequest) {

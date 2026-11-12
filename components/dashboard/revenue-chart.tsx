@@ -1,5 +1,9 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+import { formatCurrency } from '@/lib/format'
+
+
 interface ChartDataPoint {
   day: string
   income: number
@@ -14,7 +18,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="rounded-3xl border border-border bg-card p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-foreground">Visão de Receita</h3>
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground"><SystemIcon name="receita" />Visão de Receita</h3>
         <p className="text-xs text-muted-foreground mt-1">Sem dados disponíveis</p>
       </div>
     )
@@ -29,7 +33,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
     <div className="rounded-3xl border border-border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-sm font-semibold text-foreground">Visão de Receita</h3>
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground"><SystemIcon name="receita" />Visão de Receita</h3>
           <p className="text-xs text-muted-foreground mt-0.5">Receitas vs despesas dos últimos 7 dias</p>
         </div>
         <div className="flex items-center gap-4">
@@ -95,21 +99,21 @@ export function RevenueChart({ data }: RevenueChartProps) {
       {/* Resumo */}
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
         <div className="text-center">
-          <p className="text-xs text-muted-foreground">Total Receitas</p>
+          <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="receita" className="h-4 w-4" />Total Receitas</p>
           <p className="text-sm font-bold text-primary">
-            R${data.reduce((sum, d) => sum + d.income, 0).toFixed(2)}
+            {formatCurrency(data.reduce((sum, d) => sum + d.income, 0))}
           </p>
         </div>
         <div className="text-center">
-          <p className="text-xs text-muted-foreground">Total Despesas</p>
+          <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="despesas" className="h-4 w-4" />Total Despesas</p>
           <p className="text-sm font-bold text-destructive">
-            R${data.reduce((sum, d) => sum + d.expense, 0).toFixed(2)}
+            {formatCurrency(data.reduce((sum, d) => sum + d.expense, 0))}
           </p>
         </div>
         <div className="text-center">
-          <p className="text-xs text-muted-foreground">Lucro</p>
+          <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"><SystemIcon name="lucro-liquido" className="h-4 w-4" />Lucro</p>
           <p className="text-sm font-bold text-success">
-            R${(data.reduce((sum, d) => sum + d.income, 0) - data.reduce((sum, d) => sum + d.expense, 0)).toFixed(2)}
+            {formatCurrency(data.reduce((sum, d) => sum + d.income, 0) - data.reduce((sum, d) => sum + d.expense, 0))}
           </p>
         </div>
       </div>

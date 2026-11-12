@@ -1,5 +1,10 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
+import { PERMISSION_DEFINITIONS, readPermissionOverrides } from '@/lib/permissions'
+import { permissionOverridesSchema } from '@/lib/permission-schema'
+import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,6 +15,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -22,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { User, Mail, Lock, ShieldCheck } from 'lucide-react'
+import { User, Mail, Lock, ShieldCheck, Percent } from 'lucide-react'
 import { PhotoField, syncPhoto, usePhotoField } from '@/components/shared/photo-field'
 import { apiRequest } from '@/lib/http-errors'
 import { showError } from '@/lib/feedback'
@@ -32,6 +38,8 @@ const schema = z.object({
   email: z.string().email('E-mail inválido'),
   password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres').optional().or(z.literal('')),
   role: z.enum(['ADMIN', 'BARBER']),
+  permissionOverrides: permissionOverridesSchema.default({}),
+  commissionPercent: z.coerce.number().min(0, 'Mínimo 0%').max(100, 'Máximo 100%').default(50),
 })
 
 type FormData = z.infer<typeof schema>
@@ -53,7 +61,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { role: 'BARBER' },
+    defaultValues: { role: 'BARBER', commissionPercent: 50, permissionOverrides: {} },
   })
 
   // Foto do barbeiro/admin (só o admin chega neste formulário)
@@ -66,9 +74,11 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         email: user.email,
         role: user.role,
         password: '',
+        commissionPercent: user.commissionPercent ?? 50,
+        permissionOverrides: readPermissionOverrides(user.permissionOverrides),
       })
     } else {
-      reset({ name: '', email: '', role: 'BARBER', password: '' })
+      reset({ name: '', email: '', role: 'BARBER', password: '', commissionPercent: 50, permissionOverrides: {} })
     }
     photo.reset()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -88,6 +98,8 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
         name: data.name,
         email: data.email,
         role: data.role,
+        commissionPercent: Number(data.commissionPercent),
+        permissionOverrides: data.role === 'BARBER' ? data.permissionOverrides : {},
       }
 
       if (data.password) {
@@ -124,9 +136,8 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">
-            {user ? 'Editar Usuário' : 'Novo Usuário (Barbeiro/Admin)'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="equipe" className="h-8 w-8" /><span>{user ? 'Editar Usuário' : 'Novo Usuário (Barbeiro/Admin)'}</span></DialogTitle>
+          <DialogDescription>Organize o acesso e os dados do profissional da equipe.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
@@ -136,12 +147,12 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
           <div className="flex flex-col gap-2">
             <Label className="text-sm font-semibold text-foreground">Nome *</Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+              <SystemIcon name="equipe" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
               <Input
                 disabled={isSubmitting}
-                {...register('name')}
+                {...register('name')} maxLength={LIMITES.nome}
                 placeholder="Ex: João da Silva"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
@@ -157,7 +168,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
                 disabled={isSubmitting}
                 {...register('email')}
                 placeholder="joao@barbearia.com"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
@@ -175,7 +186,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
                 disabled={isSubmitting}
                 {...register('password')}
                 placeholder="******"
-                className="pl-9"
+                className="pl-11"
               />
             </div>
             {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
@@ -187,7 +198,7 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
             <div className="relative">
               <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
               <Select onValueChange={(v) => setValue('role', v as any)} value={watch('role')}>
-                <SelectTrigger className="pl-9">
+                <SelectTrigger className="pl-11">
                   <SelectValue placeholder="Selecione o acesso..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -198,7 +209,48 @@ export function UserFormModal({ open, onClose, user, onSaved }: Props) {
             </div>
           </div>
 
+          {/* Comissão (%) */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold text-foreground">Comissão de Repasse (%)</Label>
+              <span className="text-xs text-muted-foreground">Sugestão: 20% a 75%</span>
+            </div>
+            <div className="relative">
+              <SystemIcon name="comissoes" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none"  />
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                disabled={isSubmitting}
+                {...register('commissionPercent')}
+                placeholder="50"
+                className="pl-11"
+              />
+            </div>
+            {errors.commissionPercent && <p className="text-xs text-destructive">{errors.commissionPercent.message}</p>}
+          </div>
+
           {/* Rodapé */}
+          {watch('role') === 'BARBER' && <fieldset className="space-y-3 rounded-xl border border-border p-4">
+            <legend className="px-1 text-sm font-semibold">Permissões deste profissional</legend>
+            <p className="text-xs text-muted-foreground">Herdar usa o padrão da equipe. As exceções valem somente para este profissional e para a própria agenda.</p>
+            {PERMISSION_DEFINITIONS.map(({ key, label }) => {
+              const overrides = watch('permissionOverrides') ?? {}
+              const value = overrides[key] === undefined ? 'inherit' : overrides[key] ? 'allow' : 'deny'
+              return <label key={key} className="flex min-h-12 flex-col items-stretch justify-between gap-2 text-sm sm:flex-row sm:items-center">
+                <span>{label}</span>
+                <select aria-label={label} value={value} disabled={isSubmitting} className="min-h-11 w-full rounded-xl border border-border bg-card px-3 text-sm sm:w-auto" onChange={event => {
+                  const next = { ...overrides }
+                  if (event.target.value === 'inherit') delete next[key]
+                  else next[key] = event.target.value === 'allow'
+                  setValue('permissionOverrides', next, { shouldDirty: true })
+                }}>
+                  <option value="inherit">Herdar da equipe</option><option value="allow">Permitir</option><option value="deny">Bloquear</option>
+                </select>
+              </label>
+            })}
+          </fieldset>}
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
               Cancelar

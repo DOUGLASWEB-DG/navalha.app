@@ -1,0 +1,100 @@
+{
+  "public": [
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/produto",
+      "status": 200
+    },
+    {
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "route": "/book",
+      "status": 200
+    },
+    {
+      "route": "/assets/icons/catalogo.json",
+      "status": 200
+    }
+  ],
+  "private": [
+    {
+      "role": "ADMIN",
+      "route": "/api/team-permissions",
+      "status": 200
+    },
+    {
+      "role": "BARBER",
+      "route": "/api/team-permissions",
+      "status": 403
+    },
+    {
+      "role": "BARBER",
+      "route": "/api/finances",
+      "status": 403
+    },
+    {
+      "role": "BARBER",
+      "route": "/api/appointments",
+      "status": 200,
+      "scope": "own"
+    }
+  ],
+  "screens": [
+    {
+      "route": "/dashboard",
+      "width": 1280,
+      "font": "Inter, \"Inter Fallback\", system-ui, sans-serif",
+      "overflow": false
+    },
+    {
+      "route": "/dashboard/appointments",
+      "width": 1280,
+      "font": "Inter, \"Inter Fallback\", system-ui, sans-serif",
+      "overflow": false
+    },
+    {
+      "route": "/dashboard/packages",
+      "width": 1280,
+      "font": "Inter, \"Inter Fallback\", system-ui, sans-serif",
+      "overflow": false
+    },
+    {
+      "route": "/dashboard/users",
+      "width": 1280,
+      "font": "Inter, \"Inter Fallback\", system-ui, sans-serif",
+      "overflow": false
+    },
+    {
+      "route": "/dashboard",
+      "width": 390,
+      "font": "Inter, \"Inter Fallback\", system-ui, sans-serif",
+      "overflow": false
+    },
+    {
+      "route": "/dashboard/appointments",
+      "width": 390,
+      "font": "Inter, \"Inter Fallback\", system-ui, sans-serif",
+      "overflow": false
+    },
+    {
+      "route": "/dashboard/packages",
+      "width": 390,
+      "font": "Inter, \"Inter Fallback\", system-ui, sans-serif",
+      "overflow": false
+    },
+    {
+      "route": "/dashboard/users",
+      "width": 390,
+      "font": "Inter, \"Inter Fallback\", system-ui, sans-serif",
+      "overflow": false
+    }
+  ],
+  "notes": [
+    "Only the demo was authenticated; no real client installation was logged into."
+  ]
+}

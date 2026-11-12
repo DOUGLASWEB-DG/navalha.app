@@ -1,7 +1,7 @@
 # Gate de qualidade: nada entra na main sem passar por aqui (exigir este check na proteção da branch).
 # Dois trabalhos em paralelo:
 #   verificacao: tipos, lint, testes unitários e build (o build ignora erros de tipo, por isso o tsc separado)
-#   integracao:  banco descartável + servidor real + suítes de isolamento entre barbearias e de fotos
+#   integracao:  banco descartável + servidor real + suítes de isolamento entre barbearias, de fotos e do robô de lembretes
 # Nenhum segredo de produção é usado: o banco é um Postgres efêmero do próprio runner e o JWT_SECRET é gerado na hora.
 name: CI
 
@@ -99,6 +99,8 @@ jobs:
         run: npm run test:isolation
       - name: Fotos ponta a ponta
         run: npm run test:uploads
+      - name: Robô de lembretes (Evolution falsa)
+        run: npm run test:reminders
       - name: Log do servidor (em caso de falha)
         if: failure()
         run: tail -n 200 server.log

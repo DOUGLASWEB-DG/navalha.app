@@ -1,5 +1,8 @@
 'use client'
 
+import { SystemIcon } from '@/components/shared/system-icon'
+
+import { LIMITES } from '@/lib/input-limits'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,6 +13,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -108,9 +112,8 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md border-border sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground ">
-            {service ? 'Editar Serviço' : 'Novo Serviço'}
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-3 pr-10 text-foreground"><SystemIcon name="servicos-tesoura" className="h-8 w-8" /><span>{service ? 'Editar Serviço' : 'Novo Serviço'}</span></DialogTitle>
+          <DialogDescription>Defina o serviço, o preço e o tempo necessário para atender.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 mt-4">
@@ -120,12 +123,12 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             <Label className="text-sm font-semibold text-foreground">Nome do Serviço *</Label>
             <div className="relative">
               <Type className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                {...register('name')} 
-                disabled={isSubmitting} 
-                placeholder="Ex: Corte Clássico" 
-                className="pl-9" 
-              />
+              <Input
+                {...register('name')} maxLength={LIMITES.nome}
+                disabled={isSubmitting}
+                placeholder="Ex: Corte Clássico"
+                className="pl-11"
+             />
             </div>
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
@@ -134,13 +137,13 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             <Label className="text-sm font-semibold text-foreground">Descrição</Label>
             <div className="relative">
               <AlignLeft className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Textarea 
-                {...register('description')} 
-                disabled={isSubmitting} 
-                placeholder="Breve descrição do serviço..." 
-                rows={3} 
-                className="pl-9 resize-none" 
-              />
+              <Textarea
+                {...register('description')} maxLength={LIMITES.descricao}
+                disabled={isSubmitting}
+                placeholder="Breve descrição do serviço..."
+                rows={3}
+                className="pl-11 resize-none"
+             />
             </div>
           </div>
 
@@ -148,31 +151,31 @@ export function ServiceFormModal({ open, onClose, service, onSaved }: Props) {
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Preço *</Label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                <Input 
-                  {...register('price')} 
-                  disabled={isSubmitting} 
-                  type="number" 
-                  step="0.01" 
-                  min="0" 
-                  placeholder="35,00" 
-                  className="pl-9 font-medium" 
-                />
+                <SystemIcon name="financeiro-caixa" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-primary pointer-events-none" />
+                <Input
+                  {...register('price')}
+                  disabled={isSubmitting}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="35,00"
+                  className="pl-11 font-medium"
+               />
               </div>
               {errors.price && <p className="text-xs text-destructive">{errors.price.message}</p>}
             </div>
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-semibold text-foreground">Duração *</Label>
               <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  {...register('durationMins')} 
-                  disabled={isSubmitting} 
-                  type="number" 
-                  min="5" 
-                  placeholder="30" 
-                  className="pl-9" 
-                />
+                <SystemIcon name="horarios-e-folgas" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                <Input
+                  {...register('durationMins')}
+                  disabled={isSubmitting}
+                  type="number"
+                  min="5"
+                  placeholder="30"
+                  className="pl-11"
+               />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium pointer-events-none">
                   min
                 </span>

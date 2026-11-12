@@ -9,7 +9,7 @@ import { getCurrentBarbearia } from '@/lib/tenant'
 // adicionar Domain: isso compartilharia a sessão entre todas as barbearias do domínio.
 const SESSION_COOKIE = 'barberos_session'
 
-const sessionUserSelect = { id: true, name: true, email: true, role: true, barbeariaId: true } as const
+const sessionUserSelect = { id: true, name: true, email: true, role: true, barbeariaId: true, permissionOverrides: true } as const
 
 // Sessão válida NA barbearia do Host: o JWT precisa ter sido emitido para ela (claim barbeariaId) e o
 // usuário precisa pertencer a ela e estar ativo. Qualquer divergência é tratada como "sem sessão".

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { LIMITES } from '@/lib/input-limits'
 import { sendTextMessage } from '@/lib/whatsapp'
 import { normalizeBrazilPhone } from '@/lib/format'
 import { Prisma } from '@prisma/client'
-import { notFound, requireTenantUser, tenantErrorResponse } from '@/lib/api'
+import { notFound, requireTenantUser, requirePermission, tenantErrorResponse } from '@/lib/api'
 import {
   AppointmentRuleError,
   assertStatusTransition,
@@ -21,18 +22,20 @@ import {
 } from '@/lib/appointment-services'
 
 const updateSchema = z.object({
-  clientId: z.string().optional(),
-  serviceIds: z.array(z.string().min(1)).min(1).optional(),
-  serviceId: z.string().min(1).optional(),
-  barberId: z.string().nullable().optional(),
-  date: z.string().optional(),
-  notes: z.string().optional(),
+  clientId: z.string().max(LIMITES.id).optional(),
+  serviceIds: z.array(z.string().min(1).max(LIMITES.id)).min(1).max(LIMITES.ids).optional(),
+  serviceId: z.string().min(1).max(LIMITES.id).optional(),
+  barberId: z.string().max(LIMITES.id).nullable().optional(),
+  clientPackageId: z.string().max(LIMITES.id).nullable().optional(),
+  date: z.string().max(LIMITES.data).optional(),
+  notes: z.string().max(LIMITES.notas).optional(),
   status: z.enum(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED']).optional(),
 })
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { user, barbearia } = await requireTenantUser()
+    const session = await requireTenantUser()
+    const { user, barbearia } = session
     const barbeariaId = barbearia.id
     const { id } = await params
     const body = await req.json()
@@ -49,6 +52,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const isAdmin = user.role === 'ADMIN'
+    const permissionChangesSchedule = ['clientId', 'serviceIds', 'serviceId', 'barberId', 'clientPackageId', 'date', 'notes'].some(key => Object.prototype.hasOwnProperty.call(parsed, key))
+    if (permissionChangesSchedule) await requirePermission(session, 'appointments.edit')
+    if (parsed.status && parsed.status !== current.status) {
+      const permission = { CONFIRMED: 'appointments.confirm', COMPLETED: 'appointments.complete', CANCELED: 'appointments.cancel', PENDING: 'appointments.edit' } as const
+      await requirePermission(session, permission[parsed.status])
+    }
     const nextStatus = parsed.status ?? current.status
     assertStatusTransition(current.status, nextStatus, current.date, isAdmin)
     const hasServiceChange = parsed.serviceIds !== undefined || parsed.serviceId !== undefined
@@ -113,6 +122,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       date: nextDate,
       notes: parsed.notes,
       status: nextStatus,
+      clientPackage: parsed.clientPackageId !== undefined
+        ? (parsed.clientPackageId ? { connect: { id: parsed.clientPackageId } } : { disconnect: true })
+        : undefined,
       ...(mudouHorario && { reminderSent: false }),
     }
 
@@ -190,67 +202,131 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       }
     }
 
-    // Auto-create income transaction when completed
+    // Auto-create income transaction & compute commissions when completed
     if (current.status !== 'COMPLETED' && nextStatus === 'COMPLETED') {
       const appt = await prisma.appointment.findFirst({
         where: { id, barbeariaId },
-        include: { service: true, appointmentServices: { include: { service: true } }, client: true },
+        include: {
+          service: true,
+          appointmentServices: { include: { service: true } },
+          client: true,
+          clientPackage: { include: { package: true } },
+          barber: true,
+        },
       })
       if (appt) {
-        const newTx = await prisma.transaction.upsert({
-          where: { appointmentId: id },
-          update: {},
-          create: {
-            barbeariaId: appt.barbeariaId, // a receita pertence à mesma barbearia do agendamento
-            type: 'INCOME',
-            amount: getAppointmentServiceTotals(appt).price,
-            description: `${getAppointmentServiceSummary(appt).namesJoined} — ${appt.client.name}`,
-            category: 'Service',
-            appointmentId: id,
-            date: new Date(),
-          },
-        })
+        const commPercent = appt.barber?.commissionPercent ?? 50.0
+        let isFromPackage = false
+        let isLastCut = false
+        let remainingCuts = 0
+        let packageName = ''
+        let newTx: any = null
 
-        const adminPhone = process.env.ADMIN_PHONE
-        const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount)
-        const msgToAdmin = `💰 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
-        if (adminPhone) {
-          await sendTextMessage(adminPhone, msgToAdmin).catch((error) => console.error('WhatsApp admin message error:', error))
+        // Se o agendamento foi coberto por um pacote
+        if (appt.clientPackage && appt.clientPackage.status === 'ACTIVE') {
+          isFromPackage = true
+          packageName = appt.clientPackage.package.name
+          const nextUsed = appt.clientPackage.usedCuts + 1
+          isLastCut = nextUsed >= appt.clientPackage.totalCuts
+          remainingCuts = Math.max(0, appt.clientPackage.totalCuts - nextUsed)
+
+          // Atualiza uso do pacote
+          await prisma.clientPackage.update({
+            where: { id: appt.clientPackage.id },
+            data: {
+              usedCuts: nextUsed,
+              status: isLastCut ? 'COMPLETED' : 'ACTIVE',
+            },
+          })
+
+          // Comissão baseada no valor unitário do corte no pacote
+          const unitCutPrice = appt.clientPackage.package.price / appt.clientPackage.totalCuts
+          const commAmount = Math.round(unitCutPrice * (commPercent / 100) * 100) / 100
+
+          await prisma.appointment.update({
+            where: { id, barbeariaId },
+            data: {
+              commissionPercent: commPercent,
+              commissionAmount: commAmount,
+            },
+          })
         } else {
-          console.warn('[Appointments PATCH] ADMIN_PHONE não configurado. Mensagem ao administrador ignorada.')
+          // Atendimento avulso normal
+          const servicePrice = getAppointmentServiceTotals(appt).price
+          const commAmount = Math.round(servicePrice * (commPercent / 100) * 100) / 100
+
+          await prisma.appointment.update({
+            where: { id, barbeariaId },
+            data: {
+              commissionPercent: commPercent,
+              commissionAmount: commAmount,
+            },
+          })
+
+          newTx = await prisma.transaction.upsert({
+            where: { appointmentId: id },
+            update: {},
+            create: {
+              barbeariaId: appt.barbeariaId,
+              type: 'INCOME',
+              amount: servicePrice,
+              description: `${getAppointmentServiceSummary(appt).namesJoined} — ${appt.client.name}`,
+              category: 'Service',
+              appointmentId: id,
+              date: new Date(),
+            },
+          })
+
+          const adminPhone = process.env.ADMIN_PHONE
+          const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(newTx.amount)
+          const msgToAdmin = `💰 *Serviço Concluído*\n\nTipo: Receita\nValor: ${formattedAmount}\nDescrição: ${newTx.description}\nCategoria: ${newTx.category}`
+          if (adminPhone) {
+            await sendTextMessage(adminPhone, msgToAdmin).catch((error) => console.error('WhatsApp admin message error:', error))
+          }
         }
 
-        // Notify client about completion
+        // Notificação de conclusão ao Cliente via WhatsApp
         const { resolvePhone } = await import('@/lib/notifications')
-        const targetClientPhone = resolvePhone(appt.client.phone);
+        const targetClientPhone = resolvePhone(appt.client.phone)
         if (targetClientPhone) {
-           const number = normalizeBrazilPhone(targetClientPhone);
-           if (number) {
-             const msgToClient = `✅ *Atendimento Concluído*\n\nOlá, ${appt.client.name}! Seu atendimento foi finalizado.\n\nMuito obrigado pela preferência! Esperamos ver você novamente em breve. 💈✂️`;
-             await sendTextMessage(number, msgToClient).catch(e => console.error('WhatsApp client completion error:', e));
-           }
+          const number = normalizeBrazilPhone(targetClientPhone)
+          if (number) {
+            let msgToClient = ''
+            if (isFromPackage) {
+              if (isLastCut) {
+                msgToClient = `💈 *Atendimento Concluído!*\n\nOlá, *${appt.client.name}*! Seu corte foi finalizado com sucesso.\n\n⚠️ *Aviso Importante:* Este foi o *ÚLTIMO CORTE* do seu pacote *${packageName}*!\n\nEntre em contato com o Mateus ou seu barbeiro para renovar seu pacote e garantir o seu desconto para o próximo mês! 👊✂️`
+              } else {
+                msgToClient = `✅ *Atendimento Concluído!*\n\nOlá, *${appt.client.name}*! Seu corte foi finalizado.\n\n✂️ Você utilizou 1 corte do pacote *${packageName}*. Restam *${remainingCuts} cortes* disponíveis.\n\nMuito obrigado pela preferência! 💈`
+              }
+            } else {
+              msgToClient = `✅ *Atendimento Concluído*\n\nOlá, ${appt.client.name}! Seu atendimento foi finalizado.\n\nMuito obrigado pela preferência! Esperamos ver você novamente em breve. 💈✂️`
+            }
+            await sendTextMessage(number, msgToClient).catch((e) => console.error('WhatsApp client completion error:', e))
+          }
         }
 
         // Disparar Evento para Webhook (Fire-and-forget)
-        import('crypto').then(({ randomUUID }) => {
-          const eventId = randomUUID();
-          import('@/lib/events').then(({ dispatchWebhookEvent }) => {
-            dispatchWebhookEvent({
-              eventId,
-              event: 'finance.transaction.created',
-              occurredAt: new Date().toISOString(),
-              data: {
-                transaction: {
-                  id: newTx.id,
-                  amount: Number(newTx.amount),
-                  type: newTx.type,
-                  description: newTx.description,
-                  category: newTx.category
+        if (newTx) {
+          import('crypto').then(({ randomUUID }) => {
+            const eventId = randomUUID();
+            import('@/lib/events').then(({ dispatchWebhookEvent }) => {
+              dispatchWebhookEvent({
+                eventId,
+                event: 'finance.transaction.created',
+                occurredAt: new Date().toISOString(),
+                data: {
+                  transaction: {
+                    id: newTx.id,
+                    amount: Number(newTx.amount),
+                    type: newTx.type,
+                    description: newTx.description,
+                    category: newTx.category
+                  }
                 }
-              }
+              });
             });
           });
-        });
+        }
       }
     }
 

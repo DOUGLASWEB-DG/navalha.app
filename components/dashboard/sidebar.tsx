@@ -30,16 +30,17 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { label: 'Painel', href: '/dashboard', iconUrl: '/assets/icons/painel-icon.png', adminOnly: true },
-  { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/icons/agendamentos-icon.png' },
-  { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/icons/clientes-icon.png', adminOnly: true },
-  { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/icons/finaces-icon.png', adminOnly: true },
-  { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/icons/metas-icon.png', adminOnly: true },
-  { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/icons/servicos-icon.png', adminOnly: true },
-  { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/icons/produtos-icon.png', adminOnly: true },
-  { label: 'Equipe', href: '/dashboard/users', iconUrl: '/assets/icons/equipe-icon.png', adminOnly: true },
+  { label: 'Painel', href: '/dashboard', iconUrl: '/assets/icons/navegacao-painel/inicio-painel.png', adminOnly: true },
+  { label: 'Agendamentos', href: '/dashboard/appointments', iconUrl: '/assets/icons/agenda-atendimento/agenda-horarios.png' },
+  { label: 'Clientes', href: '/dashboard/clients', iconUrl: '/assets/icons/clientes-equipe/clientes.png' },
+  { label: 'Pacotes', href: '/dashboard/packages', iconUrl: '/assets/icons/desempenho-relacionamento/clube-de-assinatura-vip.png' },
+  { label: 'Finanças', href: '/dashboard/finances', iconUrl: '/assets/icons/financeiro/financeiro-caixa.png', adminOnly: true },
+  { label: 'Metas', href: '/dashboard/goals', iconUrl: '/assets/icons/desempenho-relacionamento/metas-desempenho.png', adminOnly: true },
+  { label: 'Serviços', href: '/dashboard/services', iconUrl: '/assets/icons/servicos-produtos/servicos-tesoura.png', adminOnly: true },
+  { label: 'Produtos', href: '/dashboard/products', iconUrl: '/assets/icons/servicos-produtos/produtos-estoque.png', adminOnly: true },
+  { label: 'Equipe', href: '/dashboard/users', iconUrl: '/assets/icons/clientes-equipe/equipe.png', adminOnly: true },
   // Conexão do WhatsApp; a API só aceita o admin da barbearia (requireWhatsappAdmin)
-  { label: 'Configurações', href: '/dashboard/settings', iconUrl: '/assets/icons/configuracoes-icon.png', adminOnly: true },
+  { label: 'Configurações', href: '/dashboard/settings', iconUrl: '/assets/icons/configuracoes/configuracoes-ajustes.png', adminOnly: true },
 ]
 
 const bottomItems = [
@@ -78,13 +79,13 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
             src={tenantConfig.logoWordmarkUrl}
             alt={tenantConfig.name}
             className="h-9 w-auto max-w-full object-contain"
-          />
+         />
         ) : (
           <img
             src={tenantConfig.logoIconUrl}
             alt={tenantConfig.name}
             className="w-9 h-9 object-contain"
-          />
+         />
         )}
       </div>
 

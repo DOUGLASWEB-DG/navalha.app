@@ -1,3 +1,4 @@
+import { getUserPermissions } from '@/lib/api'
 import { NextResponse } from 'next/server'
 import { getTenantSession } from '@/lib/auth'
 
@@ -9,5 +10,6 @@ export async function GET() {
   }
 
   // timezone: as telas do painel exibem datas e horários no relógio da barbearia, não no do aparelho
-  return NextResponse.json({ user: session.user, timezone: session.barbearia.timezone })
+  const permissions = await getUserPermissions(session)
+  return NextResponse.json({ user: session.user, timezone: session.barbearia.timezone, permissions })
 }

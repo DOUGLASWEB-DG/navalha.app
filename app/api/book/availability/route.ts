@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { LIMITES } from '@/lib/input-limits'
 import { prisma } from '@/lib/prisma'
 import { AppointmentRuleError, getAppointmentDayRange } from '@/lib/appointment-rules'
 import { getActiveServices, getAppointmentServiceTotals, getServiceTotals, normalizeServiceIds } from '@/lib/appointment-services'
@@ -18,7 +19,11 @@ export async function GET(req: NextRequest) {
     const { start, end } = getAppointmentDayRange(dateParam, barbearia.timezone)
     let requestedDurationMins: number | undefined
     if (serviceIdsParam) {
-      const serviceIds = normalizeServiceIds(serviceIdsParam.split(','))
+      const pedidos = serviceIdsParam.split(',')
+      if (pedidos.length > LIMITES.ids || pedidos.some((id) => id.length > LIMITES.id)) {
+        return NextResponse.json({ error: 'Serviços demais ou inválidos.' }, { status: 400 })
+      }
+      const serviceIds = normalizeServiceIds(pedidos)
       const services = await getActiveServices(barbearia.id, serviceIds)
       requestedDurationMins = getServiceTotals(services).durationMins
     }

@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton"
 import { LayoutDashboard } from 'lucide-react'
+import { AppIcon } from '@/components/shared/app-icon'
 
 export default function DashboardLoading() {
   return (
@@ -7,7 +8,7 @@ export default function DashboardLoading() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
-            <LayoutDashboard className="w-6 h-6" />
+            <AppIcon src="/assets/icons/navegacao-painel/inicio-painel.png" className="w-6 h-6" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground ">Painel Inicial</h1>

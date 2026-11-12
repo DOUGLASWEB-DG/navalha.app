@@ -3,6 +3,8 @@ import { jwtVerify, SignJWT } from 'jose'
 
 import { getJwtSecretKey } from '@/lib/jwt'
 import { resolveBarbeariaByHost } from '@/lib/tenant'
+import { demoLandingRoute } from '@/lib/demo-landing'
+import { landingDaCasaRoute } from '@/lib/landing-casa'
 
 const SESSION_COOKIE = 'barberos_session'
 
@@ -26,6 +28,16 @@ export async function middleware(request: NextRequest) {
   // em páginas e APIs. Os handlers revalidam por conta própria; esta barreira não substitui o filtro deles.
   const barbearia = await resolveBarbeariaByHost(request.headers.get('host'))
   if (!barbearia) return tenantNotFound(pathname)
+
+  // Demo: a raiz mostra a página do produto; /produto não existe nas outras barbearias (lib/demo-landing.ts)
+  const landing = demoLandingRoute(barbearia.subdomain, pathname)
+  if (landing.action === 'notFound') return tenantNotFound(pathname)
+  if (landing.action === 'rewrite') return NextResponse.rewrite(new URL(landing.to, request.url))
+
+  // América: a raiz mostra a página própria da casa; /america não existe nas outras barbearias (lib/landing-casa.ts)
+  const casa = landingDaCasaRoute(barbearia.subdomain, pathname)
+  if (casa.action === 'notFound') return tenantNotFound(pathname)
+  if (casa.action === 'rewrite') return NextResponse.rewrite(new URL(casa.to, request.url))
 
   const token = request.cookies.get(SESSION_COOKIE)?.value
 
@@ -100,12 +112,21 @@ export async function middleware(request: NextRequest) {
       response = NextResponse.redirect(loginUrl)
     }
   } else if (sessionId && userRole === 'BARBER') {
-    // Controle de Acesso por Papel (RBAC)
+    // Controle de Acesso por Papel (RBAC) - Barbeiro acessa Agenda, Clientes e Pacotes
     const isAllowedBarberPath =
       pathname === '/dashboard/appointments' ||
+      pathname.startsWith('/dashboard/appointments') ||
+      pathname === '/dashboard/clients' ||
+      pathname.startsWith('/dashboard/clients') ||
+      pathname === '/dashboard/packages' ||
+      pathname.startsWith('/dashboard/packages') ||
       pathname.startsWith('/api/appointments') ||
       pathname.startsWith('/api/clients') ||
-      pathname.startsWith('/api/services')
+      pathname.startsWith('/api/services') ||
+      pathname.startsWith('/api/packages') ||
+      pathname.startsWith('/api/client-packages') ||
+      pathname.startsWith('/api/finances/commissions') ||
+      pathname.startsWith('/api/users')
 
     if (isApiDashboard && !isAllowedBarberPath) {
       response = NextResponse.json({ error: 'Acesso negado.' }, { status: 403 })
